@@ -1,102 +1,70 @@
-// server.js
+require('dotenv').config(); // Load environment variables from .env
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
-
-// ✅ Node 18+ has global fetch; for CommonJS we can use node-fetch
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-
-dotenv.config();
+const bodyParser = require("body-parser");
+const { Invoice } = require("xendit-node");
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+
+// Middleware
+app.use(bodyParser.json());
+app.use(cors({
+    origin: ["https://showandgo4x4.com", "https://www.showandgo4x4.com"],
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));allowedHeaders: ["Content-Type", "Authorization"]
+// Initialize Xendit Invoice with the key from .env
+const xenditInvoiceInstance = new Invoice({ 
+    secretKey: process.env.XENDIT_SECRET_KEY 
+});
+// Add this to server.js
+app.get("/", (req, res) => {
+    res.json({ status: "Online", message: "Show and Go Backend is working!" });
+});
+app.post("/create-invoice", async (req, res) => {
+    try {
+        const { external_id, amount, payer_email, description } = req.body;
+
+        // Basic validation before calling Xendit
+        if (!external_id || !amount || !payer_email) {
+            return res.status(400).json({ 
+                error: "Missing required fields: external_id, amount, and payer_email are mandatory." 
+            });
+        }
+
+        // The SDK v2+ expects camelCase keys inside the 'data' object
+        const invoiceParams = {
+            data: {
+                externalId: String(external_id),
+                amount: Number(amount),
+                payerEmail: payer_email,
+                description: description || "Payment for Order",
+                currency: "PHP", // Defaulting to IDR, change if using PHP
+                successRedirectUrl: `${process.env.FRONTEND_URL}/success.html`,
+                failureRedirectUrl: `${process.env.FRONTEND_URL}/cart.html`,
+            }
+        };
+
+        console.log("Creating invoice for:", external_id);
+        
+        const response = await xenditInvoiceInstance.createInvoice(invoiceParams);
+
+        // Success! Send the invoice data back to the frontend
+        res.status(200).json(response);
+
+    } catch (err) {
+        // Log the SPECIFIC error details (this solves the [Object] issue)
+        console.error("❌ XENDIT VALIDATION ERROR:");
+        console.dir(err.response?.data || err, { depth: null });
+
+        res.status(err.status || 500).json({
+            message: "Failed to create invoice",
+            error: err.response?.data || err.message
+        });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
-const PAYMONGO_SECRET_KEY = process.env.PAYMONGO_SECRET_KEY;
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5500";
-
-// ------------------- Test Route -------------------
-app.get("/", (req, res) => {
-  res.send("Server is running!");
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server is live and listening on port ${PORT}`);
 });
-
-// ------------------- Create Payment -------------------
-app.post("/create-payment", async (req, res) => {
-  try {
-    const { amount, order, user_id } = req.body;
-
-    if (!amount || !order || !user_id) {
-      return res.status(400).json({ success: false, error: "Missing required fields" });
-    }
-
-    const amountInCentavos = Math.round(amount * 100);
-
-    // ------------------- Create PaymentIntent -------------------
-    const paymentIntentResp = await fetch("https://api.paymongo.com/v1/payment_intents", {
-      method: "POST",
-      headers: {
-        "Authorization": `Basic ${Buffer.from(PAYMONGO_SECRET_KEY + ":").toString("base64")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data: {
-          attributes: {
-            amount: amountInCentavos,
-            currency: "PHP",
-            payment_method_allowed: ["qr_ph"],   // ✅ QR PH
-            payment_method_options: { qr_ph: {} }, // ✅ QR PH options
-            metadata: { user_id: user_id }       // flat metadata
-          }
-        }
-      })
-    });
-
-    const paymentIntentData = await paymentIntentResp.json();
-    if (!paymentIntentData.data) {
-      return res.status(500).json({ success: false, error: paymentIntentData });
-    }
-
-    const paymentIntentId = paymentIntentData.data.id;
-
-    // ------------------- Create Source -------------------
-    const sourceResp = await fetch("https://api.paymongo.com/v1/sources", {
-      method: "POST",
-      headers: {
-        "Authorization": `Basic ${Buffer.from(PAYMONGO_SECRET_KEY + ":").toString("base64")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data: {
-          attributes: {
-            type: "qr_ph",                      // ✅ QR PH
-            amount: amountInCentavos,
-            currency: "PHP",
-            redirect: {
-              success: `${FRONTEND_URL}/success.html`,
-              failed: `${FRONTEND_URL}/cart.html`
-            },
-            payment_intent: paymentIntentId,
-            metadata: { user_id: user_id }
-          }
-        }
-      })
-    });
-
-    const sourceData = await sourceResp.json();
-    if (!sourceData.data) {
-      return res.status(500).json({ success: false, error: sourceData });
-    }
-
-    res.json({
-      success: true,
-      checkout_url: sourceData.data.attributes.redirect.checkout_url
-    });
-
-  } catch (err) {
-    console.error("Server error:", err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

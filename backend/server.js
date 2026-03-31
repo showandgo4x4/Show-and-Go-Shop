@@ -7,18 +7,20 @@ const { Invoice } = require("xendit-node");
 const app = express();
 
 // Middleware
-app.use(cors());
 app.use(bodyParser.json());
 app.use(cors({
-    origin: ["https://showandgo4x4.com", "https://show-and-go-shop-backend.onrender.com"], 
-    methods: ["GET", "POST"],
-    credentials: true
-}));
+    origin: ["https://showandgo4x4.com", "https://www.showandgo4x4.com"],
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));allowedHeaders: ["Content-Type", "Authorization"]
 // Initialize Xendit Invoice with the key from .env
 const xenditInvoiceInstance = new Invoice({ 
     secretKey: process.env.XENDIT_SECRET_KEY 
 });
-
+// Add this to server.js
+app.get("/", (req, res) => {
+    res.json({ status: "Online", message: "Show and Go Backend is working!" });
+});
 app.post("/create-invoice", async (req, res) => {
     try {
         const { external_id, amount, payer_email, description } = req.body;
@@ -63,6 +65,6 @@ app.post("/create-invoice", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server is live and listening on port ${PORT}`);
 });
