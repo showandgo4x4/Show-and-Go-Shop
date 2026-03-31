@@ -9,7 +9,11 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-
+app.use(cors({
+    origin: ["https://showandgo4x4.com", "https://show-and-go-shop-backend.onrender.com"], 
+    methods: ["GET", "POST"],
+    credentials: true
+}));
 // Initialize Xendit Invoice with the key from .env
 const xenditInvoiceInstance = new Invoice({ 
     secretKey: process.env.XENDIT_SECRET_KEY 
@@ -60,5 +64,5 @@ app.post("/create-invoice", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Backend running on ${process.env.FRONTEND_URL || 'http://localhost'}:${PORT}`);
+    console.log(`🚀 Server is live and listening on port ${PORT}`);
 });

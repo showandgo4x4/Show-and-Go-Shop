@@ -277,7 +277,7 @@ document.getElementById("pay-button").addEventListener("click", async () => {
     const description = "Show & Go Repair Shop Purchase";
 
     // 3. Send request to backend
-    const res = await fetch("http://localhost:3000/create-invoice", {
+    const res = await fetch("https://show-and-go-shop-backend.onrender.com/create-invoice", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ external_id, amount, payer_email, description })
