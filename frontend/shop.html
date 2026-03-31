@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+  <link rel="icon" href="assets/images/logo.png" type="image/x-icon">
+<head>
+<meta charset="UTF-8">
+<title>Shop - Show & Go Auto Shop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body class="bg-black text-white">
+
+<!-- ================= NAVBAR ================= -->
+<nav class="bg-black border-b border-gray-800 px-4 md:px-8 py-3 flex justify-between items-center sticky top-0 z-50">
+  <a href="index.html"><img src="assets/images/logo.png" class="h-12"></a>
+  
+  <!-- Desktop links -->
+  <div class="hidden md:flex items-center space-x-8 text-sm font-medium">
+    <a href="index.html" class="text-gray-300 hover:text-white transition">Home</a>
+    <a href="shop.html" class="text-gray-300 hover:text-white transition">Shop</a>
+    <a href="cart.html" class="relative text-gray-300 hover:text-white transition">
+      Cart
+      <span id="cartCount" class="absolute -top-2 -right-4 bg-yellow-500 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full font-semibold">0</span>
+    </a>
+    <div class="h-5 w-px bg-gray-700"></div>
+    <div id="authTabs" class="flex items-center space-x-4">
+      <a href="#" id="loginBtn" class="px-4 py-2 rounded-md text-sm font-medium border border-gray-600 text-gray-300 hover:border-yellow-500 hover:text-yellow-400 transition">Sign In</a>
+      <a href="#" id="registerBtn" class="px-4 py-2 rounded-md text-sm font-semibold bg-yellow-500 text-black hover:bg-yellow-400 transition">Create Account</a>
+      <div id="userDropdown" class="relative hidden">
+        <button id="userMenuBtn" class="px-4 py-2 rounded-md text-sm font-medium border border-gray-600 text-gray-300 hover:border-yellow-500 hover:text-yellow-400 transition">Account ▾</button>
+        <div id="userMenu" class="hidden absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded-md shadow-lg overflow-hidden">
+          <a href="account.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 transition">My Account</a>
+          <button id="authLogoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile: Home, Cart, and Auth -->
+  <div id="mobileNav" class="flex md:hidden space-x-4 items-center relative">
+    <a href="index.html" class="text-gray-300 hover:text-white transition">Home</a>
+    <a href="cart.html" class="relative text-gray-300 hover:text-white transition">
+      Cart
+      <span id="cartCountMobile" class="absolute -top-2 -right-4 bg-yellow-500 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full font-semibold">0</span>
+    </a>
+    <div id="mobileAuthContainer" class="flex space-x-2 items-center"></div>
+  </div>
+</nav>
+
+<!-- ================= SHOP ================= -->
+<section class="p-4 md:p-12">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6 md:mb-8">
+      <h2 class="text-2xl md:text-3xl font-bold text-yellow-400">Shop Products</h2>
+      <select id="categorySelect" class="bg-gray-900 border border-yellow-500 px-3 py-1 md:px-4 md:py-2 rounded text-sm md:text-base">
+        <option value="All">All Categories</option>
+      </select>
+    </div>
+    <div id="productsList" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-8"></div>
+  </div>
+</section>
+
+<!-- ================= AUTH MODAL ================= -->
+<div id="authModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 opacity-0 transition-opacity duration-300">
+  <div id="authModalBox" class="bg-gray-900 w-full max-w-md p-6 md:p-8 rounded-xl border border-gray-800 shadow-2xl relative transform scale-95 transition-all duration-300">
+    <div class="flex justify-center space-x-8 mb-6 text-sm font-semibold">
+      <button id="loginTab" class="text-yellow-400 border-b-2 border-yellow-400 pb-2">Sign In</button>
+      <button id="registerTab" class="text-gray-500 hover:text-gray-300 pb-2 transition">Create Account</button>
+    </div>
+    <form id="authForm" class="flex flex-col space-y-4">
+      <input id="authUsername" type="text" placeholder="Username" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none">
+      <input id="authContact" type="text" placeholder="Contact Number" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none hidden">
+      <input id="authAddress" type="text" placeholder="Address" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none hidden">
+      <input id="authEmail" type="email" placeholder="Email" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none">
+      <input id="authPassword" type="password" placeholder="Password" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none">
+      <input id="authConfirmPassword" type="password" placeholder="Confirm Password" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none hidden">
+      <button type="submit" class="mt-2 py-3 rounded-md bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition">Continue</button>
+    </form>
+    <p id="authMessage" class="text-red-400 text-sm mt-3"></p>
+    <button id="closeAuth" class="absolute top-4 right-4 text-gray-500 hover:text-white text-lg">×</button>
+  </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  // ========== SUPABASE ==========
+  const supabaseUrl = "https://jimjbjtlekdytvnpyykw.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  let loggedInUser = null;
+  let cart = [];
+  let products = [];
+  let isRegister = true;
+
+  // ========== DOM ELEMENTS ==========
+  const loginBtn = document.getElementById("loginBtn");
+  const registerBtn = document.getElementById("registerBtn");
+  const userDropdown = document.getElementById("userDropdown");
+  const authLogoutBtn = document.getElementById("authLogoutBtn");
+  const userMenuBtn = document.getElementById("userMenuBtn");
+const userMenu = document.getElementById("userMenu");
+
+// Toggle dropdown
+userMenuBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  userMenu.classList.toggle("hidden");
+});
+
+// Close when clicking outside
+document.addEventListener("click", (e) => {
+  if (!userMenu.contains(e.target) && !userMenuBtn.contains(e.target)) {
+    userMenu.classList.add("hidden");
+  }
+});
+  const mobileAuthContainer = document.getElementById("mobileAuthContainer");
+  const authModal = document.getElementById("authModal");
+  const closeAuth = document.getElementById("closeAuth");
+  const loginTab = document.getElementById("loginTab");
+  const registerTab = document.getElementById("registerTab");
+  const authForm = document.getElementById("authForm");
+  const authUsername = document.getElementById("authUsername");
+  const authContact = document.getElementById("authContact");
+  const authAddress = document.getElementById("authAddress");
+  const authEmail = document.getElementById("authEmail");
+  const authPassword = document.getElementById("authPassword");
+  const authConfirmPassword = document.getElementById("authConfirmPassword");
+  const authMessage = document.getElementById("authMessage");
+  const productList = document.getElementById("productsList");
+  const categorySelect = document.getElementById("categorySelect");
+
+  // ========== MODAL FUNCTIONS ==========
+  function showModal(){ authModal.classList.remove("hidden"); setTimeout(()=>authModal.classList.add("opacity-100"),10); }
+  function hideModal(){ authModal.classList.remove("opacity-100"); setTimeout(()=>authModal.classList.add("hidden"),300); }
+
+  function updateAuthUI(){
+    if(loggedInUser){
+      loginBtn.classList.add("hidden");
+      registerBtn.classList.add("hidden");
+      userDropdown.classList.remove("hidden");
+    } else {
+      loginBtn.classList.remove("hidden");
+      registerBtn.classList.remove("hidden");
+      userDropdown.classList.add("hidden");
+    }
+    updateMobileAuthUI();
+  }
+
+  // ========== SWITCH TABS & SHOW FIELDS ==========
+  loginBtn.addEventListener("click", () => { showModal(); loginTab.click(); });
+  registerBtn.addEventListener("click", () => { showModal(); registerTab.click(); });
+
+  loginTab.addEventListener("click", ()=>{
+    isRegister = false;
+    loginTab.classList.add("text-yellow-400","border-b-2","border-yellow-400");
+    registerTab.classList.remove("text-yellow-400","border-b-2","border-yellow-400");
+    authConfirmPassword.classList.add("hidden");
+    authContact.classList.add("hidden");
+    authAddress.classList.add("hidden");
+    authMessage.textContent="";
+  });
+
+  registerTab.addEventListener("click", ()=>{
+    isRegister = true;
+    registerTab.classList.add("text-yellow-400","border-b-2","border-yellow-400");
+    loginTab.classList.remove("text-yellow-400","border-b-2","border-yellow-400");
+    authConfirmPassword.classList.remove("hidden");
+    authContact.classList.remove("hidden");
+    authAddress.classList.remove("hidden");
+    authMessage.textContent="";
+  });
+
+  closeAuth.addEventListener("click", hideModal);
+
+  // ========== FORM SUBMIT ==========
+  authForm.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    authMessage.textContent="";
+
+    const username = authUsername.value.trim() || "";
+    const contact = authContact.value.trim() || "";
+    const address = authAddress.value.trim() || "";
+    const email = authEmail.value.trim();
+    const password = authPassword.value.trim();
+    const confirm = authConfirmPassword.value.trim();
+
+    try{
+      if(isRegister){
+        if(password !== confirm){ authMessage.textContent="Passwords do not match!"; return; }
+
+        // Signup via Supabase Auth
+        const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
+        if(signupError){ authMessage.textContent = signupError.message; return; }
+
+        // Insert profile into "profiles"
+        const { error: profileError } = await supabase.from("profiles").insert([{
+          id: signupData.user.id,
+          username,
+          email,
+          contact,
+          address,
+          payments: JSON.stringify([]),
+          is_admin: false
+        }]);
+
+        if(profileError){ authMessage.textContent="Signed up, but profile error: "+profileError.message; return; }
+
+        authMessage.textContent="Registered! Please check your email.";
+        isRegister = false;
+        loginTab.click();
+
+      } else {
+        // LOGIN
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if(error){ authMessage.textContent = error.message; return; }
+        loggedInUser = data.user.id;
+        hideModal();
+        updateAuthUI();
+        await loadCart();
+      }
+    } catch(err){ console.error(err); authMessage.textContent="Something went wrong"; }
+  });
+
+  // ========== LOGOUT ==========
+  authLogoutBtn.addEventListener("click", async ()=>{
+    await supabase.auth.signOut();
+    loggedInUser = null;
+    cart = [];
+    updateAuthUI();
+  });
+
+  // ========== MOBILE AUTH ==========
+  function updateMobileAuthUI(){
+    mobileAuthContainer.innerHTML="";
+    if(loggedInUser){
+      const accBtn = document.createElement("button");
+      accBtn.textContent="Account ▾";
+      accBtn.className="px-3 py-1 border border-gray-600 rounded text-gray-300 hover:border-yellow-500 hover:text-yellow-400 text-sm relative z-50";
+      const menu = document.createElement("div");
+      menu.className="hidden absolute top-10 right-0 w-40 bg-gray-900 border border-gray-800 rounded-md shadow-lg overflow-hidden z-50";
+      menu.innerHTML=`
+        <a href="account.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 transition">My Account</a>
+        <button id="mobileLogoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition">Logout</button>
+      `;
+      accBtn.addEventListener("click", e=>{ e.stopPropagation(); menu.classList.toggle("hidden"); });
+      document.addEventListener("click", e=>{ if(!menu.contains(e.target) && !accBtn.contains(e.target)) menu.classList.add("hidden"); });
+      mobileAuthContainer.appendChild(accBtn);
+      mobileAuthContainer.appendChild(menu);
+      menu.querySelector("#mobileLogoutBtn").addEventListener("click", async ()=>{
+        await supabase.auth.signOut();
+        loggedInUser=null; cart=[];
+        updateAuthUI();
+      });
+    } else {
+      const loginBtnMobile = document.createElement("button");
+      loginBtnMobile.textContent="Sign In";
+      loginBtnMobile.className="px-3 py-1 border border-gray-600 rounded text-gray-300 hover:border-yellow-500 hover:text-yellow-400 text-sm";
+      loginBtnMobile.addEventListener("click", ()=>loginBtn.click());
+      const registerBtnMobile = document.createElement("button");
+      registerBtnMobile.textContent="Create Account";
+      registerBtnMobile.className="px-3 py-1 bg-yellow-500 text-black rounded text-sm hover:bg-yellow-400";
+      registerBtnMobile.addEventListener("click", ()=>registerBtn.click());
+      mobileAuthContainer.appendChild(loginBtnMobile);
+      mobileAuthContainer.appendChild(registerBtnMobile);
+    }
+  }
+
+  // ========== PRODUCTS & CART ==========
+  async function loadCategories(){
+    const { data } = await supabase.from("categories").select("*").order("id");
+    categorySelect.innerHTML = '<option value="All">All Categories</option>';
+    data.forEach(c=> categorySelect.appendChild(Object.assign(document.createElement("option"),{ value:c.name, textContent:c.name })));
+  }
+
+  async function loadProducts() {
+  // Fetch products with their category name using foreign key
+  const { data, error } = await supabase
+    .from("products")
+    .select(`id, name, price, stock, image_url, categories(name)`) // join categories
+    .order("id");
+
+  if (error) {
+    console.error("Error loading products:", error);
+    return;
+  }
+
+  // Map to local products array
+  products = data.map(p => ({
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    stock: p.stock ?? 0,
+    category: p.categories?.name || "Uncategorized", // category name from relation
+    img: p.image_url || "assets/images/Default.png"
+  }));
+
+  renderProducts(categorySelect.value);
+}
+
+  function renderProducts(filter="All"){
+    productList.innerHTML="";
+    products.filter(p=>filter==="All"||p.category===filter).forEach(p=>{
+      const card = document.createElement("div");
+      card.className=`bg-gray-900 p-2 md:p-4 rounded-xl flex flex-col items-center transform transition duration-300 hover:scale-105 hover:shadow-xl hover:bg-gray-800 cursor-pointer`;
+      card.innerHTML=`
+        <div class="overflow-hidden rounded-lg w-full h-48 flex items-center justify-center bg-gray-800">
+  <img src="${p.img}" class="max-w-full max-h-full object-contain transition-transform duration-300 hover:scale-110">
+</div>
+        <h3 class="text-yellow-400 font-bold mt-1 md:mt-3 text-sm md:text-base">${p.name}</h3>
+        <p class="mt-1 text-xs md:text-sm">₱${p.price}</p>
+        <p class="mt-1 text-xs md:text-sm">Stock: <span>${p.stock}</span></p>
+      `;
+      const btn=document.createElement("button");
+      btn.textContent="Add to Cart";
+      btn.className="bg-green-500 px-2 py-1 md:px-4 md:py-2 mt-2 rounded text-black font-semibold hover:bg-green-400 transition text-xs md:text-sm";
+      btn.onclick=async ()=>{
+        if(!loggedInUser){ alert("Please login first!"); return; }
+        await addToCart(p.id);
+        updateCartCount();
+      };
+      card.appendChild(btn);
+      productList.appendChild(card);
+    });
+    updateCartCount();
+  }
+
+  async function loadCart(){
+    if(!loggedInUser) return;
+    const { data } = await supabase.from("carts").select("*").eq("user_id", loggedInUser);
+    cart = data || [];
+    updateCartCount();
+  }
+
+  async function addToCart(productId){
+    const product = products.find(p=>p.id===productId);
+    if(!product || product.stock<=0){ alert("Out of stock"); return; }
+    let existing = cart.find(c=>c.product_id===productId);
+    if(existing){
+      existing.quantity++;
+      await supabase.from("carts").update({ quantity:existing.quantity }).eq("id",existing.id);
+    } else {
+      const { data } = await supabase.from("carts").insert([{ user_id:loggedInUser, product_id:productId, quantity:1 }]).select().maybeSingle();
+      cart.push(data);
+    }
+    product.stock--;
+    await supabase.from("products").update({ stock:product.stock }).eq("id",productId);
+    renderProducts(categorySelect.value);
+  }
+
+  function updateCartCount(){ 
+    const count = cart.reduce((sum,c)=>sum+c.quantity,0); 
+    document.getElementById("cartCount").textContent = count;
+    document.getElementById("cartCountMobile").textContent = count;
+  }
+
+  categorySelect.addEventListener("change", ()=>renderProducts(categorySelect.value));
+
+  // ========== INIT ==========
+  const { data: { session } } = await supabase.auth.getSession();
+  if(session) loggedInUser = session.user.id;
+  updateAuthUI();
+  await loadCategories();
+  await loadProducts();
+  await loadCart();
+});
+</script>
+</body>
+</html>

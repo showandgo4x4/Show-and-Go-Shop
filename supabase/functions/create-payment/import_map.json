@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "sift": "https://deno.land/x/sift@0.6.0/mod.ts",
+    "uuid": "https://deno.land/std@0.203.0/uuid/mod.ts",
+    "dotenv": "https://deno.land/x/dotenv@v3.2.2/mod.ts"
+  }
+}

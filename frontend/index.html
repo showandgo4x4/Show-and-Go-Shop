@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <title>Show & Go Auto</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+  <link rel="icon" href="assets/images/logo.png" type="image/x-icon">
+ 
+<style>
+  /* ================= CHAT BUBBLE ================= */
+#chat-bubble,
+#chat-box{
+pointer-events:auto;
+}
+#chat-bubble{
+position:fixed;
+bottom:20px;
+right:20px;
+width:60px;
+height:60px;
+background:#fbbf24;
+color:#111827;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+cursor:pointer;
+box-shadow:0 8px 20px rgba(0,0,0,.4);
+z-index:999999;
+transition:.3s;
+}
+#chat-bubble,
+#chat-box {
+  pointer-events: auto !important;
+  z-index: 100000 !important;
+}
+
+#chat-messages,
+#chat-input-area {
+  pointer-events: auto !important;
+}
+#chat-bubble:hover{
+transform:scale(1.1);
+}
+
+
+/* ================= CHAT BOX ================= */
+
+#chat-box{
+position:fixed;
+bottom:20px;
+right:20px;
+
+width:360px;
+height:520px;
+
+background:#0f172a;
+border-radius:18px;
+
+display:none;
+flex-direction:column;
+
+box-shadow:0 15px 40px rgba(0,0,0,.6);
+overflow:hidden;
+
+z-index:999999;
+}
+
+#chat-box.show{
+display:flex;
+}
+
+
+/* ================= HEADER ================= */
+
+#chat-header{
+display:flex;
+align-items:center;
+gap:10px;
+
+background:#111827;
+padding:12px;
+
+border-bottom:1px solid rgba(255,255,255,.1);
+
+flex-shrink:0;
+}
+
+.chat-logo{
+width:32px;
+height:32px;
+border-radius:8px;
+}
+
+.chat-title{
+font-weight:600;
+color:white;
+font-size:14px;
+}
+
+.chat-status{
+font-size:11px;
+color:#9ca3af;
+}
+
+
+/* ================= GREETING ================= */
+
+.chat-greeting{
+padding:14px;
+border-bottom:1px solid rgba(255,255,255,.05);
+flex-shrink:0;
+}
+
+.chat-greeting h3{
+font-size:16px;
+font-weight:600;
+}
+
+.chat-greeting p{
+font-size:13px;
+color:#9ca3af;
+}
+
+
+/* ================= RECENT ================= */
+
+.chat-recent{
+display:flex;
+gap:10px;
+padding:12px;
+border-bottom:1px solid rgba(255,255,255,.05);
+flex-shrink:0;
+}
+
+.recent-avatar{
+width:34px;
+height:34px;
+background:#fbbf24;
+color:black;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:50%;
+font-weight:bold;
+}
+
+.recent-text p{
+font-size:13px;
+color:#d1d5db;
+}
+
+
+/* ================= MESSAGES ================= */
+
+#chat-messages{
+flex:1;
+overflow-y:auto;
+padding:14px;
+}
+
+#chat-messages::-webkit-scrollbar{
+width:6px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb{
+background:rgba(255,255,255,.2);
+border-radius:3px;
+}
+
+
+/* ================= MESSAGE BUBBLES ================= */
+
+.message-container{
+display:flex;
+align-items:flex-end;
+margin-bottom:10px;
+}
+
+.message-container.bot{
+justify-content:flex-start;
+}
+
+.message-container.user{
+justify-content:flex-end;
+}
+
+.message-icon{
+width:28px;
+height:28px;
+border-radius:50%;
+background-size:cover;
+background-position:center;
+margin:0 6px;
+}
+
+.message{
+max-width:85%;
+padding:12px 16px;
+font-size:15px;
+line-height:1.5;
+}
+
+.message-container.bot .message{
+background:#1f2937;
+color:#e5e7eb;
+border-bottom-left-radius:4px;
+}
+
+.message-container.user .message{
+background:#fbbf24;
+color:black;
+border-bottom-right-radius:4px;
+}
+
+
+/* ================= INPUT ================= */
+
+#chat-input-area{
+display:flex;
+gap:6px;
+padding:10px;
+background:#111827;
+border-top:1px solid rgba(255,255,255,.1);
+flex-shrink:0;
+}
+
+#chat-input{
+flex:1;
+padding:10px;
+border-radius:8px;
+border:none;
+background:#1f2937;
+color:white;
+outline:none;
+}
+
+#send-btn{
+background:#fbbf24;
+border:none;
+padding:12px 16px;
+border-radius:10px;
+cursor:pointer;
+font-size:18px;
+}
+#chat-suggestions{
+display:flex;
+overflow-x:auto;
+gap:6px;
+padding:10px;
+}
+
+.suggestion-btn{
+flex-shrink:0;
+font-size:13px;
+padding:8px 12px;
+}
+
+/* ================= HELP ================= */
+
+.chat-help{
+padding:10px;
+border-top:1px solid rgba(255,255,255,.05);
+max-height:110px;
+overflow:auto;
+flex-shrink:0;
+}
+
+.chat-help input{
+width:100%;
+padding:8px;
+border-radius:8px;
+border:none;
+background:#1f2937;
+color:white;
+margin-bottom:8px;
+}
+
+.chat-help ul{
+font-size:13px;
+color:#9ca3af;
+}
+
+.chat-help li{
+margin-bottom:6px;
+cursor:pointer;
+}
+.chat-help {
+  display: none !important;
+}
+
+/* ================= NAV ================= */
+
+.chat-nav{
+display:flex;
+justify-content:space-around;
+padding:10px;
+background:#111827;
+border-top:1px solid rgba(255,255,255,.1);
+flex-shrink:0;
+}
+
+.nav-item{
+display:flex;
+flex-direction:column;
+align-items:center;
+font-size:12px;
+color:#9ca3af;
+cursor:pointer;
+}
+
+.nav-item.active{
+color:#fbbf24;
+}
+
+
+/* ================= MOBILE ================= */
+
+@media (max-width:640px){
+
+#chat-box{
+position:fixed;
+bottom:80px;
+right:10px;
+width:95%;
+max-width:380px;
+height:70vh;
+border-radius:16px;
+}
+
+#chat-messages{
+font-size:14px;
+padding:10px;
+}
+
+#chat-input{
+font-size:16px;
+}
+
+#chat-input-area{
+position:sticky;
+bottom:0;
+}
+
+}
+#chat-box{
+padding-bottom:env(safe-area-inset-bottom);
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const bubble = document.getElementById("chat-bubble");
+  const box = document.getElementById("chat-box");
+  const closeBtn = document.getElementById("close-chat");
+
+  bubble.addEventListener("click", () => box.classList.add("show"));
+  closeBtn.addEventListener("click", () => box.classList.remove("show"));
+
+  // Supabase client
+  const supabaseUrl = "https://jimjbjtlekdytvnpyykw.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  const messageSound = new Audio("assets/sounds/Ang Mahiwagang Mensahe.mp3")
+  const messages = document.getElementById("chat-messages");
+  const input = document.getElementById("chat-input");
+  const sendBtn = document.getElementById("send-btn");
+  input.addEventListener("focus",()=>{
+setTimeout(()=>{
+messages.scrollTop = messages.scrollHeight;
+},300);
+});
+
+bubble.addEventListener("click",()=>{
+document.body.style.overflow="hidden";
+});
+
+closeBtn.addEventListener("click",()=>{
+document.body.style.overflow="auto";
+});
+  // ----------------------------
+  // Helper Functions
+  // ----------------------------
+  function generateSessionId() {
+    return 'sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+  }
+
+  async function ensureChatSession(visitorName) {
+    let sessionId = localStorage.getItem("visitorSessionId");
+    if (!sessionId) {
+      sessionId = generateSessionId();
+
+      const { error } = await supabaseClient.from("chat_sessions").insert([{
+        session_id: sessionId,
+        visitor_name: visitorName
+      }]);
+
+      if (error) {
+        console.error("Insert session failed:", error);
+        return null;
+      }
+
+      localStorage.setItem("visitorSessionId", sessionId);
+    }
+    return sessionId;
+  }
+
+  function addMessage(sender, text) {
+    const container = document.createElement("div");
+    container.className = `message-container ${sender}`;
+
+    const icon = document.createElement("div");
+    icon.className = "message-icon";
+    icon.style.backgroundImage = sender === "user"
+      ? "url('https://i.imgur.com/8Km9tLL.png')"
+      : "url('assets/images/logo.png')";
+
+    const bubbleMsg = document.createElement("div");
+    bubbleMsg.className = "message";
+    bubbleMsg.innerText = text;
+
+    if (sender === "user") {
+      container.appendChild(bubbleMsg);
+      container.appendChild(icon);
+    } else {
+      container.appendChild(icon);
+      container.appendChild(bubbleMsg);
+    }
+
+    messages.appendChild(container);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  async function loadChatHistory(sessionId) {
+    const { data, error } = await supabaseClient
+      .from("chats")
+      .select("*")
+      .eq("session_id", sessionId)
+      .order("created_at", { ascending: true });
+
+    if (error) console.error(error);
+    else data.forEach(msg => {
+      addMessage(msg.sender === "visitor" ? "user" : "bot", msg.message);
+    });
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+
+    const sessionId = bubble.dataset.sessionId;
+    if (!sessionId) return alert("Chat session not initialized.");
+
+    addMessage("user", text);
+
+    const { error } = await supabaseClient.from("chats").insert([{
+      session_id: sessionId,
+      sender: "visitor",
+      message: text
+    }]);
+
+    if (error) console.error("Insert error:", error);
+  }
+
+  // ----------------------------
+  // Event Listeners
+  // ----------------------------
+  bubble.addEventListener("click", async () => {
+    box.classList.add("show");
+
+    // Only create session once
+    if (!bubble.dataset.sessionId) {
+      const visitorName = prompt("Enter your name") || "Visitor";
+      const sessionId = await ensureChatSession(visitorName);
+      if (!sessionId) return;
+
+      bubble.dataset.sessionId = sessionId;
+
+      // Load previous messages
+      loadChatHistory(sessionId);
+
+      // Subscribe to new messages from agents
+      supabaseClient.channel(`chat_session_${sessionId}`)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chats',
+          filter: `session_id=eq.${sessionId}`
+        }, payload => {
+          if (payload.new.sender === 'agent') addMessage('bot', payload.new.message);
+        })
+        .subscribe();
+        supabaseClient
+        .channel("typing")
+        .send({
+        type: "broadcast",
+        event: "typing",
+        payload: { session_id: sessionId }
+        });
+    }
+  });
+
+  closeBtn.addEventListener("click", () => box.classList.remove("show"));
+  sendBtn.addEventListener("click", sendMessage);
+  input.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
+});
+</script>
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    #heroSlides > div { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 1s ease-in-out; }
+    #heroSlides > div.active { opacity: 1; }
+    #heroText { 
+      background-clip: text; -webkit-background-clip: text; color: transparent; display: inline-block; 
+      text-align: center; font-size: clamp(2rem, 8vw, 6rem); -webkit-text-stroke: 2px rgb(255, 217, 0); 
+    }
+    .video-container { position: relative; width: 100%; overflow: hidden; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .video-container video, .video-container iframe { width: 100%; height: 100%; object-fit: cover; }
+    a, button { padding: 0.8rem 1.5rem; font-size: 1rem; }
+    .social-icon svg { color: #facc15; transition: all 0.3s ease; filter: drop-shadow(0 0 0px #facc15); }
+    .social-icon:hover svg { animation: glow 1.2s infinite alternate; }
+    @keyframes glow {
+      0% { color: #fcd34d; filter: drop-shadow(0 0 4px #fcd34d); transform: scale(1.1); }
+      50% { color: #fef08a; filter: drop-shadow(0 0 10px #fef08a); transform: scale(1.2); }
+      100% { color: #fcd34d; filter: drop-shadow(0 0 6px #fcd34d); transform: scale(1.15); }
+    }
+
+    /* ================= MOBILE RESPONSIVENESS ================= */
+    @media (max-width: 1024px) { /* Tablets */
+      #heroText { font-size: clamp(1.8rem, 6vw, 4rem); -webkit-text-stroke: 1.5px rgb(255,217,0); }
+      .video-container { height: 220px; }
+    }
+    @media (max-width: 768px) { /* Cellphones */
+      #heroText { font-size: clamp(1.5rem, 5vw, 3rem); -webkit-text-stroke: 1px rgb(255,217,0); }
+      .video-container { height: 180px; }
+      a, button { padding: 0.6rem 1rem; font-size: 0.9rem; }
+      nav h1 { font-size: 1.5rem; }
+      #navLinks { flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
+    }
+    
+    @media (max-width: 480px) { /* Small phones */
+      .video-container { height: 150px; }
+      #heroText { font-size: clamp(1.2rem, 6vw, 2.5rem); -webkit-text-stroke: 0.8px rgb(255,217,0); }
+      nav h1 { font-size: 1.2rem; }
+      a, button { padding: 0.5rem 0.8rem; font-size: 0.85rem; }
+    }
+    .hotspot {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,0,0,0.8);
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.3s;
+  z-index: 10;
+  
+}
+@media (max-width:768px){
+
+.hotspot{
+width:48px;
+height:48px;
+font-size:20px;
+}
+
+}
+.hotspot:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 15px red;
+}
+
+/* Floating info box responsive */
+#infoBox {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;           /* occupy 90% of screen width */
+  max-width: 400px;     /* limit max width for desktops */
+  padding: 16px;
+  display: none;
+  background: #1c1c1c;
+  border-radius: 10px;
+  color: white;
+  z-index: 9999;
+  box-shadow: 0 4px 25px rgba(0,0,0,0.7);
+  overflow-y: auto;
+  max-height: 80vh;     /* prevent from growing too tall */
+}
+
+#infoBox img {
+  width: 100%;           /* make images scale to box width */
+  max-height: 200px;     /* optional: limit image height */
+  object-fit: contain;   /* keep aspect ratio */
+  border-radius: 5px;
+  margin-bottom: 8px;
+}
+
+/* Title */
+#infoTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+/* Description */
+#infoDesc {
+  font-size: 0.9rem;
+  line-height: 1.3rem;
+}
+
+/* Close button */
+#infoBox button {
+  margin-top: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  background: #FFD700;
+  color: black;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#infoBox button:hover {
+  background: #ffec7a;
+}
+  </style>
+</head>
+<body class="bg-gray-800 text-white">
+
+<div id="chat-bubble">💬</div>
+
+<div id="chat-box">
+  <!-- Header -->
+  <div id="chat-header">
+    <img src="assets/images/logo.png" class="chat-logo">
+    <div>
+      <div class="chat-title">Show & Go Support</div>
+      <div class="chat-status">We'll be back online soon</div>
+    </div>
+    <button id="close-chat">✕</button>
+  </div>
+
+  <!-- Greeting -->
+  <div class="chat-greeting">
+    <h3>Hi there 👋</h3>
+    <p>How can we help?</p>
+  </div>
+
+  <div class="chat-recent">
+    <div class="recent-avatar">S</div>
+    <div class="recent-text">
+      <strong>Show & Go Support</strong>
+      <p>Welcome to Show & Go Repair Shop. How can we assist you today?</p>
+    </div>
+  </div>
+
+  <div id="chat-messages"></div>
+
+  <div id="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Send us a message">
+    <button id="send-btn">
+      <i class="fa-solid fa-paper-plane"></i>
+    </button>
+  </div>
+
+  <div class="chat-help">
+    <input type="text" placeholder="Search for help">
+    <ul>
+      <li>How to request a quote?</li>
+      <li>How to check my repair status?</li>
+      <li>What services do you offer?</li>
+    </ul>
+  </div>
+
+  <div class="chat-nav">
+    <div class="nav-item active">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </div>
+    <div class="nav-item">
+      <i class="fa-solid fa-message"></i>
+      <span>Messages</span>
+    </div>
+    <div class="nav-item">
+      <i class="fa-solid fa-circle-question"></i>
+      <span>Help</span>
+    </div>
+  </div>
+</div>
+<div id="infoOverlay" onclick="hideInfo()" style="
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 9998;
+  pointer-events:none;"></div>
+<!-- NAVBAR -->
+<nav class="bg-gray-800 border-b border-yellow-500/20 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+
+ <!-- Logo Left -->
+<div class="flex items-center space-x-2">
+  <!-- Logo Image -->
+  <img 
+    src="assets/images/logo.png" 
+    alt="Show & Go Logo" 
+    class="h-8 w-8 sm:h-10 sm:w-10 object-contain"
+  >
+  
+  <!-- Shop Name -->
+  <h1 class="text-sm sm:text-lg md:text-xl font-bold text-yellow-400 truncate">
+    Show & Go Tires and Repair Shop
+  </h1>
+</div>
+
+    <!-- Desktop Links and Highlight Buttons -->
+    <div class="hidden md:flex items-center justify-between flex-1 ml-16">
+
+      <!-- Regular Links -->
+      <div class="flex items-center gap-6">
+        <a href="index.html" class="hover:text-yellow-400 transition">Home</a>
+        <a href="shop.html" class="hover:text-yellow-400 transition">Shop</a>
+        <a href="store-locator.html" class="hover:text-yellow-400 transition">Store Locator</a>
+        <a href="about.html" class="hover:text-yellow-400 transition">About Us</a>
+        <a href="account.html" class="hover:text-yellow-400 transition">Account</a>
+      </div>
+
+      <!-- Highlight Buttons -->
+      <div class="flex items-center gap-2">
+        <a href="quote.html" class="px-3 py-1 bg-yellow-400 text-black rounded-md font-semibold hover:bg-yellow-300 transition text-center">Request Quote</a>
+        <a href="inquiry.html" class="px-3 py-1 bg-yellow-400 text-black rounded-md font-semibold hover:bg-yellow-300 transition text-center">Be a Partner</a>
+        <a href="camping.html" class="px-3 py-1 bg-yellow-400 text-black rounded-md font-semibold hover:bg-yellow-300 transition text-center">Join Our Community</a>
+      </div>
+
+    </div>
+
+    <!-- Hamburger Button (Mobile Only) -->
+    <button id="mobileMenuBtn" class="md:hidden text-yellow-400 text-2xl focus:outline-none">
+      <i id="mobileIcon" class="fas fa-bars"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Dropdown -->
+  <div id="mobileMenu" class="md:hidden hidden absolute right-4 top-16 bg-gray-800 border border-yellow-500/20 rounded-lg shadow-xl px-3 py-3 flex flex-wrap gap-2 justify-end z-50">
+    <a href="quote.html" class="mobile-btn">Quote</a>
+    <a href="inquiry.html" class="mobile-btn">Partner</a>
+    <a href="camping.html" class="mobile-btn">Community</a>
+    <a href="about.html" class="mobile-btn">About</a>
+    <a href="index.html" class="mobile-btn">Home</a>
+    <a href="shop.html" class="mobile-btn">Shop</a>
+    <a href="store-locator.html" class="mobile-btn">Store</a>
+    <a href="account.html" class="mobile-btn">Account</a>
+  </div>
+</nav>
+
+<!-- SCRIPT -->
+<script>
+  const mobileBtn = document.getElementById("mobileMenuBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
+  const mobileIcon = document.getElementById("mobileIcon");
+
+  mobileBtn.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+    mobileIcon.classList.toggle("fa-bars");
+    mobileIcon.classList.toggle("fa-xmark");
+  });
+</script>
+
+<!-- HERO SECTION -->
+ 
+<section class="relative h-screen flex items-center justify-center text-center px-4 sm:px-6 overflow-hidden">
+  <!-- Slides / Backgrounds -->
+  <div id="heroSlides" class="absolute inset-0 pointer-events-none">
+    <div class="active bg-cover bg-center pointer-events-none" style="background-image: url('assets/cars/car1.jpeg');"></div>
+    <div class="bg-cover bg-center pointer-events-none" style="background-image: url('assets/cars/car2.jpeg');"></div>
+    <div class="bg-cover bg-center pointer-events-none" style="background-image: url('assets/cars/car3.jpeg');"></div>
+    <div class="bg-cover bg-center pointer-events-none" style="background-image: url('assets/cars/car4.jpeg');"></div>
+    <div class="bg-cover bg-center pointer-events-none" style="background-image: url('assets/cars/car5.jpeg');"></div>
+  </div>
+
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/60 md:bg-black/20 pointer-events-none"></div>
+
+  <!-- Content -->
+  <div class="absolute inset-0 flex flex-col items-center justify-center z-10 px-2 md:px-6 pointer-events-auto">
+    <div class="hero-text-wrapper text-center">
+      <h2 id="heroText" class="font-extrabold relative z-10 text-3xl sm:text-4xl md:text-6xl leading-snug md:leading-tight">
+        PERFORMANCE. PRECISION. POWER.
+      </h2>
+    </div>
+
+    <p class="text-sm sm:text-base md:text-xl text-gray-200 mb-6 mt-4 max-w-xs sm:max-w-md md:max-w-2xl text-center">
+      Premium automotive parts and professional services built for enthusiasts who demand excellence.
+    </p>
+
+    <a href="shop.html" 
+       class="bg-yellow-400 text-black px-6 py-3 sm:px-8 sm:py-4 font-semibold rounded-lg hover:bg-yellow-300 transition duration-300 shadow-lg">
+       Shop Now
+    </a>
+  </div>
+</section>
+
+<!-- Mobile-only style -->
+<style>
+  /* Mobile first (default) */
+  #heroText {
+    color: #FFD900; /* solid yellow */
+    -webkit-text-stroke: 0;
+    background-image: none !important;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+  }
+
+  /* Desktop (min-width: 768px) */
+  @media (min-width: 768px) {
+    #heroText {
+      color: transparent;
+      -webkit-text-stroke: 5px rgb(255, 217, 0);
+      background-image: url('assets/cars/car1.jpeg');
+      background-size: cover;
+      background-position: center;
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-shadow: none;
+    }
+  }
+</style>
+<!-- FEATURED OVERLAND BUILD -->
+<section class="py-16 md:py-20 bg-gray-800 text-center">
+  <h2 class="text-2xl md:text-4xl font-bold text-yellow-400 mb-8 md:mb-12">Featured Overland Build</h2>
+
+  <div class="relative max-w-5xl mx-auto w-full">
+    <img src="assets/images/camping/1.png" alt="Overland Vehicle" class="w-full h-auto rounded-lg">
+
+    <!-- Hotspots -->
+    <button class="hotspot absolute text-yellow-400 font-bold text-2xl md:text-3xl transition-transform duration-200 hover:scale-125 hover:text-white hover:drop-shadow-xl"
+      style="top:25%; left:30%;"
+      onclick="showInfoFloating(this,'TJM Walcha Roof Tent','assets/images/camping/Walcha.jpg','The TJM Walcha ABS Roof Top Tent is a premium, hard-shell camping solution designed for quick, easy setup and superior comfort for up to two adults and a child')">+</button>
+
+    <button class="hotspot absolute text-yellow-400 font-bold text-2xl md:text-3xl transition-transform duration-200 hover:scale-125 hover:text-white hover:drop-shadow-xl"
+      style="top:30%; left:70%;"
+      onclick="showInfoFloating(this,'TJM Alora Roof Tent','assets/images/camping/Camping-Tent.jpg','The TJM Allora is a durable, hard-shell aluminum roof top tent designed for fast, two-person camping with a 50mm high-density mattress, 10mm anti-condensation mat, and gas-strut-assisted setup. It features a 320gsm waterproof canvas, a stargazing window, integrated LED lighting, 12V/USB power ports, and a 16cm closed height for low profile.')">+</button>
+
+    <button class="hotspot absolute text-yellow-400 font-bold text-2xl md:text-3xl transition-transform duration-200 hover:scale-125 hover:text-white hover:drop-shadow-xl"
+      style="top:65%; left:40%;"
+      onclick="showInfoFloating(this,'TJM Shower Tent','assets/images/camping/ShowerTent.jpg','The TJM Shower Tent is a compact, roofline-mounted 4x4 accessory made from 300D ripstop polyester with a silver-coated, private interior, designed for quick setup. It features adjustable height (160–210 cm), a protective roof cover, internal storage pockets, a towel rail, and LED light attachment points. ')">+</button>
+
+    <button class="hotspot absolute text-yellow-400 font-bold text-2xl md:text-3xl transition-transform duration-200 hover:scale-125 hover:text-white hover:drop-shadow-xl"
+      style="top:35%; left:60%;"
+      onclick="showInfoFloating(this,'Roam Rugged Case','assets/images/camping/Roambox.jpg','The ROAM Rugged Case (often referred to as a Roam box) is a premium, heavy-duty storage solution designed for overlanding, camping, and vehicle-based adventures. These cases are built to protect gear from harsh weather and rugged terrain, typically featuring durable LLDPE (Linear Low-Density Polyethylene) shell construction.')">+</button>
+
+    <button class="hotspot absolute text-yellow-400 font-bold text-2xl md:text-3xl transition-transform duration-200 hover:scale-125 hover:text-white hover:drop-shadow-xl"
+      style="top:40%; left:5%;"
+      onclick="showInfoFloating(this,'Body Armour Side Awning Tent','assets/images/camping/AwningTent.jpg','The Body Armor 4x4 Sky Ridge 270 Awning is a durable, freestanding, and easy-setup shade solution providing 80 sq. ft. of coverage (or 129 sq. ft. for the 270XL). It features 280gsm poly-cotton rip-stop, UV-protective, waterproof fabric, with lightweight aluminum telescopic legs. Designed for, it mounts to most roof or bed racks.')">+</button>
+
+    <button class="hotspot absolute text-yellow-400 font-bold text-2xl md:text-3xl transition-transform duration-200 hover:scale-125 hover:text-white hover:drop-shadow-xl"
+      style="top:55%; left:68%;"
+      onclick="showInfoFloating(this,'TJM Snorkel','assets/images/camping/Snorkel.jpg','TJM Airtec snorkels are premium, Australian-made, vehicle-specific snorkels designed to protect engines from water, dust, and debris by raising the intake to roof level ')">+</button>
+
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="py-20 text-center bg-gray-800">
+  <h2 class="text-3xl md:text-4xl font-bold text-yellow-400 mb-12" data-aos="fade-up">Featured Products</h2>
+
+  <!-- Grid container -->
+  <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 max-w-6xl mx-auto px-4" data-aos="fade-up">
+    
+    <!-- Product Card 1 -->
+    <a href="shop.html" class="product-card bg-gray-700 rounded-2xl shadow-lg hover:shadow-yellow-500/30 transition duration-300 p-4 sm:p-5 flex flex-col items-center">
+      <img src="assets/images/xado.jpg" alt="Premium Engine Oil" class="h-36 sm:h-40 w-full object-cover rounded-xl mb-3 sm:mb-4">
+      <h3 class="text-base sm:text-lg font-semibold text-yellow-400 mb-1 sm:mb-2">Premium Engine Oil</h3>
+    </a>
+
+    <!-- Product Card 2 -->
+    <a href="shop.html" class="product-card bg-gray-700 rounded-2xl shadow-lg hover:shadow-yellow-500/30 transition duration-300 p-4 sm:p-5 flex flex-col items-center">
+      <img src="assets/products/Rims(1).jpg" alt="Quality Rims" class="h-36 sm:h-40 w-full object-cover rounded-xl mb-3 sm:mb-4">
+      <h3 class="text-base sm:text-lg font-semibold text-yellow-400 mb-1 sm:mb-2">Quality Rims</h3>
+    </a>
+
+    <!-- Product Card 3 -->
+    <a href="shop.html" class="product-card bg-gray-700 rounded-2xl shadow-lg hover:shadow-yellow-500/30 transition duration-300 p-3 sm:p-5 flex flex-col items-center">
+      <img src="assets/images/Falken-Tires-Wildpeak-AT-Trail.png" alt="High Flow Air Filter" class="h-36 sm:h-40 w-full object-fit rounded-xl mb-3 sm:mb-4">
+      <h3 class="text-base sm:text-lg font-semibold text-yellow-400 mb-1 sm:mb-2">HIGH QUALITY TIRES</h3>
+    </a>
+
+    <!-- Product Card 4 -->
+    <a href="shop.html" class="product-card bg-gray-700 rounded-2xl shadow-lg hover:shadow-yellow-500/30 transition duration-300 p-4 sm:p-5 flex flex-col items-center">
+      <img src="assets/products/Camping-Tent.jpg" alt="Camping Tent" class="h-36 sm:h-40 w-full object-cover rounded-xl mb-3 sm:mb-4">
+      <h3 class="text-base sm:text-lg font-semibold text-yellow-400 mb-1 sm:mb-2">Camping Tent</h3>
+    </a>
+    
+  </div>
+
+  <!-- View All Products Button -->
+  <a href="shop.html" class="mt-10 sm:mt-12 inline-block bg-black text-yellow-400 px-8 sm:px-10 py-3 sm:py-4 rounded-lg font-semibold hover:bg-gray-900 transition duration-300" data-aos="fade-up" data-aos-delay="500">
+    View All Products
+  </a>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const mobileBtn = document.getElementById('mobileMenuBtn');
+const navLinks = document.getElementById('mobileMenu');
+const mobileIcon = document.getElementById('mobileIcon');
+
+mobileBtn.addEventListener('click', () => {
+  navLinks.classList.toggle('hidden');        // Show/hide the menu
+  mobileIcon.classList.toggle('fa-bars');     // Toggle bars icon
+  mobileIcon.classList.toggle('fa-xmark');    // Toggle X icon
+});
+});
+</script>
+
+<!-- QUOTE FORM MODAL -->
+<div id="quoteModal" class="fixed inset-0 bg-black bg-opacity-70 hidden justify-center items-center z-50">
+  <div class="bg-black border border-yellow-500 rounded-2xl w-11/12 md:w-1/2 p-6 md:p-8 relative shadow-lg overflow-y-auto max-h-[90vh]">
+    <button id="closeModal" class="absolute top-4 right-4 text-yellow-400 text-2xl font-bold hover:text-yellow-300">&times;</button>
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6 text-center">Get a Quote</h2>
+    <form id="quoteForm" class="flex flex-col gap-3 md:gap-4">
+      <input type="text" name="name" placeholder="Your Name" required class="p-3 rounded-lg border border-yellow-500 bg-black text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+      <input type="email" name="email" placeholder="Your Email" required class="p-3 rounded-lg border border-yellow-500 bg-black text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+      <input type="tel" name="phone" placeholder="Your Phone Number" required class="p-3 rounded-lg border border-yellow-500 bg-black text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+      <input type="text" name="carMake" placeholder="Car Make" required class="p-3 rounded-lg border border-yellow-500 bg-black text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+      <input type="text" name="carModel" placeholder="Car Model" required class="p-3 rounded-lg border border-yellow-500 bg-black text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+      <input type="number" name="yearModel" placeholder="Year Model" required class="p-3 rounded-lg border border-yellow-500 bg-black text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+      <select name="service" required class="p-3 rounded-lg border border-yellow-500 bg-black text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+        <option value="">Select Service</option>
+        <option value="Paint Job">Paint Job</option>
+        <option value="Glamping">Glamping</option>
+        <option value="4x4 Set-up">4x4 Set-up</option>
+      </select>
+      <textarea name="message" rows="4" placeholder="Additional Details" class="p-3 rounded-lg border border-yellow-500 bg-black text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"></textarea>
+      <input type="file" name="carPhotos" accept="image/*" multiple class="p-3 rounded-lg border border-yellow-500 bg-black text-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+      <p class="text-gray-400 text-sm mt-1">You can upload up to 5 reference images.</p>
+      <button type="submit" class="bg-yellow-500 text-black px-6 py-3 rounded-full font-bold hover:bg-yellow-400 transition duration-300">Send Quote</button>
+    </form>
+  </div>
+</div>
+
+<!-- OUR SERVICES -->
+<section class="py-16 bg-black text-white">
+  <div class="container mx-auto px-6">
+    <h2 class="text-4xl font-bold text-yellow-400 text-center mb-12">Our Services</h2>
+
+    <!-- Responsive grid: 2 columns mobile, 4 columns desktop -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+
+      <!-- SERVICE CARD 1 -->
+      <div class="relative group overflow-hidden rounded-2xl border border-yellow-500 shadow-lg cursor-pointer">
+        <img src="assets/images/tire-change.jpg" alt="Tire Change" class="w-full h-64 object-cover transform group-hover:scale-110 transition duration-500">
+        <div class="absolute inset-0 bg-black bg-opacity-60 group-hover:bg-opacity-70 transition duration-300"></div>
+        <div class="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+          <h3 class="text-2xl md:text-3xl font-bold text-yellow-400 mb-2">Tire Change</h3>
+          <p class="text-sm text-gray-300 mb-4 opacity-0 group-hover:opacity-100 transition duration-300">
+            Fast tire changes for all vehicles.
+          </p>
+          <a href="quote.html?service=Tire%20Change" class="opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 
+          bg-yellow-500 text-black px-4 py-2 rounded-full font-semibold transition duration-300 hover:bg-yellow-400 inline-block">Get a Quote</a>
+        </div>
+      </div>
+
+      <!-- SERVICE CARD 2 -->
+      <div class="relative group overflow-hidden rounded-2xl border border-yellow-500 shadow-lg cursor-pointer">
+        <img src="assets/images/paintjob.jpg" alt="Paint Job" class="w-full h-64 object-cover transform group-hover:scale-110 transition duration-500">
+        <div class="absolute inset-0 bg-black bg-opacity-60 group-hover:bg-opacity-70 transition duration-300"></div>
+        <div class="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+          <h3 class="text-2xl md:text-3xl font-bold text-yellow-400 mb-2">Paint Job</h3>
+          <p class="text-sm text-gray-300 mb-4 opacity-0 group-hover:opacity-100 transition duration-300">
+            Full body repaint, touch-ups, and custom finishes.
+          </p>
+          <a href="quote.html?service=Paint%20Job" class="opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 
+          bg-yellow-500 text-black px-4 py-2 rounded-full font-semibold transition duration-300 hover:bg-yellow-400 inline-block">Get a Quote</a>
+        </div>
+      </div>
+
+      <!-- SERVICE CARD 3 -->
+      <div class="relative group overflow-hidden rounded-2xl border border-yellow-500 shadow-lg cursor-pointer">
+        <img src="assets/images/car3.jpeg" alt="Glamping" class="w-full h-64 object-cover transform group-hover:scale-110 transition duration-500">
+        <div class="absolute inset-0 bg-black bg-opacity-60 group-hover:bg-opacity-70 transition duration-300"></div>
+        <div class="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+          <h3 class="text-2xl md:text-3xl font-bold text-yellow-400 mb-2">Glamping</h3>
+          <p class="text-sm text-gray-300 mb-4 opacity-0 group-hover:opacity-100 transition duration-300">
+            Luxury camping experiences with premium setups and amenities.
+          </p>
+          <a href="quote.html?service=Glamping" class="opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 
+          bg-yellow-500 text-black px-4 py-2 rounded-full font-semibold transition duration-300 hover:bg-yellow-400 inline-block">Get a Quote</a>
+        </div>
+      </div>
+
+      <!-- SERVICE CARD 4 -->
+      <div class="relative group overflow-hidden rounded-2xl border border-yellow-500 shadow-lg cursor-pointer">
+        <img src="assets/images/4x4.jpg" alt="4x4 Set-up" class="w-full h-64 object-cover transform group-hover:scale-110 transition duration-500">
+        <div class="absolute inset-0 bg-black bg-opacity-60 group-hover:bg-opacity-70 transition duration-300"></div>
+        <div class="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+          <h3 class="text-2xl md:text-3xl font-bold text-yellow-400 mb-2">4x4 Set-up</h3>
+          <p class="text-sm text-gray-300 mb-4 opacity-0 group-hover:opacity-100 transition duration-300">
+            Complete 4x4 upgrades, lift kits, and off-road customization.
+          </p>
+          <a href="quote.html?service=4x4%20Set-up" class="opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 
+          bg-yellow-500 text-black px-4 py-2 rounded-full font-semibold transition duration-300 hover:bg-yellow-400 inline-block">Get a Quote</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- BRANDS -->
+<section class="py-5 px-2 text-center border-t border-yellow-500/10 border-b border-yellow-500/10 bg-gray-700">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-3xl font-bold text-yellow-500 mb-5" data-aos="fade-up">Brands We Carry</h2>
+    <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 items-center">
+      <img src="assets/brands/AMP.png" alt="AMP" class="h-auto sm:h-auto md:h-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300">
+      <img src="assets/brands/FALKEN.png" alt="FALKEN" class="h-auto sm:h-auto md:h-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300">
+      <img src="assets/brands/HANKOOK.png" alt="HANKOOK" class="h-auto sm:h-auto md:h-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300">
+      <img src="assets/brands/TJM.png" alt="TJM" class="h-auto sm:h-auto md:h-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300">
+      <img src="assets/brands/DIRTY LIFE.png" alt="DIRTY LIFE" class="h-auto sm:h-auto md:h-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300">
+      <img src="assets/brands/roam.png" alt="DIRTY LIFE" class="h-auto sm:h-auto md:h-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300">
+      <img src="assets/brands/MaxTrek-tyres-logo.png" alt="MaxTrek-tyres-logo" class="h-auto sm:h-auto md:h-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300">
+      <img src="assets/brands/SR PERFORMANCE logo.png" alt="SR performance" class="h-auto sm:h-auto md:h-16 mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300">
+      <img src="assets/brands/BFGoodrich-Logo.wine.png" alt="BFGoodrich" class="h-auto sm:h-auto md:h-auto mx-auto grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition duration-300">
+    </div>
+  </div>
+</section>
+
+<!-- VIDEOS SHOWCASE -->
+<section class="py-20 px-6 text-center bg-gray-800">
+  <h2 class="text-4xl md:text-4xl font-bold text-yellow-400 mb-12" data-aos="fade-up">Watch & Learn</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+    <div class="video-container relative w-full" style="padding-top:56.25%; overflow:hidden;">
+      <iframe class="absolute top-0 left-0 w-full h-full"
+        src="https://www.youtube.com/embed/zcK-6Eeclpo?autoplay=1&mute=1&playsinline=1&loop=1&playlist=zcK-6Eeclpo"
+        frameborder="0"
+        allow="autoplay; encrypted-media; fullscreen">
+      </iframe>
+    </div>
+    <div class="video-container relative w-full" style="padding-top:56.25%; overflow:hidden;">
+      <iframe class="absolute top-0 left-0 w-full h-full"
+        src="https://www.youtube.com/embed/vIigiIV6vlI?autoplay=1&mute=1&playsinline=1&loop=1&playlist=vIigiIV6vlI"
+        frameborder="0"
+        allow="autoplay; encrypted-media; fullscreen">
+      </iframe>
+    </div>
+    <div class="video-container relative w-full" style="padding-top:56.25%; overflow:hidden;">
+      <iframe class="absolute top-0 left-0 w-full h-full"
+        src="https://www.youtube.com/embed/12BUo0enOG4?autoplay=1&mute=1&playsinline=1&loop=1&playlist=12BUo0enOG4"
+        frameborder="0"
+        allow="autoplay; encrypted-media; fullscreen">
+      </iframe>
+    </div>
+    <div class="video-container relative w-full" style="padding-top:56.25%; overflow:hidden;">
+      <iframe class="absolute top-0 left-0 w-full h-full"
+        src="https://www.youtube.com/embed/d47XkQI-Z2c?autoplay=1&mute=1&playsinline=1&loop=1&playlist=d47XkQI-Z2c"
+        frameborder="0"
+        allow="autoplay; encrypted-media; fullscreen">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- WHY CHOOSE US -->
+<section class="py-20 px-6 text-center bg-gray-800">
+  <h2 class="text-3xl md:text-4xl font-bold text-yellow-400 mb-12" data-aos="fade-up">Why Choose Show & Go</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+    <div class="bg-gray-700 p-6 rounded-2xl shadow-lg hover:shadow-yellow-500/30 transition duration-300" data-aos="fade-up" data-aos-delay="100">
+      <h3 class="text-xl font-semibold mb-4">Premium Quality</h3>
+      <p class="text-gray-200">We supply only trusted automotive brands for performance and reliability.</p>
+    </div>
+    <div class="bg-gray-700 p-6 rounded-2xl shadow-lg hover:shadow-yellow-500/30 transition duration-300" data-aos="fade-up" data-aos-delay="200">
+      <h3 class="text-xl font-semibold mb-4">Expert Technicians</h3>
+      <p class="text-gray-200">Certified professionals with real-world performance experience.</p>
+    </div>
+    <div class="bg-gray-700 p-6 rounded-2xl shadow-lg hover:shadow-yellow-500/30 transition duration-300" data-aos="fade-up" data-aos-delay="300">
+      <h3 class="text-xl font-semibold mb-4">Fast Service</h3>
+      <p class="text-gray-200">Quick turnaround times without compromising quality.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOLLOW US -->
+<section class="py-16 bg-gray-900 text-center">
+  <h2 class="text-3xl font-bold mb-8 text-yellow-400">Follow Us</h2>
+  <div class="flex justify-center gap-3 follow-us-icons">
+    <a href="https://www.facebook.com/showandgo4x4/" target="_blank" class="hover:scale-110 transition duration-300 hover:text-blue-500">
+      <i class="fab fa-facebook"></i>
+    </a>
+    <a href="https://www.tiktok.com/@showandgo4x4?is_from_webapp=1&sender_device=pc" target="_blank" class="hover:scale-110 transition duration-300 hover:text-blue-300">
+      <i class="fab fa-tiktok"></i>
+    </a>
+    <a href="https://www.youtube.com/@showandgo4x4" target="_blank" class="hover:scale-110 transition duration-300 hover:text-red-500">
+      <i class="fab fa-youtube"></i>
+    </a>
+  </div>
+</section>
+<!-- STORE LOCATOR -->
+<section class="py-20 px-8 text-center bg-gray-900/80">
+  <h2 class="text-4xl section-title mb-12" data-aos="fade-up">Find a Show & Go Store</h2>
+  <p class="text-gray-200 mb-8" data-aos="fade-up" data-aos-delay="100">
+    With multiple locations and an expanding network, you can easily find a Show & Go Auto Shop near you for parts, services, and expert advice.
+  </p>
+  <a href="store-locator.html" class="bg-yellow-400 text-black px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 shadow-lg transition duration-300" data-aos="fade-up" data-aos-delay="200">
+    Store Locator
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-black text-gray-400 text-center py-8 border-t border-yellow-500/20">
+  <p>&copy; 2026 Show & Go Auto Shop. All Rights Reserved.</p>
+</footer>
+
+<!-- SCRIPTS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+const mobileBtn = document.getElementById("mobileMenuBtn");
+const mobileMenu = document.getElementById("mobileMenu");
+const mobileIcon = document.getElementById("mobileIcon");
+
+mobileBtn.addEventListener("click", () => {
+  mobileMenu.classList.toggle("hidden");
+
+  if (mobileMenu.classList.contains("hidden")) {
+    mobileIcon.classList.remove("fa-times");
+    mobileIcon.classList.add("fa-bars");
+  } else {
+    mobileIcon.classList.remove("fa-bars");
+    mobileIcon.classList.add("fa-times");
+  }
+});
+
+  /* PARTNER PANEL */
+  const partnerPanel = document.getElementById('partnerPanel');
+  const partnerOverlay = document.getElementById('partnerOverlay');
+  const closePartnerPanel = document.getElementById('closePartnerPanel');
+  const closePartnerPanelBtn = document.getElementById('closePartnerPanelBtn');
+  const partnerContent = document.getElementById('partnerContent');
+
+  function openPanel(){
+    if(!partnerPanel) return; // safety check
+    partnerOverlay.classList.remove('pointer-events-none', 'opacity-0');
+    partnerOverlay.classList.add('opacity-100');
+    partnerPanel.style.left = '50%';
+    partnerPanel.style.transform = 'translate(-50%, -50%) scale(1)';
+    partnerPanel.style.opacity = '1';
+    partnerPanel.style.pointerEvents = 'auto';
+    setTimeout(()=>{ partnerContent.classList.remove('opacity-0','translate-y-4'); },200);
+  }
+
+  function closePanel(){
+    if(!partnerPanel) return; // safety check
+    partnerContent.classList.add('opacity-0','translate-y-4');
+    setTimeout(()=>{
+      partnerPanel.style.left = '0';
+      partnerPanel.style.transform = '-translate-y-1/2 scale(0.75)';
+      partnerPanel.style.opacity = '0';
+      partnerPanel.style.pointerEvents = 'none';
+      partnerOverlay.classList.add('opacity-0','pointer-events-none');
+    },200);
+  }
+
+  if(closePartnerPanel) closePartnerPanel.addEventListener('click', closePanel);
+  if(closePartnerPanelBtn) closePartnerPanelBtn.addEventListener('click', closePanel);
+  if(partnerOverlay) partnerOverlay.addEventListener('click', closePanel);
+
+  /* AOS INIT */
+  AOS.init({ duration: 1000, once: true });
+});
+</script>
+<script>
+function showInfoFloating(element, title, img, desc) {
+  const infoBox = document.getElementById('infoBox');
+  const overlay = document.getElementById('infoOverlay');
+
+  // Set content
+  document.getElementById('infoTitle').innerText = title;
+  document.getElementById('infoDesc').innerText = desc;
+  document.getElementById('infoImage').src = img;
+
+  // Show first so width/height can be calculated
+  infoBox.style.display = 'block';
+  overlay.style.display = 'block';
+
+  // MOBILE MODE
+  if (window.innerWidth < 768) {
+    infoBox.style.top = "50%";
+    infoBox.style.left = "50%";
+    infoBox.style.transform = "translate(-50%, -50%)";
+    return;
+  }
+
+  // DESKTOP MODE
+  const rect = element.getBoundingClientRect();
+
+  let top = rect.top - infoBox.offsetHeight - 10;
+  let left = rect.left + rect.width / 2 - infoBox.offsetWidth / 2;
+
+  if (top < 10) top = rect.bottom + 10;
+  if (left < 10) left = 10;
+  if (left + infoBox.offsetWidth > window.innerWidth - 10) {
+    left = window.innerWidth - infoBox.offsetWidth - 10;
+  }
+
+  infoBox.style.top = `${top}px`;
+  infoBox.style.left = `${left}px`;
+  infoBox.style.transform = "none";
+}
+</script>
+<div id="infoBox">
+  <h3 id="infoTitle"></h3>
+  <img id="infoImage" src="" alt="Info Image">
+  <p id="infoDesc"></p>
+  <button onclick="hideInfo()" class="mt-2 px-3 py-1 bg-yellow-400 text-black rounded">Close</button>
+</div>
+<script>
+function showInfoFloating(element, title, img, desc) {
+  const infoBox = document.getElementById('infoBox');
+  const overlay = document.getElementById('infoOverlay');
+  overlay.style.display = 'block';
+  overlay.style.pointerEvents = 'auto';
+
+  document.getElementById('infoTitle').innerText = title;
+  document.getElementById('infoDesc').innerText = desc;
+  document.getElementById('infoImage').src = img;
+
+  infoBox.style.display = 'block';
+  overlay.style.display = 'block';
+
+  if (window.innerWidth < 768) {
+    infoBox.style.top = "50%";
+    infoBox.style.left = "50%";
+    infoBox.style.transform = "translate(-50%, -50%)";
+    return;
+  }
+
+  const rect = element.getBoundingClientRect();
+  let top = rect.top - infoBox.offsetHeight - 10;
+  let left = rect.left + rect.width / 2 - infoBox.offsetWidth / 2;
+
+  if (top < 10) top = rect.bottom + 10;
+  if (left < 10) left = 10;
+  if (left + infoBox.offsetWidth > window.innerWidth - 10) {
+    left = window.innerWidth - infoBox.offsetWidth - 10;
+  }
+
+  infoBox.style.top = `${top}px`;
+  infoBox.style.left = `${left}px`;
+  infoBox.style.transform = "none";
+}
+
+function hideInfo() {
+  const infoBox = document.getElementById("infoBox");
+  const overlay = document.getElementById("infoOverlay");
+
+  infoBox.style.display = "none";
+  overlay.style.display = "none";
+  overlay.style.pointerEvents = "none";
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request a Quote - Show & Go Auto Shop</title>
+
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.35.0/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+body { font-family: 'Poppins', sans-serif; }
+input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 2px #facc15; }
+#quoteModal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.7); z-index: 50; }
+#quoteModal.hide { opacity: 0; pointer-events: none; }
+#toast { position: fixed; top: 20px; right: 20px; background-color: #22c55e; color: #000; padding: 12px 20px; border-radius: 12px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3); opacity: 0; transform: translateY(-20px); pointer-events: none; transition: opacity 0.5s ease, transform 0.5s ease; z-index: 9999; }
+#toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 640px) {
+  #quoteModal div { padding: 2rem; border-radius: 2rem; width: 90%; }
+  h2 { font-size: 2rem; }
+  p { font-size: 0.95rem; }
+  input, textarea, select, button { font-size: 0.95rem; padding: 0.75rem; }
+  #previewContainer img { height: 60px; width: 60px; }
+  .grid.md\:grid-cols-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body class="bg-black text-white min-h-screen">
+
+<section id="quoteModal" class="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+  <div class="bg-gray-900 border border-yellow-500 p-10 rounded-3xl shadow-2xl relative w-11/12 max-w-2xl max-h-[95vh] overflow-y-auto">
+
+    <button id="goBackBtn" class="absolute top-5 left-5 bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition duration-300">← Go Back</button>
+
+    <h2 class="text-3xl md:text-4xl font-bold text-yellow-400 mb-2 text-center">Get a Service Quote</h2>
+    <p class="text-gray-400 text-center mb-6">Tell us about your vehicle and service needs.</p>
+
+    <form id="quoteForm" class="space-y-4">
+      <div class="grid md:grid-cols-2 gap-3">
+        <input type="text" id="name" placeholder="Full Name *" class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white" required>
+        <input type="tel" id="phone" placeholder="Phone Number *" class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white" required>
+      </div>
+
+      <input type="email" id="email" placeholder="Email Address *" class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white" required>
+
+      <div class="grid md:grid-cols-2 gap-3">
+        <input type="text" id="vehicle" placeholder="Vehicle Model (e.g. Toyota Hilux)" class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white">
+        <input type="text" id="plate" placeholder="Plate Number" class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white">
+      </div>
+
+      <select id="service" class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white" required>
+        <option value="">Select Service *</option>
+        <option>Oil Change</option>
+        <option>Brake Replacement</option>
+        <option>Suspension Upgrade</option>
+        <option>Engine Diagnostics</option>
+        <option>General Maintenance</option>
+        <option>Other</option>
+      </select>
+
+      <textarea id="message" rows="3" placeholder="Additional Details (optional)" class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white"></textarea>
+
+      <div>
+        <label class="block mb-1">Upload Vehicle Photos (max 5)</label>
+        <input type="file" id="photos" accept="image/*" multiple class="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white">
+        <div id="previewContainer" class="flex gap-2 overflow-x-auto mt-2 pb-2"></div>
+      </div>
+
+      <button type="submit" class="w-full bg-yellow-400 text-black px-6 py-2 rounded-xl font-semibold hover:bg-yellow-300 transition duration-300">
+        Submit Quote
+      </button>
+    </form>
+  </div>
+</section>
+
+<div id="toast" class="fixed top-5 right-5 bg-green-500 text-black px-4 py-2 rounded-lg shadow-lg opacity-0 transform -translate-y-6 transition-all duration-300 z-50"></div>
+
+<script>
+const supabaseUrl = "https://jimjbjtlekdytvnpyykw.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE"; // Replace with your anon key
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+function showToast(message, color = "#22c55e") {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.style.backgroundColor = color;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const quoteForm = document.getElementById("quoteForm");
+  const photosInput = document.getElementById("photos");
+  const previewContainer = document.getElementById("previewContainer");
+  const quoteModal = document.getElementById("quoteModal");
+
+  document.getElementById("goBackBtn").addEventListener("click", () => {
+    quoteModal.classList.add("hide");
+    setTimeout(() => window.history.back(), 300);
+  });
+
+  // Photo preview
+  photosInput.addEventListener("change", () => {
+    previewContainer.innerHTML = "";
+    Array.from(photosInput.files).forEach(file => {
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      img.className = "h-20 w-20 object-cover rounded-lg";
+      previewContainer.appendChild(img);
+    });
+  });
+
+  quoteForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
+    const vehicle = document.getElementById("vehicle").value;
+    const plate = document.getElementById("plate").value;
+    const service = document.getElementById("service").value;
+    const message = document.getElementById("message").value;
+
+    const files = photosInput.files;
+    const photoUrls = [];
+
+    try {
+      for (let i = 0; i < Math.min(files.length, 5); i++) {
+        const file = files[i];
+        const safeName = file.name.replace(/\s+/g,'_').replace(/[^\w.-]/g,'').replace(/\.+$/,'');
+        const fileName = `${Date.now()}_${i}_${safeName}`;
+
+        const { data, error } = await supabaseClient.storage
+          .from('quote-photos')
+          .upload(fileName, file);
+
+        if (error) throw error;
+
+        const { data: publicUrlData } = supabaseClient.storage
+          .from('quote-photos')
+          .getPublicUrl(fileName);
+
+        photoUrls.push(publicUrlData.publicUrl);
+      }
+
+      const { data: inserted, error: insertError } = await supabaseClient
+        .from('quotes')
+        .insert([{ name, email, phone, vehicle, plate, service, message, photos: photoUrls }]);
+
+      if (insertError) throw insertError;
+
+      quoteForm.reset();
+      previewContainer.innerHTML = "";
+      showToast("✅ Your quote has been submitted!");
+      quoteModal.classList.add("hide");
+      setTimeout(() => window.location.href = "index.html", 600);
+
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to submit quote or upload photos.", "#f87171");
+    }
+  });
+});
+</script>
+</body>
+</html>

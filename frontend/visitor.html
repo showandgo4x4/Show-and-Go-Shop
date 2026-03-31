@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Visitor Chat</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.35.0/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+<h2>Visitor Chat</h2>
+<input type="text" id="visitorMessage" placeholder="Type your message">
+<button id="sendVisitor">Send</button>
+
+<script>
+const SUPABASE_URL = "https://jimjbjtlekdytvnpyykw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Generate or reuse a session_id for this visitor
+const sessionId = localStorage.getItem("chatSessionId") || `sess-${Date.now()}`;
+localStorage.setItem("chatSessionId", sessionId);
+
+// Ask visitor name
+const visitorName = prompt("Your name:", "Visitor") || "Visitor";
+
+// Create chat session if not exists
+(async () => {
+  await supabaseClient.from("chat_sessions").upsert({
+    session_id: sessionId,
+    visitor_name: visitorName
+  });
+})();
+
+// Send message
+document.getElementById("sendVisitor").addEventListener("click", async () => {
+  const msg = document.getElementById("visitorMessage").value.trim();
+  if (!msg) return;
+
+  const { error } = await supabaseClient.from("chats").insert([{
+    session_id: sessionId,
+    sender: "visitor",
+    message: msg,
+    read_by_agent: false
+  }]);
+
+  if (error) console.error("Send failed:", error);
+  else document.getElementById("visitorMessage").value = "";
+});
+</script>
+</body>
+</html>

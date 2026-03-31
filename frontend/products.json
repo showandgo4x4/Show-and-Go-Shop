@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "Premium Engine Oil",
+    "brand": "Motoroil",
+    "price": 1200,
+    "quantity": 10,
+    "category": "Oils",
+    "description": "High performance engine oil",
+    "image": "assets/products/motoroil.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Quality Rims",
+    "brand": "RimBrand",
+    "price": 4500,
+    "quantity": 5,
+    "category": "Rims",
+    "description": "Durable alloy rims",
+    "image":"assets/products/motoroil.jpg"
+  }
+]

@@ -1,0 +1,6 @@
+frontend/assets/videos/*jd.mp4 filter=lfs diff=lfs merge=lfs -text
+frontend/assets/videos/*sm[[:space:]]display.mp4 filter=lfs diff=lfs merge=lfs -text
+frontend/assets/videos/*SHOCKS[[:space:]]EXPO[[:space:]]F.mp4 filter=lfs diff=lfs merge=lfs -text
+frontend/assets/videos/*option[[:space:]]xxx.mp4 filter=lfs diff=lfs merge=lfs -text
+frontend/assets/videos/*option[[:space:]]XXX.mp4 filter=lfs diff=lfs merge=lfs -text
+frontend/assets/videos/*SM[[:space:]]DISPLAY.mp4 filter=lfs diff=lfs merge=lfs -text

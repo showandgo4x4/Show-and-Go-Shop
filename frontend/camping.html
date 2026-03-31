@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Camping Community - Show & Go</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom, #0f172a, #1e293b);
+    color: #fff;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Navigation button */
+  .back-btn {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    background: #facc15;
+    color: #000;
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    z-index: 100;
+    transition: background 0.3s;
+  }
+  .back-btn:hover { background: #fbbf24; }
+
+  /* Starry night background */
+  .star {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: twinkle 3s infinite ease-in-out alternate;
+  }
+  @keyframes twinkle {
+    0% { opacity: 0.2; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0.2; transform: scale(0.5); }
+  }
+
+  /* Titles */
+  h1 { text-align: center; margin: 4rem 0 2rem; color: #facc15; font-size: clamp(3rem, 8vw, 5rem); font-weight: 700; }
+  h2,h3 { text-align: center; margin-bottom: 1rem; color: #facc15; }
+  h2 { font-size: clamp(1.5rem, 5vw, 2.5rem); }
+  h3 { font-size: clamp(1.2rem, 4vw, 1.8rem); }
+
+  p { text-align: center; color: #d1d5db; line-height: 1.6; margin-bottom: 1rem; }
+
+  .section { padding: 3rem 1rem; max-width: 900px; margin:auto; position:relative; z-index:2; }
+  .section .cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:1.5rem; margin-top:2rem; }
+  .card { background: rgba(255,255,255,0.05); padding:1rem; border-radius:1rem; box-shadow:0 10px 20px rgba(0,0,0,0.3); transition: transform 0.3s; }
+  .card:hover { transform: translateY(-5px); }
+
+  /* Silhouette backgrounds */
+  .silhouette { position:absolute; bottom:0; width:100%; height:150px; background-repeat:no-repeat; background-size:cover; opacity:0.3; z-index:1; }
+  .silhouette.trees { background-image:url('https://i.ibb.co/J5R6Z3q/trees.png'); }
+  .silhouette.tents { background-image:url('https://i.ibb.co/8bLxkF3/tents.png'); }
+
+  /* Carousel */
+  .carousel-container { position: relative; width: 90%; max-width: 900px; height: 450px; margin: 3rem auto; perspective: 1200px; }
+  .carousel { position: relative; width: 100%; height: 100%; border-radius: 1rem; overflow: hidden; z-index:3; }
+  .carousel img {
+    position: absolute; top:0; left:0; width: 100%; height: 100%;
+    object-fit: cover; border-radius: 1rem; opacity: 0;
+    transform: scale(0.8); transition: all 1s ease-in-out;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 60px rgba(250,204,21,0.3);
+    filter: brightness(0.95);
+  }
+  .carousel img.active { opacity: 1; transform: scale(1); z-index: 3; }
+  .carousel img.prev,.carousel img.next { opacity: 0.5; transform: scale(0.7); z-index: 2; filter: blur(2px) brightness(0.7); }
+
+  /* Mist overlay */
+  .mist { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; background: url('https://i.ibb.co/qxJZyXK/mist.png') repeat-x; background-size: cover; opacity: 0.25; animation: mistMove 60s linear infinite; border-radius: 1rem; }
+  @keyframes mistMove { 0% { background-position:0 0; } 100% { background-position:1000px 0; } }
+
+  /* Carousel arrows */
+  .arrow { position:absolute; top:50%; transform:translateY(-50%); background: rgba(0,0,0,0.5); color: #facc15; font-size:2rem; padding:0.5rem 1rem; border-radius:0.5rem; cursor:pointer; user-select:none; transition: background 0.3s; z-index:5; }
+  .arrow:hover { background: rgba(0,0,0,0.8); }
+  .arrow-left { left: -3rem; }
+  .arrow-right { right: -3rem; }
+  @media(max-width:768px){ 
+    .carousel-container{ height: 300px; } 
+    .arrow-left{ left:-1.5rem; } 
+    .arrow-right{ right:-1.5rem; } 
+  }
+
+  /* Gallery cards */
+  .gallery-card img { width:100%; height:200px; object-fit:cover; border-radius:0.75rem; }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-btn">&#8592; Back to Home</a>
+
+<h1>Camping Community</h1>
+
+<!-- Silhouettes -->
+<div class="silhouette trees"></div>
+<div class="silhouette tents"></div>
+
+<!-- Carousel -->
+<div class="carousel-container">
+  <div class="carousel" id="carousel"></div>
+  <div class="mist"></div>
+  <div class="arrow arrow-left" id="prev">&#10094;</div>
+  <div class="arrow arrow-right" id="next">&#10095;</div>
+</div>
+
+<!-- Section: Welcome -->
+<div class="section">
+  <h2>Welcome to Our Camping Community</h2>
+  <p>Explore nature, connect with fellow campers, and enjoy exciting events. We welcome everyone, from beginners to seasoned adventurers.</p>
+</div>
+
+<!-- Section: Events -->
+<div class="section">
+  <h2>Upcoming Events</h2>
+  <div class="cards">
+    <div class="card"><h3>Glamping Weekend</h3><p>Luxury tents, gourmet meals, and starlit skies.</p></div>
+    <div class="card"><h3>Family Campout</h3><p>Fun activities, hiking, and campfire storytelling.</p></div>
+    <div class="card"><h3>Off-Road Adventure</h3><p>Combine camping with 4x4 trail adventure for thrill-seekers.</p></div>
+  </div>
+</div>
+
+<!-- Section: Tips -->
+<div class="section">
+  <h2>Camping Tips</h2>
+  <div class="cards">
+    <div class="card"><h3>Prepare Your Gear</h3><p>Check tents, sleeping bags, and cooking supplies.</p></div>
+    <div class="card"><h3>Plan Your Meals</h3><p>Bring easy-to-cook meals and snacks.</p></div>
+    <div class="card"><h3>Safety First</h3><p>Carry a first-aid kit, flashlights, and know the terrain.</p></div>
+  </div>
+</div>
+
+<!-- Section: Gallery -->
+<div class="section">
+  <h2>Gallery Highlights</h2>
+  <div class="cards">
+    <div class="gallery-card card"><img src="assets/images/camping/1.png" alt="Camping 1"></div>
+    <div class="gallery-card card"><img src="assets/images/camping/2.png" alt="Camping 2"></div>
+    <div class="gallery-card card"><img src="assets/images/camping/3.png" alt="Camping 3"></div>
+    <div class="gallery-card card"><img src="assets/images/camping/4.png" alt="Camping 4"></div>
+    <div class="gallery-card card"><img src="assets/images/camping/5.png" alt="Camping 5"></div>
+    <div class="gallery-card card"><img src="assets/images/camping/6.png" alt="Camping 6"></div>
+    <div class="gallery-card card"><img src="assets/images/camping/7.png" alt="Camping 7"></div>
+    <div class="gallery-card card"><img src="assets/images/camping/8.png" alt="Camping 8"></div>
+    <div class="gallery-card card"><img src="assets/images/camping/9.png" alt="Camping 9"></div>
+    <div class="gallery-card card"><img src="assets/images/camping/10.png" alt="Camping 10"></div>
+  </div>
+</div>
+
+<script>
+  // Stars background
+  const starCount = 100;
+  for(let i=0;i<starCount;i++){
+    const star = document.createElement('div');
+    star.classList.add('star');
+    star.style.width = `${Math.random()*3+1}px`;
+    star.style.height = star.style.width;
+    star.style.top = `${Math.random()*100}%`;
+    star.style.left = `${Math.random()*100}%`;
+    star.style.animationDuration = `${Math.random()*3+2}s`;
+    star.style.opacity = Math.random();
+    document.body.appendChild(star);
+  }
+
+  // Carousel
+  const carousel = document.getElementById('carousel');
+  const images = [];
+  for(let i=1;i<=10;i++){ images.push(`assets/images/camping/${i}.png`); }
+
+  images.forEach(src=>{
+    const img = document.createElement('img');
+    img.src = src;
+    carousel.appendChild(img);
+  });
+
+  const imgElements = carousel.querySelectorAll('img');
+  let current = 0;
+
+  function updateCarousel(){
+    imgElements.forEach((img,i)=>{
+      img.classList.remove('active','prev','next');
+      if(i===current) img.classList.add('active');
+      if(i=== (current-1+imgElements.length)%imgElements.length) img.classList.add('prev');
+      if(i=== (current+1)%imgElements.length) img.classList.add('next');
+    });
+  }
+
+  updateCarousel();
+  let autoRotate = setInterval(()=>{
+    current = (current+1)%imgElements.length;
+    updateCarousel();
+  },2500);
+
+  document.getElementById('prev').addEventListener('click',()=>{
+    current = (current-1+imgElements.length)%imgElements.length;
+    updateCarousel(); resetInterval();
+  });
+  document.getElementById('next').addEventListener('click',()=>{
+    current = (current+1)%imgElements.length;
+    updateCarousel(); resetInterval();
+  });
+
+  function resetInterval(){
+    clearInterval(autoRotate);
+    autoRotate = setInterval(()=>{
+      current = (current+1)%imgElements.length;
+      updateCarousel();
+    },2500);
+  }
+</script>
+</body>
+</html>

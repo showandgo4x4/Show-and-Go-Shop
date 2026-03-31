@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Cart - Show and Go Auto Shop</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg,#e0f7fa,#fff9c4); color: #1f2937; }
+.card { background: #fff; border-radius: 1rem; box-shadow: 0 15px 30px rgba(0,0,0,0.08); padding: 2rem; margin-bottom: 2rem; transition: transform 0.2s, box-shadow 0.2s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+.btn-primary { background: linear-gradient(90deg,#10b981,#059669); color: #fff; font-weight: 600; border-radius: 0.75rem; padding: 0.75rem 1.5rem; transition: all 0.2s; cursor:pointer; }
+.btn-primary:hover { opacity: 0.9; transform: scale(1.03); }
+.btn-secondary { background: #e5e7eb; color: #1f2937; font-weight: 600; border-radius: 0.75rem; padding: 0.75rem 1.5rem; transition: all 0.2s; cursor:pointer; }
+.btn-secondary:hover { background: #d1d5db; transform: scale(1.02); }
+.stepper { display:flex; justify-content:space-between; margin-bottom:2rem; position: relative; }
+.step { flex:1; text-align:center; position: relative; }
+.step:not(:last-child)::after { content:""; position:absolute; top:50%; right:0; width:100%; height:4px; background:#d1d5db; z-index:-1; transform:translateY(-50%); border-radius:2px; }
+.step span { display:inline-block; width:2.8rem; height:2.8rem; line-height:2.8rem; border-radius:50%; background:#d1d5db; margin-bottom:0.5rem; font-weight:bold; color:#fff; transition: all 0.3s; }
+.step.active span { background: linear-gradient(90deg,#10b981,#059669); box-shadow:0 0 8px rgba(16,185,129,0.8);}
+.step p { font-size:0.85rem; font-weight:600; }
+.cart-item { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; transition: transform 0.2s; }
+.cart-item img { border-radius:0.5rem; width:80px; height:80px; object-fit:cover; }
+.cart-controls button { background:#e5e7eb; border-radius:0.5rem; padding:0.2rem 0.6rem; font-weight:600; transition: all 0.2s; margin:0 0.2rem; cursor:pointer; }
+.cart-controls button:hover { background:#d1d5db; }
+input, select, textarea { border:1px solid #d1d5db; border-radius:0.5rem; padding:0.5rem; width:100%; }
+input:focus, select:focus, textarea:focus { outline:none; border-color:#10b981; box-shadow:0 0 0 2px rgba(16,185,129,0.3); }
+.hidden { display:none; }
+</style>
+</head>
+<body class="p-6">
+
+<!-- Logo Left -->
+<div class="flex items-center space-x-2">
+  <img src="assets/images/logo.png" alt="Show & Go Logo" class="h-8 w-8 sm:h-10 sm:w-10 object-contain">
+  <h1 class="text-lg sm:text-xl font-bold text-yellow-400 whitespace-nowrap">Show & Go Repair Shop</h1>
+</div>
+
+<div class="max-w-5xl mx-auto">
+  <!-- Top Buttons -->
+  <div class="flex justify-between mb-6">
+    <a href="index.html" class="btn-secondary"><i class="fa fa-home mr-2"></i>Home</a>
+    <a href="shop.html" class="btn-secondary"><i class="fa fa-shopping-bag mr-2"></i>Continue Shopping</a>
+  </div>
+
+  <!-- Stepper -->
+  <div class="stepper">
+    <div class="step active" id="stepCart"><span>1</span><p>Cart</p></div>
+    <div class="step" id="stepShipping"><span>2</span><p>Shipping</p></div>
+    <div class="step" id="stepReview"><span>3</span><p>Review</p></div>
+    <div class="step" id="stepPayment"><span>4</span><p>Payment</p></div>
+  </div>
+
+  <!-- Cart Step -->
+  <div id="cartStep" class="step-content">
+    <div id="cartList"></div>
+    <p id="cartTotal" class="text-xl font-bold text-right mb-6"></p>
+    <div class="flex justify-end mb-12">
+      <button id="proceedShipping" class="btn-primary">Proceed to Shipping</button>
+    </div>
+  </div>
+
+  <!-- Shipping Step -->
+  <div id="shippingStep" class="step-content hidden">
+    <div class="card">
+      <h2 class="text-xl font-bold mb-4"><i class="fa fa-truck mr-2"></i>Shipping Information</h2>
+      <form id="shippingForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" id="shippingName" placeholder="Full Name" required>
+          <input type="email" id="shippingEmail" placeholder="Email" required>
+          <input type="text" id="shippingAddress" placeholder="Full Address" class="md:col-span-2" required>
+          <input type="text" id="shippingContact" placeholder="Contact Number" required>
+          <textarea id="shippingNotes" placeholder="Additional Notes (Optional)" class="md:col-span-2"></textarea>
+        </div>
+        <div class="flex justify-between mt-4">
+          <button type="button" id="backToCart" class="btn-secondary">Back to Cart</button>
+          <button type="submit" class="btn-primary">Proceed to Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Review Step -->
+  <div id="reviewStep" class="step-content hidden">
+    <div class="card">
+      <h2 class="text-xl font-bold mb-4"><i class="fa fa-list mr-2"></i>Order Review</h2>
+      <div id="reviewList"></div>
+      <p id="reviewTotal" class="text-xl font-bold text-right mt-4"></p>
+      <div class="flex justify-between mt-4">
+        <button type="button" id="backToShipping" class="btn-secondary">Back to Shipping</button>
+        <button type="button" id="proceedPaymentBtn" class="btn-primary">Proceed to Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Step -->
+  <div id="paymentStep" class="step-content hidden">
+    <div class="card">
+      <h2 class="text-xl font-bold mb-4"><i class="fa fa-credit-card mr-2"></i>Payment</h2>
+      <p class="mb-4">Total: <span id="paymentTotal"></span></p>
+      <button id="pay-button" class="btn-primary">Pay</button>
+      <div id="qr-container" class="mt-6 text-center"></div>
+      <button type="button" id="backToReview" class="btn-secondary mt-4">Back to Review</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const supabaseUrl = "https://jimjbjtlekdytvnpyykw.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+  let loggedInUser = null;
+  let cart = [];
+
+  const cartList = document.getElementById("cartList");
+  const cartTotal = document.getElementById("cartTotal");
+  const paymentTotal = document.getElementById("paymentTotal");
+
+  // ---------------- SESSION ----------------
+  async function checkSession() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if(session) loggedInUser = session.user.id;
+    await loadCart();
+  }
+
+  // ---------------- LOAD CART ----------------
+  async function loadCart() {
+    if(!loggedInUser) return;
+
+    const { data, error } = await supabaseClient.from("carts")
+      .select(`id, product_id, quantity, products(id,name,price,stock,image_url)`)
+      .eq("user_id", loggedInUser)
+      .order("id");
+
+    if(error) { console.error(error); return; }
+
+    cart = data.map(c => ({
+      ...c,
+      product: {
+        id: c.products.id,
+        name: c.products.name,
+        price: c.products.price,
+        stock: c.products.stock,
+        img: c.products.image_url || "assets/images/Default.png"
+      }
+    }));
+
+    renderCart();
+  }
+
+  function renderCart() {
+    cartList.innerHTML = "";
+    let total = 0;
+
+    cart.forEach((c,index)=>{
+      const div = document.createElement("div");
+      div.className="cart-item";
+      div.innerHTML=`
+        <img src="${c.product.img}">
+        <div class="flex-1 ml-4">
+          <h3>${c.product.name}</h3>
+          <p>₱${c.product.price} x ${c.quantity}</p>
+          <div class="cart-controls">
+            <button class="remove-btn" data-index="${index}">Remove</button>
+            <button class="qty-minus" data-index="${index}">-</button>
+            <button class="qty-plus" data-index="${index}">+</button>
+          </div>
+        </div>
+      `;
+      cartList.appendChild(div);
+      total += c.product.price * c.quantity;
+    });
+
+    cartTotal.textContent = `Total: ₱${total.toFixed(2)}`;
+    paymentTotal.textContent = `₱${total.toFixed(2)}`;
+
+    // ✅ ADD THIS LINE (important)
+    attachCartEvents();
+  }
+
+  // =========================
+  // ✅ ADDED FUNCTIONS ONLY
+  // =========================
+
+  function attachCartEvents(){
+    document.querySelectorAll(".remove-btn").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+    const index = btn.dataset.index;
+    const item = cart[index];
+
+    // Restore stock
+    await supabaseClient.from("products")
+        .update({ stock: item.product.stock + item.quantity })
+        .eq("id", item.product.id);
+
+    // Delete cart item
+    await supabaseClient.from("carts").delete().eq("id", item.id);
+
+    loadCart();
+});
+    });
+
+    document.querySelectorAll(".qty-minus").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        updateQuantity(btn.dataset.index, -1);
+      });
+    });
+
+    document.querySelectorAll(".qty-plus").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        updateQuantity(btn.dataset.index, 1);
+      });
+    });
+  }
+
+  async function updateQuantity(index, delta){
+    const item = cart[index];
+    const newQty = item.quantity + delta;
+
+    if(newQty <= 0){
+        // Restore stock back to products
+        await supabaseClient.from("products")
+            .update({ stock: item.product.stock + item.quantity })
+            .eq("id", item.product.id);
+
+        // Delete cart
+        await supabaseClient.from("carts").delete().eq("id", item.id);
+    } else {
+        // Update cart quantity
+        await supabaseClient.from("carts")
+            .update({ quantity: newQty })
+            .eq("id", item.id);
+
+        // Adjust product stock accordingly
+        const stockChange = delta * -1; // e.g., qty +1 → stock -1
+        await supabaseClient.from("products")
+            .update({ stock: item.product.stock + stockChange })
+            .eq("id", item.product.id);
+    }
+
+    loadCart();
+}
+
+  // =========================
+
+  await checkSession();
+
+});
+</script>
+<script>
+document.getElementById("pay-button").addEventListener("click", async () => {
+  try {
+    const payBtn = document.getElementById("pay-button");
+    payBtn.disabled = true;
+    payBtn.textContent = "Processing...";
+
+    // 1. Get the total amount (Removes ₱ and commas)
+    const totalText = document.getElementById("paymentTotal").textContent;
+    const amount = Number(totalText.replace(/[₱,]/g, "").trim());
+
+    // 2. Get payer email
+    const payer_email = document.getElementById("shippingEmail").value.trim();
+    if (!payer_email) {
+      alert("Please go back and enter your email in the shipping form.");
+      payBtn.disabled = false;
+      payBtn.textContent = "Pay";
+      return;
+    }
+
+    const external_id = "order_" + Date.now();
+    const description = "Show & Go Repair Shop Purchase";
+
+    // 3. Send request to backend
+    const res = await fetch("http://localhost:3000/create-invoice", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ external_id, amount, payer_email, description })
+    });
+
+    const data = await res.json();
+    console.log("Xendit response received:", data);
+
+    // ✅ FIXED: Using data.invoiceUrl instead of data.invoice_url
+    if (data.invoiceUrl) {
+      const qrContainer = document.getElementById("qr-container");
+      qrContainer.innerHTML = `
+        <div class="p-4 bg-white border rounded-xl shadow-inner inline-block">
+          <h3 class="font-bold mb-3 text-green-600">Scan to Pay via GCash/Maya</h3>
+          <img src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(data.invoiceUrl)}" 
+               alt="QR Code" class="mx-auto border-4 border-white">
+          <div class="mt-4">
+            <a href="${data.invoiceUrl}" target="_blank" 
+               class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+               Open Payment Page
+            </a>
+          </div>
+          <p class="text-xs text-gray-500 mt-4">Invoice ID: ${data.id}</p>
+        </div>
+      `;
+      qrContainer.scrollIntoView({ behavior: "smooth" });
+      payBtn.textContent = "Invoice Generated";
+    } else {
+      console.error("Payload mismatch:", data);
+      alert("Failed to create invoice. " + (data.error?.message || "Check console."));
+      payBtn.disabled = false;
+      payBtn.textContent = "Pay";
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error connecting to server. Is the backend running?");
+    document.getElementById("pay-button").disabled = false;
+    document.getElementById("pay-button").textContent = "Pay";
+  }
+});
+// STEP NAVIGATION
+const cartStep = document.getElementById("cartStep");
+const shippingStep = document.getElementById("shippingStep");
+const reviewStep = document.getElementById("reviewStep");
+const paymentStep = document.getElementById("paymentStep");
+
+const stepCart = document.getElementById("stepCart");
+const stepShipping = document.getElementById("stepShipping");
+const stepReview = document.getElementById("stepReview");
+const stepPayment = document.getElementById("stepPayment");
+
+// Cart → Shipping
+document.getElementById("proceedShipping").addEventListener("click", () => {
+  cartStep.classList.add("hidden");
+  shippingStep.classList.remove("hidden");
+  stepCart.classList.remove("active");
+  stepShipping.classList.add("active");
+});
+
+// Back to Cart
+document.getElementById("backToCart").addEventListener("click", () => {
+  shippingStep.classList.add("hidden");
+  cartStep.classList.remove("hidden");
+  stepShipping.classList.remove("active");
+  stepCart.classList.add("active");
+});
+
+// Shipping → Review
+document.getElementById("shippingForm").addEventListener("submit", (e) => {
+  e.preventDefault(); // prevent form submission
+  shippingStep.classList.add("hidden");
+  reviewStep.classList.remove("hidden");
+  stepShipping.classList.remove("active");
+  stepReview.classList.add("active");
+
+  // Fill review info
+  const reviewList = document.getElementById("reviewList");
+  reviewList.innerHTML = `
+    <p><strong>Name:</strong> ${document.getElementById("shippingName").value}</p>
+    <p><strong>Email:</strong> ${document.getElementById("shippingEmail").value}</p>
+    <p><strong>Address:</strong> ${document.getElementById("shippingAddress").value}</p>
+    <p><strong>Contact:</strong> ${document.getElementById("shippingContact").value}</p>
+    <p><strong>Notes:</strong> ${document.getElementById("shippingNotes").value}</p>
+  `;
+
+  // Copy total to review
+  document.getElementById("reviewTotal").textContent = cartTotal.textContent;
+});
+
+// Back to Shipping
+document.getElementById("backToShipping").addEventListener("click", () => {
+  reviewStep.classList.add("hidden");
+  shippingStep.classList.remove("hidden");
+  stepReview.classList.remove("active");
+  stepShipping.classList.add("active");
+});
+
+// Review → Payment
+document.getElementById("proceedPaymentBtn").addEventListener("click", () => {
+  reviewStep.classList.add("hidden");
+  paymentStep.classList.remove("hidden");
+  stepReview.classList.remove("active");
+  stepPayment.classList.add("active");
+
+  // Copy total to payment step
+  paymentTotal.textContent = cartTotal.textContent.replace("Total: ", "");
+});
+
+// Back to Review
+document.getElementById("backToReview").addEventListener("click", () => {
+  paymentStep.classList.add("hidden");
+  reviewStep.classList.remove("hidden");
+  stepPayment.classList.remove("active");
+  stepReview.classList.add("active");
+});
+</script>
+
+</body>
+</html>

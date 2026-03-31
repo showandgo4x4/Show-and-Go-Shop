@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login - Show & Go</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Poppins', sans-serif; background: #1f2937; }
+</style>
+</head>
+<body class="flex items-center justify-center h-screen">
+  <div class="bg-gray-800 p-10 rounded-2xl shadow-lg w-full max-w-md">
+    <h2 class="text-2xl font-bold text-yellow-400 mb-6 text-center">Admin Login</h2>
+    <form id="loginForm" class="flex flex-col gap-4">
+      <input type="text" id="username" placeholder="Username" class="px-4 py-3 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-yellow-400 border border-yellow-500/50">
+      <input type="password" id="password" placeholder="Password" class="px-4 py-3 rounded-lg bg-gray-700 text-white focus:outline-none focus:border-yellow-400 border border-yellow-500/50">
+      <p id="errorMsg" class="text-red-500 text-sm hidden">Incorrect username or password.</p>
+      <button type="submit" class="bg-yellow-400 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition">Login</button>
+    </form>
+  </div>
+
+  <script>
+    const adminCredentials = { username: "admin", password: "admin123" };
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+
+      if(username === adminCredentials.username && password === adminCredentials.password){
+        localStorage.setItem('isAdminLoggedIn', 'true');
+        window.location.href = "dashboard.html";
+      } else {
+        errorMsg.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

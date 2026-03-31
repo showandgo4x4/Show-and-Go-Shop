@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us - Show & Go Auto </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    
+    body { font-family: 'Poppins', sans-serif; background: #111; color: #fff; }
+    a { transition: all 0.3s ease; }
+    a:hover { color: #facc15; }
+    .section-title { color: #facc15; font-weight: 700; }
+    .bg-pattern { background-image: url('assets/patterns/hex-bg.png'); background-repeat: repeat; }
+    .hover-glow:hover { box-shadow: 0 0 20px rgba(250, 204, 21, 0.5); transform: scale(1.03); }
+
+    /* ================= MOBILE RESPONSIVENESS ================= */
+    @media (max-width: 1024px) { 
+      /* Adjust hero */
+      h1[data-aos] { font-size: 2rem; }
+      p[data-aos] { font-size: 0.9rem; }
+      a[data-aos] { padding: 0.5rem 1rem; font-size: 0.9rem; }
+
+      /* Mission & Vision stack */
+      .grid.md\\:grid-cols-2 { grid-template-columns: 1fr; gap: 4rem; }
+      
+      /* History section stack */
+      .flex.md\\:flex-row { flex-direction: column; }
+      .md\\:w-1\\/2 { width: 100%; }
+      .md\\:w-100 { width: 100%; margin-top: 2rem; }
+
+      /* Core Values scrollable */
+      .flex.flex-nowrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 1rem; gap: 1rem; }
+      .flex.flex-nowrap > div { min-width: 250px; flex: 0 0 auto; }
+
+      /* Navbar for mobile */
+      nav .hidden.md\\:flex { display: none; }
+      nav #mobileMenuBtn { display: block; }
+    }
+
+    @media (max-width: 480px) {
+      h1[data-aos] { font-size: 1.5rem; }
+      p[data-aos] { font-size: 0.8rem; }
+      a[data-aos] { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+    }
+  </style>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us - Show & Go Auto</title>
+<link rel="icon" type="image/png" href="assets/images/logo.png">
+</head>
+<body>
+
+<!-- NAVBAR -->
+ <nav>
+  <div class="flex items-center gap-3">
+  <img src="assets/images/logo.png" alt="Show & Go Logo" class="h-8 w-8 object-contain">
+  <h1 class="text-2xl font-bold text-yellow-400">Show & Go Auto</h1>
+</div>
+  <div class="hidden md:flex space-x-6">
+    <a href="about.html" class="hover:text-yellow-300 font-semibold">About Us</a>
+    <a href="index.html" class="hover:text-yellow-300">Home</a>
+    <a href="shop.html" class="hover:text-yellow-300">Shop</a>
+    <a href="cart.html" class="hover:text-yellow-300">Cart</a>
+    <a href="account.html" class="hover:text-yellow-300">Account</a>
+  </div>
+  <!-- Hamburger -->
+  <button id="mobileMenuBtn" class="md:hidden text-yellow-400 text-2xl focus:outline-none">
+    <i class="fas fa-bars"></i>
+  </button>
+</nav>
+
+<!-- Mobile menu -->
+<div id="mobileMenu" class="md:hidden hidden bg-gray-900 border-t border-yellow-500/20 px-4 py-4 flex flex-col gap-3">
+  <a href="about.html" class="hover:text-yellow-300 font-semibold">About Us</a>
+  <a href="index.html" class="hover:text-yellow-300">Home</a>
+  <a href="shop.html" class="hover:text-yellow-300">Shop</a>
+  <a href="cart.html" class="hover:text-yellow-300">Cart</a>
+  <a href="account.html" class="hover:text-yellow-300">Account</a>
+</div>
+
+<!-- HERO -->
+<section class="relative h-96 flex items-center justify-center text-center px-6 bg-gradient-to-r from-black via-gray-900 to-black">
+  <div class="absolute inset-0 opacity-30 bg-[url('assets/cars/car1.jpeg')] bg-cover bg-center"></div>
+  <div class="relative z-10">
+    <h1 class="text-4xl md:text-6xl font-extrabold text-yellow-400 mb-4" data-aos="fade-up">Take the Lead with Show & Go</h1>
+    <p class="text-gray-300 max-w-2xl mx-auto mb-6" data-aos="fade-up" data-aos-delay="200">
+      Premium automotive parts, professional services, and adventure-inspired experiences for enthusiasts who demand excellence.
+    </p>
+    <a href="shop.html" class="bg-yellow-400 text-black px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 shadow-lg transition duration-300" data-aos="fade-up" data-aos-delay="400">
+      Shop Now
+    </a>
+  </div>
+</section>
+
+<!-- Mission & Vision -->
+<section class="py-20 px-6 text-white relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900">
+  <div class="absolute inset-0 opacity-20 pointer-events-none bg-pattern"></div>
+  <div class="relative max-w-6xl mx-auto z-10">
+    <h2 class="text-4xl section-title mb-12 text-center" data-aos="fade-up">Our Mission & Vision</h2>
+    <div class="grid md:grid-cols-2 gap-12">
+      <div class="bg-gray-900/80 backdrop-blur-sm p-6 md:p-8 rounded-2xl shadow-lg hover-glow flex flex-col items-center" data-aos="fade-up" data-aos-delay="100">
+        <div class="w-20 h-20 mb-4 flex items-center justify-center bg-yellow-500 rounded-full shadow-lg">
+          <i class="fas fa-bullseye text-3xl text-black"></i>
+        </div>
+        <h3 class="text-2xl font-semibold mb-4">Our Mission</h3>
+        <p class="text-gray-200 text-center">
+          To deliver high-quality auto repair, Maintenance, and accessory solutions by upholding professionalism, Integrity, and safety in every job, while building a team that values discipline, continous learning, and teamwork.
+        </p>
+      </div>
+      <div class="bg-gray-900/80 backdrop-blur-sm p-6 md:p-8 rounded-2xl shadow-lg hover-glow flex flex-col items-center" data-aos="fade-up" data-aos-delay="200">
+        <div class="w-20 h-20 mb-4 flex items-center justify-center bg-yellow-500 rounded-full shadow-lg">
+          <i class="fas fa-eye text-3xl text-black"></i>
+        </div>
+        <h3 class="text-2xl font-semibold mb-4">Our Vision</h3>
+        <p class="text-gray-200 text-center">
+          To be the most trusted and innovative automotive service and product provider, known for technical excellence, honest service, and customer-focused care.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HISTORY / OUR STORY -->
+<section class="py-20 px-6 text-gray-200 justify-center bg-gray-900/80">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-4xl section-title mb-12 text-center" data-aos="fade-up">Our Story</h2>
+    <div class="flex flex-col md:flex-row gap-8 items-center">
+      <img src="assets/images/ShopFront.jpg" alt="Shop Front" class="w-full md:w-1/2 rounded-2xl shadow-lg" data-aos="fade-right">
+      <div class="md:w-100" data-aos="fade-left">
+        <p class="text-gray-300 mb-4">
+          Show and Go 4x4 Autoshop & Car Accessories was established on February 22, 2006. The company specializes in auto repair, 4x4 modifications, accessories, and aesthetic services.
+        </p>
+        <p class="text-gray-300 mb-4">
+          It was founded to provide reliable, high-quality vehicle care for 4x4 owners, SUV drivers, and car enthusiasts, committed to technical excellence and honest service.
+        </p>
+        <p class="text-gray-300">
+          Beyond repairs, the company offers auto customization, body services, ceramic coating, detailing, and professional carwash services, making it a trusted partner for both everyday driving and adventurous pursuits.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CORE VALUES - MOBILE CAROUSEL WITH SCROLL -->
+<section class="py-20 px-6 text-center bg-gray-800">
+  <h2 class="text-4xl section-title mb-12" data-aos="fade-up">Our Core Values</h2>
+  
+  <div class="relative max-w-6xl mx-auto">
+    <!-- Scrollable container -->
+    <div id="coreValues" class="flex gap-6 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory scroll-smooth scrollbar-hide">
+      <!-- Excellence -->
+      <div class="flex-1 min-w-[250px] bg-gray-700/80 backdrop-blur-sm p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-yellow-500/50 transition duration-300 snap-center">
+        <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-yellow-500 rounded-full shadow-lg">
+          <i class="fas fa-cogs text-2xl text-black"></i>
+        </div>
+        <h3 class="text-2xl font-semibold mb-4 text-yellow-400">Excellence</h3>
+        <p class="text-gray-200">We pursue uncompromising quality in every service.</p>
+      </div>
+
+      <!-- Reliability -->
+      <div class="flex-1 min-w-[250px] bg-gray-700/80 backdrop-blur-sm p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-yellow-500/50 transition duration-300 snap-center">
+        <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-yellow-500 rounded-full shadow-lg">
+          <i class="fas fa-handshake text-2xl text-black"></i>
+        </div>
+        <h3 class="text-2xl font-semibold mb-4 text-yellow-400">Reliability</h3>
+        <p class="text-gray-200">Dedication to durable, long-lasting repairs.</p>
+      </div>
+
+      <!-- Innovation -->
+      <div class="flex-1 min-w-[250px] bg-gray-700/80 backdrop-blur-sm p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-yellow-500/50 transition duration-300 snap-center">
+        <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-yellow-500 rounded-full shadow-lg">
+          <i class="fas fa-lightbulb text-2xl text-black"></i>
+        </div>
+        <h3 class="text-2xl font-semibold mb-4 text-yellow-400">Innovation</h3>
+        <p class="text-gray-200">We embrace cutting-edge technologies for modern driving.</p>
+      </div>
+
+      <!-- Customer Centricity -->
+      <div class="flex-1 min-w-[250px] bg-gray-700/80 backdrop-blur-sm p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-yellow-500/50 transition duration-300 snap-center">
+        <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-yellow-500 rounded-full shadow-lg">
+          <i class="fas fa-users text-2xl text-black"></i>
+        </div>
+        <h3 class="text-2xl font-semibold mb-4 text-yellow-400">Customer Centricity</h3>
+        <p class="text-gray-200">Transparent communication and exceptional service.</p>
+      </div>
+
+      <!-- Integrity -->
+      <div class="flex-1 min-w-[250px] bg-gray-700/80 backdrop-blur-sm p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-yellow-500/50 transition duration-300 snap-center">
+        <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-yellow-500 rounded-full shadow-lg">
+          <i class="fas fa-shield-alt text-2xl text-black"></i>
+        </div>
+        <h3 class="text-2xl font-semibold mb-4 text-yellow-400">Integrity</h3>
+        <p class="text-gray-200">Honesty and ethical practices build trust.</p>
+      </div>
+    </div>
+
+    <!-- Optional swipe buttons for mobile -->
+    <button id="prevCore" class="absolute top-1/2 left-2 -translate-y-1/2 bg-yellow-400 text-black p-2 rounded-full shadow-lg md:hidden">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <button id="nextCore" class="absolute top-1/2 right-2 -translate-y-1/2 bg-yellow-400 text-black p-2 rounded-full shadow-lg md:hidden">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+</section>
+
+<script>
+  const core = document.getElementById('coreValues');
+  const prev = document.getElementById('prevCore');
+  const next = document.getElementById('nextCore');
+  const scrollStep = 270;
+
+  prev.addEventListener('click', () => {
+    core.scrollBy({ left: -scrollStep, behavior: 'smooth' });
+  });
+
+  next.addEventListener('click', () => {
+    core.scrollBy({ left: scrollStep, behavior: 'smooth' });
+  });
+</script>
+
+<style>
+  /* Hide scrollbar on mobile */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+<!-- Store Info -->
+<section class="py-20 px-6 text-center bg-gray-900/80">
+  <h2 class="text-4xl section-title mb-12" data-aos="fade-up">Find a Show & Go Store</h2>
+  <p class="text-gray-200 mb-8" data-aos="fade-up" data-aos-delay="100">
+    With multiple locations and an expanding network, you can easily find a Show & Go Auto Shop near you for parts, services, and expert advice.
+  </p>
+  <a href="store-locator.html" class="bg-yellow-400 text-black px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 shadow-lg transition duration-300" data-aos="fade-up" data-aos-delay="200">
+    Store Locator
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-black text-gray-400 text-center py-8 border-t border-yellow-500/20">
+  <p>&copy; 2026 Show & Go Auto Shop. All Rights Reserved.</p>
+</footer>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({ duration: 1000, once: true });
+
+  // Mobile menu toggle
+  const mobileBtn = document.getElementById("mobileMenuBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
+  const mobileIcon = mobileBtn.querySelector("i");
+
+  mobileBtn.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+    mobileIcon.classList.toggle("fa-bars");
+    mobileIcon.classList.toggle("fa-xmark");
+  });
+</script>
+</body>
+</html>

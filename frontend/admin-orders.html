@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>View Orders | Show & Go Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Poppins', sans-serif; background-color: #1f2937; color: white; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0.75rem; border-bottom: 1px solid #fbbf24; text-align: left; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- Navbar -->
+<nav class="flex justify-between items-center p-6 bg-gray-900/90 border-b border-yellow-500/20 sticky top-0 z-50">
+  <h1 class="text-2xl font-bold text-yellow-400">Admin Orders</h1>
+  <div class="space-x-4">
+    <a href="dashboard.html" class="text-yellow-400 hover:text-yellow-300 transition">Dashboard</a>
+    <a href="index.html" class="text-yellow-400 hover:text-yellow-300 transition">Go to Site</a>
+  </div>
+</nav>
+
+<section class="px-8 py-12 flex-grow max-w-6xl mx-auto">
+  <h2 class="text-3xl font-bold text-yellow-400 mb-8 text-center">Customer Orders</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Items</th>
+        <th>Total</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="ordersTable">
+      <!-- Orders will be populated here -->
+    </tbody>
+  </table>
+</section>
+
+<script>
+// Sample Orders
+const orders = [
+  {id: 101, customer: 'John D.', items: 'Premium Engine Oil x2', total: 2500, status: 'Completed'},
+  {id: 102, customer: 'Maria S.', items: 'High Flow Air Filter x1', total: 1200, status: 'Pending'},
+  {id: 103, customer: 'Alex R.', items: 'Camping Tent x1', total: 3500, status: 'Shipped'},
+];
+
+// Populate table
+const ordersTable = document.getElementById('ordersTable');
+orders.forEach(o => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${o.id}</td>
+    <td>${o.customer}</td>
+    <td>${o.items}</td>
+    <td>₱${o.total}</td>
+    <td>${o.status}</td>
+  `;
+  ordersTable.appendChild(tr);
+});
+</script>
+</body>
+</html>

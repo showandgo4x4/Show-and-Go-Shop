@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Show & Go Featured Build</title>
+
+<style>
+body {
+  margin:0;
+  background:#0f0f0f;
+  font-family:Arial, sans-serif;
+  color:white;
+}
+
+.container {
+  position:relative;
+  max-width:1200px;
+  margin:auto;
+}
+
+.container img {
+  width:100%;
+  display:block;
+  border-radius:10px;
+  transition:transform 0.5s ease;
+}
+
+.hotspot {
+  position:absolute;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:rgba(255,0,0,0.8);
+  cursor:pointer;
+  transition:0.3s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+
+.hotspot:hover {
+  transform:scale(1.2);
+  box-shadow:0 0 15px red;
+}
+
+.infoBox {
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#1c1c1c;
+  padding:20px;
+  border-radius:10px;
+  max-width:400px;
+  display:none;
+}
+
+.closeBtn {
+  position:absolute;
+  top:5px;
+  right:10px;
+  cursor:pointer;
+  color:red;
+}
+</style>
+</head>
+
+<body>
+
+<h1 style="text-align:center; padding:20px;">Featured Overland Build</h1>
+
+<div class="container">
+  <img id="carImage" src="assets/images/camping/1.png">
+
+  <!-- Rooftop Tent -->
+  <div class="hotspot" style="top:25%; left:30%;" onclick="showInfoFloating('TJM Alora Roof Tent','assets/image/camping/Camping-Tent.jpg','Premium overland rooftop tent with quick deploy system.')">+</div>
+
+  <!-- CR -->
+  <div class="hotspot" style="top:65%; left:40%;"  onclick="showInfoFloating('Off-Road Wheels','/images/wheels.png','Heavy-duty alloy wheels with all-terrain tires.')">+</div>
+
+
+  <!-- Shower -->
+  <div class="hotspot" style="top:35%; left:45%;" onclick="showInfoFloating('Front Bull Bar','/images/bullbar.png','Steel front bull bar with recovery points.')">+</div>
+  <!-- Storage Box -->
+  <div class="hotspot" 
+     style="top:35%; left:60%;" 
+     onclick="showInfoFloating('Storage Box','/images/box.png','Heavy-duty storage box for gear and supplies.')">+</div>
+
+  <!-- Awning -->
+  <div class="hotspot" style="top:40%; left: 5%;"  onclick="showInfoFloating('Side Awning','/images/awning.png','Full-length awning with privacy tent enclosure.')">+</div>
+
+  <!-- Snorkel -->
+  <div class="hotspot" style="top:55%; left: 68%;" onclick="showInfoFloating('Snorkel','/images/snorkel.png','Raised air intake for deep water crossings.')">+</div>
+
+</div>
+
+<!-- Floating Info Box -->
+<div id="infoBox" style="display:none; position:absolute; background:white; border:1px solid #ccc; padding:10px; border-radius:8px; width:220px; box-shadow:0 2px 10px rgba(0,0,0,0.2); z-index:100;">
+  <h3 id="infoTitle" style="margin:0 0 5px 0; font-size:16px;"></h3>
+  <img id="infoImage" src="" style="width:100%; border-radius:4px; margin-bottom:5px;" />
+  <p id="infoDesc" style="margin:0; font-size:14px;"></p>
+  <button onclick="hideInfo()" style="margin-top:5px; padding:3px 6px; font-size:12px; cursor:pointer;">Close</button>
+</div>
+
+<script>
+function showInfoFloating(title, imgSrc, desc) {
+  const infoBox = document.getElementById('infoBox');
+  document.getElementById('infoTitle').innerText = title;
+  document.getElementById('infoImage').src = imgSrc;
+  document.getElementById('infoDesc').innerText = desc;
+
+  infoBox.style.display = 'block';
+}
+
+function hideInfo() {
+  document.getElementById('infoBox').style.display = 'none';
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Show & Go Admin Dashboard</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.35.0/dist/umd/supabase.min.js"></script>
+
+<style>
+body { font-family: 'Poppins', sans-serif; }
+#sidebar { width: 250px; min-height: 100vh; background: #111827; }
+#sidebar a { display: block; padding: 1rem; color: #fff; font-weight: 600; }
+#sidebar a.active, #sidebar a:hover { background: #1F2937; color: #FACC15; }
+.dashboard-section { display: none; }
+.dashboard-section.active { display: block; }
+img.preview { height: 60px; width: 60px; object-fit: cover; border-radius: 0.5rem; }
+.message {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  margin: 0.25rem 0;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.message.visitor { 
+  background: #f1f0f0; 
+  color: #000; 
+  align-self: flex-start; 
+}
+
+.message.agent { 
+  background: #facc15; 
+  color: #000; 
+  align-self: flex-end; 
+}
+</style>
+</head>
+<body class="bg-gray-900 text-white flex">
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="flex flex-col">
+  <h1 class="text-2xl font-bold text-yellow-400 text-center py-6 border-b border-yellow-500/20">
+    Dashboard
+  </h1>
+  <a href="#" data-section="categories" class="active">Manage Categories</a>
+  <a href="#" data-section="products">Manage Products</a>
+  <a href="#" data-section="users">Manage Users</a>
+  <a href="#" data-section="livechat" id="liveChatLink">
+  Live Chat
+  <span id="liveChatBadge" class="hidden ml-2 bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-bold"></span>
+</a>
+
+<a href="#" data-section="quotes">Manage Quotes</a>
+  <a href="#" data-section="orders">Manage Orders</a>
+  <a href="index.html" class="mt-auto mb-4 text-center hover:text-yellow-300 transition">
+    Go to Home
+  </a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="flex-1 p-8 overflow-auto">
+
+  <!-- CATEGORIES -->
+  <section id="categories" class="dashboard-section active">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Manage Categories</h2>
+    <form id="categoryForm" class="bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 flex gap-4 items-center">
+      <input type="text" id="categoryName" placeholder="New Category Name" class="p-3 rounded bg-gray-700 text-white flex-1">
+      <button type="submit" class="bg-yellow-400 text-black px-6 py-3 rounded font-semibold hover:bg-yellow-300 transition">Add</button>
+    </form>
+    <table class="w-full bg-gray-800 rounded-2xl table-auto text-center">
+      <thead class="bg-gray-700 text-yellow-400">
+        <tr>
+          <th class="p-3">ID</th>
+          <th class="p-3">Name</th>
+          <th class="p-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="categoriesTable"></tbody>
+    </table>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section id="products" class="dashboard-section">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Manage Products</h2>
+    <form id="productForm" class="bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 space-y-4">
+      <input type="text" id="productName" placeholder="Product Name" class="p-3 rounded bg-gray-700 text-white w-full">
+      <input type="number" id="productPrice" placeholder="Price" class="p-3 rounded bg-gray-700 text-white w-full">
+      <input type="number" id="productStock" placeholder="Stock" class="p-3 rounded bg-gray-700 text-white w-full">
+      <select id="productCategory" class="p-3 rounded bg-gray-700 text-white w-full">
+        <option value="">Select Category</option>
+      </select>
+      <input type="file" id="productImage" accept="image/*" class="p-2 rounded bg-gray-700 w-full">
+      <img id="imagePreview" class="preview mt-2">
+      <button type="submit" class="bg-yellow-400 text-black px-6 py-3 rounded font-semibold hover:bg-yellow-300 transition">Save Product</button>
+    </form>
+    <table class="w-full bg-gray-800 rounded-2xl table-auto text-center">
+      <thead class="bg-gray-700 text-yellow-400">
+        <tr>
+          <th class="p-3">ID</th>
+          <th class="p-3">Name</th>
+          <th class="p-3">Price</th>
+          <th class="p-3">Stock</th>
+          <th class="p-3">Category</th>
+          <th class="p-3">Image</th>
+          <th class="p-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="productsTableBody"></tbody>
+    </table>
+  </section>
+
+  <!-- USERS -->
+  <section id="users" class="dashboard-section">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Manage Users</h2>
+    <table class="w-full bg-gray-800 rounded-2xl table-auto text-center">
+      <thead class="bg-gray-700 text-yellow-400">
+        <tr>
+          <th class="p-3">ID</th>
+          <th class="p-3">Username</th>
+          <th class="p-3">Email</th>
+          <th class="p-3">Contact</th>
+          <th class="p-3">Address</th>
+          <th class="p-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="usersTableBody"></tbody>
+    </table>
+  </section>
+
+  <!-- ORDERS -->
+  <section id="orders" class="dashboard-section">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Manage Orders</h2>
+    <table class="w-full bg-gray-800 rounded-2xl table-auto text-center">
+      <thead class="bg-gray-700 text-yellow-400">
+        <tr>
+          <th class="p-3">Order ID</th>
+          <th class="p-3">User</th>
+          <th class="p-3">Total</th>
+          <th class="p-3">Status</th>
+          <th class="p-3">Date</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTableBody"></tbody>
+    </table>
+  </section>
+
+  <!-- LIVE CHAT SECTION -->
+<section id="livechat" class="dashboard-section">
+  <h2 class="text-3xl font-bold text-yellow-400 mb-6">Live Chat</h2>
+
+  <div class="flex gap-4">
+    <!-- Sessions list -->
+    <div class="flex-[0.3] flex flex-col border border-yellow-500 rounded p-4 h-[500px] overflow-y-auto" id="chatList">
+      <!-- Session buttons will appear here -->
+    </div>
+
+    <!-- Chat messages -->
+    <div class="flex-1 flex flex-col border border-yellow-500 rounded p-4 h-[500px]">
+      <div class="flex-1 overflow-y-auto mb-2 flex flex-col gap-1" id="chatMessages">
+        <!-- Messages appear here -->
+      </div>
+      <div class="flex gap-2">
+        <input type="text" id="agentMessageInput" placeholder="Type your reply..." class="flex-1 p-2 rounded bg-gray-700 text-white">
+        <button id="sendAgentMessage" class="bg-yellow-400 text-black px-4 py-2 rounded">Send</button>
+      </div>
+      <div id="typingIndicator" class="text-gray-400 text-sm hidden">
+Visitor is typing...
+</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const SUPABASE_URL = "https://jimjbjtlekdytvnpyykw.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const messageSound = new Audio("assets/sounds/Ang Mahiwagang Mensahe.mp3")
+  // -------- SESSION & ADMIN CHECK --------
+  const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+  if (sessionError || !session) { alert("Please login first."); window.location.href = "shop.html"; return; }
+
+  const { data: adminProfile, error: adminError } = await supabaseClient
+    .from("profiles")
+    .select("is_admin, username")
+    .eq("id", session.user.id)
+    .single();
+  if (adminError || !adminProfile || !adminProfile.is_admin) { alert("Access denied. Admin only."); return; }
+  const agentName = adminProfile.username || "Agent";
+
+  // -------- SIDEBAR NAVIGATION --------
+  const links = document.querySelectorAll("#sidebar a[data-section]");
+  const sections = document.querySelectorAll(".dashboard-section");
+  links.forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      sections.forEach(s => s.classList.remove("active"));
+      document.getElementById(link.dataset.section).classList.add("active");
+      links.forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+    });
+  });
+
+  // -------- CATEGORIES --------
+async function loadCategories() {
+  const { data, error } = await supabaseClient.from("categories").select("*").order("id");
+  if (error) return console.error(error);
+
+  const table = document.getElementById("categoriesTable");
+  const select = document.getElementById("productCategory");
+  table.innerHTML = "";
+  select.innerHTML = `<option value="">Select Category</option>`;
+
+  data.forEach(cat => {
+    // Table row
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="p-3">${cat.id}</td>
+      <td class="p-3">${cat.name}</td>
+      <td class="p-3"><button class="bg-red-500 px-2 py-1 rounded">Delete</button></td>
+    `;
+    tr.querySelector("button").addEventListener("click", async () => {
+      await supabaseClient.from("categories").delete().eq("id", cat.id);
+      loadCategories();
+    });
+    table.appendChild(tr);
+
+    // Dropdown option with ID
+    const option = document.createElement("option");
+    option.value = cat.id; // use ID, not name
+    option.textContent = cat.name;
+    select.appendChild(option);
+  });
+}
+// -------- ADD CATEGORY --------
+document.getElementById("categoryForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const nameInput = document.getElementById("categoryName");
+  const name = nameInput.value.trim();
+  if (!name) return alert("Enter a category name");
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("categories")
+      .insert([{ name }]);
+
+    if (error) throw error;
+
+    nameInput.value = ""; // clear input
+    await loadCategories(); // refresh table & dropdown
+  } catch (err) {
+    alert("Insert failed: " + err.message);
+    console.error(err);
+  }
+});
+// -------- PRODUCTS --------
+async function loadProducts() {
+  try {
+    const { data, error } = await supabaseClient
+      .from("products")
+      .select("id,name,price,stock,category_id,image_url") // match table
+      .order("id");
+
+    if (error) throw error;
+
+    const tbody = document.getElementById("productsTableBody");
+    tbody.innerHTML = "";
+
+    data.forEach(prod => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="p-3">${prod.id}</td>
+        <td class="p-3">${prod.name}</td>
+        <td class="p-3">₱${prod.price}</td>
+        <td class="p-3">${prod.stock}</td>
+        <td class="p-3">${prod.category_id || "-"}</td>
+        <td class="p-3"><img src="${prod.image_url || ''}" class="preview"></td>
+        <td class="p-3 flex justify-center gap-2">
+          <button class="bg-red-500 px-2 py-1 rounded text-sm">Delete</button>
+        </td>
+      `;
+      tr.querySelector("button").addEventListener("click", async () => {
+        await supabaseClient.from("products").delete().eq("id", prod.id);
+        loadProducts();
+      });
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Unexpected error loading products:", err);
+  }
+}
+
+// -------- ADD PRODUCT --------
+document.getElementById("productForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const name = document.getElementById("productName").value.trim();
+  const price = parseFloat(document.getElementById("productPrice").value);
+  const stock = parseInt(document.getElementById("productStock").value);
+  const category_id = parseInt(document.getElementById("productCategory").value);
+  const image_file = document.getElementById("productImage").files[0];
+
+  if (!name || isNaN(price) || isNaN(stock) || isNaN(category_id)) {
+    alert("Please fill all fields correctly.");
+    return;
+  }
+
+  let image_url = "";
+  if (image_file) {
+    const fileExt = image_file.name.split(".").pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const { data, error } = await supabaseClient.storage
+      .from("product-images") // make sure bucket exists
+      .upload(fileName, image_file);
+
+    if (error) {
+      alert("Image upload failed: " + error.message);
+      return;
+    }
+
+    image_url = supabaseClient.storage.from("product-images").getPublicUrl(fileName).data.publicUrl;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("products")
+    .insert([{ name, price, stock, category_id, image_url }]);
+
+  if (error) {
+    alert("Insert failed: " + error.message);
+    return;
+  }
+
+  e.target.reset();
+  document.getElementById("imagePreview").src = "";
+  loadProducts();
+});
+  // -------- USERS --------
+  async function loadUsers() {
+    const { data, error } = await supabaseClient.from("profiles").select("*").order("email");
+    if (error) return console.error(error);
+    const tbody = document.getElementById("usersTableBody");
+    tbody.innerHTML = "";
+    data.forEach(user => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="p-3">${user.id}</td>
+        <td class="p-3">${user.username || "-"}</td>
+        <td class="p-3">${user.email || "-"}</td>
+        <td class="p-3">${user.contact || "-"}</td>
+        <td class="p-3">${user.address || "-"}</td>
+        <td class="p-3"><button class="bg-red-500 px-3 py-1 rounded text-sm">Delete</button></td>
+      `;
+      tr.querySelector("button").addEventListener("click", async () => {
+        if (!confirm("Delete this user?")) return;
+        await supabaseClient.from("profiles").delete().eq("id", user.id);
+        loadUsers();
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // -------- ORDERS --------
+  async function loadOrders() {
+    const { data: orders, error } = await supabaseClient.from("orders").select("*").order("id");
+    if (error) return console.error(error);
+    const tbody = document.getElementById("ordersTableBody");
+    tbody.innerHTML = "";
+    for (const order of orders) {
+      const { data: userProfile } = await supabaseClient.from("profiles").select("username,email").eq("id", order.user_id).maybeSingle();
+      const tr = document.createElement("tr");
+      const orderDate = new Date(order.created_at).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" });
+      tr.innerHTML = `
+        <td class="p-3 text-xs">${order.id}</td>
+        <td class="p-3">${userProfile?.username || userProfile?.email || "Unknown"}</td>
+        <td class="p-3">₱${Number(order.total).toLocaleString()}</td>
+        <td class="p-3">
+          <span class="status-text">${order.status}</span>
+          <div class="flex justify-center gap-2 mt-1">
+            <button class="bg-green-500 px-2 py-1 rounded text-xs status-btn" data-status="Completed">Completed</button>
+            <button class="bg-yellow-500 px-2 py-1 rounded text-xs status-btn" data-status="Pending">Pending</button>
+            <button class="bg-red-500 px-2 py-1 rounded text-xs status-btn" data-status="Cancelled">Cancelled</button>
+          </div>
+        </td>
+        <td class="p-3">${orderDate}</td>
+      `;
+      tr.querySelectorAll(".status-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          await supabaseClient.from("orders").update({ status: btn.dataset.status }).eq("id", order.id);
+          loadOrders();
+        });
+      });
+      tbody.appendChild(tr);
+    }
+  }
+
+// -------- LIVE CHAT --------
+const chatListDiv = document.getElementById("chatList");
+const chatMessagesDiv = document.getElementById("chatMessages");
+const agentInput = document.getElementById("agentMessageInput");
+const sendBtn = document.getElementById("sendAgentMessage");
+
+
+let selectedSession = null;
+let displayedMessageIds = new Set(); // track displayed messages
+let loadedSessionButtons = new Map();
+
+// Display message in chat window
+function displayMessage(sender, message, username, id) {
+
+  if (displayedMessageIds.has(id)) return;
+
+  displayedMessageIds.add(id);
+
+  const div = document.createElement("div");
+
+  div.className =
+    sender === "agent"
+      ? "mb-2 p-2 bg-yellow-400 text-black rounded self-end"
+      : "mb-2 p-2 bg-gray-600 text-white rounded self-start";
+
+  div.textContent = username + ": " + message;
+
+  chatMessagesDiv.appendChild(div);
+
+  chatMessagesDiv.scrollTop =
+    chatMessagesDiv.scrollHeight;
+}
+
+// Load all chat sessions
+async function loadLiveChatSessions() {
+
+  const { data: sessions } = await supabaseClient
+    .from("chat_sessions")
+    .select("*")
+    .order("created_at");
+
+  if (!sessions) return;
+
+sessions.forEach(session => {
+
+  if (!session.session_id) return;
+
+  if (loadedSessionButtons.has(session.session_id)) return;
+
+  const btn = document.createElement("button");
+
+  btn.className =
+    "mb-2 px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 w-full";
+
+  btn.innerHTML = `
+    <span class="flex items-center gap-2">
+      <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+      ${session.visitor_name || "Visitor"}
+    </span>
+  `;
+
+  btn.onclick = () => selectSession(session.session_id);
+
+  chatListDiv.appendChild(btn);
+
+  loadedSessionButtons.set(session.session_id, btn);
+
+});
+}
+
+// Select a chat session
+async function selectSession(sessionId) {
+  if (!sessionId) return;
+  selectedSession = sessionId;
+  chatMessagesDiv.innerHTML = "";
+
+  try {
+    // Mark visitor messages as read
+    await supabaseClient
+      .from("chats")
+      .update({ read_by_agent: true })
+      .eq("session_id", sessionId)
+      .eq("sender", "visitor")
+      .eq("read_by_agent", false);
+
+    // Load messages
+    const { data: messages, error } = await supabaseClient
+      .from("chats")
+      .select("*")
+      .eq("session_id", sessionId)
+      .order("created_at", { ascending: true });
+
+    if (error) throw error;
+
+    // Get visitor name
+    const { data: sessionData } = await supabaseClient
+      .from("chat_sessions")
+      .select("visitor_name")
+      .eq("session_id", sessionId)
+      .maybeSingle();
+
+    const visitorName = sessionData?.visitor_name || "Visitor";
+
+    if (!messages || messages.length === 0) {
+      chatMessagesDiv.innerHTML = "<p class='text-gray-400'>No messages yet.</p>";
+    } else {
+      messages.forEach(msg => {
+        const displayName = msg.sender === "agent" ? agentName : visitorName;
+        displayMessage(msg.sender, msg.message, displayName, msg.id);
+      });
+    }
+
+    // Reload sessions to update badges
+    loadLiveChatSessions(false);
+  } catch (err) {
+    console.error("Select session error:", err);
+  }
+}
+
+// Send message as agent
+sendBtn.addEventListener("click", async () => {
+  const text = agentInput.value.trim();
+  if (!text || !selectedSession) return;
+
+  try {
+    const { error } = await supabaseClient
+      .from("chats")
+      .insert([{
+        session_id: selectedSession,
+        sender: "agent",
+        message: text,
+        read_by_agent: true,
+        user_id: session.user.id,
+        username: agentName
+      }]);
+
+    if (error) throw error;
+
+    displayMessage("agent", text, agentName, Date.now());
+    agentInput.value = "";
+  } catch (err) {
+    alert("Send failed: " + err.message);
+  }
+});
+
+// Real-time subscription for new chat messages
+const chatChannel = supabaseClient.channel("live-chats");
+
+chatChannel.on(
+  "postgres_changes",
+  { event: "INSERT", schema: "public", table: "chats" },
+  async payload => {
+    const msg = payload.new;
+
+    if (msg.sender === "visitor") {
+      messageSound.play().catch(() => {});
+    }
+
+    await loadLiveChatSessions();
+
+    if (msg.session_id === selectedSession) {
+      const { data } = await supabaseClient
+        .from("chat_sessions")
+        .select("visitor_name")
+        .eq("session_id", msg.session_id)
+        .maybeSingle();
+
+      const username = msg.sender === "agent" ? agentName : data?.visitor_name || "Visitor";
+
+      displayMessage(msg.sender, msg.message, username, msg.id);
+    }
+  }
+);
+
+chatChannel.subscribe();
+supabaseClient
+.channel("typing")
+.on("broadcast", { event: "typing" }, payload => {
+
+  const indicator = document.getElementById("typingIndicator");
+
+if (indicator) {
+  indicator.classList.remove("hidden");
+
+  setTimeout(() => {
+    indicator.classList.add("hidden");
+  }, 2000);
+  }
+
+})
+.subscribe();
+
+// ✅ Only call subscribe once
+// Request notification permission
+if (Notification.permission !== "granted") Notification.requestPermission();
+
+
+  // -------- INITIAL LOADS --------
+  await loadCategories();
+  await loadProducts();
+  await loadUsers();
+  await loadOrders();
+  await loadLiveChatSessions();
+});
+</script>
+
+</body>
+</html>
