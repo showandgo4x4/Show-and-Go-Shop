@@ -5,7 +5,10 @@ const bodyParser = require("body-parser");
 const { Invoice } = require("xendit-node");
 
 const app = express();
-
+// Add this in your server.js
+app.get("/ping", (req, res) => {
+  res.status(200).send("Awake");
+});
 // Middleware
 app.use(bodyParser.json());
 app.use(cors({
