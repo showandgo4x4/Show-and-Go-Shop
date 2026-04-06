@@ -254,68 +254,103 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 </script>
 <script>
+// --- UPDATED PAY BUTTON LOGIC ---
 document.getElementById("pay-button").addEventListener("click", async () => {
-  try {
-    const payBtn = document.getElementById("pay-button");
-    payBtn.disabled = true;
-    payBtn.textContent = "Processing...";
+  const payBtn = document.getElementById("pay-button");
+  const qrContainer = document.getElementById("qr-container");
 
-    // 1. Get the total amount (Removes ₱ and commas)
+  try {
+    payBtn.disabled = true;
+    payBtn.innerHTML = `<i class="fa fa-spinner fa-spin mr-2"></i> Waking up Secure Server...`;
+
+    // 1. Gather Data
     const totalText = document.getElementById("paymentTotal").textContent;
     const amount = Number(totalText.replace(/[₱,]/g, "").trim());
-
-    // 2. Get payer email
     const payer_email = document.getElementById("shippingEmail").value.trim();
-    if (!payer_email) {
-      alert("Please go back and enter your email in the shipping form.");
+    
+    // Gather shipping info from your form fields
+    const shippingData = {
+        full_name: document.getElementById("shippingName").value,
+        address: document.getElementById("shippingAddress").value,
+        contact: document.getElementById("shippingContact").value,
+        notes: document.getElementById("shippingNotes").value
+    };
+
+    if (!payer_email || !shippingData.full_name || !shippingData.address) {
+      alert("Please ensure all shipping fields are filled out.");
       payBtn.disabled = false;
       payBtn.textContent = "Pay";
       return;
     }
 
     const external_id = "order_" + Date.now();
-    const description = "Show & Go Repair Shop Purchase";
 
-    // 3. Send request to backend
+    // 2. SAVE TO SUPABASE (The "Proper" Way)
+    // This creates a 'pending' record so you don't lose the address
+    const { error: dbError } = await supabaseClient
+      .from('orders')
+      .insert([{
+        external_id: external_id,
+        user_id: loggedInUser, // From your existing session logic
+        full_name: shippingData.full_name,
+        email: payer_email,
+        address: shippingData.address,
+        contact: shippingData.contact,
+        items: cart, // The array of items currently in the cart
+        total_amount: amount,
+        status: 'pending'
+      }]);
+
+    if (dbError) throw new Error("Failed to save order to database.");
+
+    // 3. Connect to Xendit via your Backend
+    const slowLoadingTip = setTimeout(() => {
+        if(payBtn.disabled) payBtn.innerHTML = `<i class="fa fa-clock mr-2"></i> Connecting to Xendit (Almost there)...`;
+    }, 4000);
+
     const res = await fetch("https://show-and-go-shop-backend.onrender.com/create-invoice", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ external_id, amount, payer_email, description })
+      body: JSON.stringify({ 
+          external_id, 
+          amount, 
+          payer_email, 
+          description: `Repair Shop Order - ${shippingData.full_name}` 
+      })
     });
 
+    clearTimeout(slowLoadingTip);
     const data = await res.json();
-    console.log("Xendit response received:", data);
 
-    // ✅ FIXED: Using data.invoiceUrl instead of data.invoice_url
     if (data.invoiceUrl) {
-      const qrContainer = document.getElementById("qr-container");
       qrContainer.innerHTML = `
-        <div class="p-4 bg-white border rounded-xl shadow-inner inline-block">
-          <h3 class="font-bold mb-3 text-green-600">Scan to Pay via GCash/Maya</h3>
-          <img src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(data.invoiceUrl)}" 
-               alt="QR Code" class="mx-auto border-4 border-white">
-          <div class="mt-4">
-            <a href="${data.invoiceUrl}" target="_blank" 
-               class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
-               Open Payment Page
-            </a>
+        <div class="p-6 bg-white border-2 border-green-100 rounded-2xl shadow-xl inline-block transition-all">
+          <h3 class="font-bold mb-4 text-green-600 flex items-center justify-center">
+            <i class="fa fa-qrcode mr-2"></i> Scan to Pay via GCash/Maya
+          </h3>
+          <div class="bg-gray-50 p-2 rounded-lg mb-4">
+            <img src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(data.invoiceUrl)}" 
+                 alt="QR Code" class="mx-auto mix-blend-multiply">
           </div>
-          <p class="text-xs text-gray-500 mt-4">Invoice ID: ${data.id}</p>
+          <div class="space-y-3">
+            <a href="${data.invoiceUrl}" target="_blank" 
+               class="block w-full bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">
+               Direct Pay (GCash App)
+            </a>
+            <p class="text-[10px] text-gray-400 uppercase tracking-widest">Order ID: ${external_id}</p>
+          </div>
         </div>
       `;
       qrContainer.scrollIntoView({ behavior: "smooth" });
-      payBtn.textContent = "Invoice Generated";
+      payBtn.innerHTML = `<i class="fa fa-check mr-2"></i> Invoice Ready`;
     } else {
-      console.error("Payload mismatch:", data);
-      alert("Failed to create invoice. " + (data.error?.message || "Check console."));
-      payBtn.disabled = false;
-      payBtn.textContent = "Pay";
+      throw new Error("Invalid response from server");
     }
   } catch (err) {
     console.error(err);
-    alert("Error connecting to server. Is the backend running?");
-    document.getElementById("pay-button").disabled = false;
-    document.getElementById("pay-button").textContent = "Pay";
+    alert("Something went wrong. Please check your connection and try again.");
+    payBtn.disabled = false;
+    payBtn.textContent = "Retry Payment";
   }
 });
 // STEP NAVIGATION
@@ -336,6 +371,10 @@ document.getElementById("proceedShipping").addEventListener("click", () => {
   stepCart.classList.remove("active");
   stepShipping.classList.add("active");
 });
+
+// SILENT PING: Wake up Render while they type their address
+  console.log("Waking up server...");
+  fetch("https://show-and-go-shop-backend.onrender.com/ping").catch(() => {});
 
 // Back to Cart
 document.getElementById("backToCart").addEventListener("click", () => {

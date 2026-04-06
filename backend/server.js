@@ -71,3 +71,23 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server is live and listening on port ${PORT}`);
 });
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+app.post("/xendit-webhook", async (req, res) => {
+    const { status, external_id } = req.body;
+
+    if (status === "PAID") {
+        // Update the order in Supabase
+        const { error } = await supabase
+            .from("orders")
+            .update({ status: "paid" })
+            .eq("external_id", external_id);
+
+        if (!error) {
+            console.log(`✅ Order ${external_id} marked as PAID.`);
+            // Optional: Send a Discord/Email notification here
+        }
+    }
+    res.status(200).send("OK");
+});
