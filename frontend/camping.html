@@ -1,221 +1,445 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Camping Community - Show & Go</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(to bottom, #0f172a, #1e293b);
-    color: #fff;
-    overflow-x: hidden;
-    position: relative;
-  }
+    <meta charset="UTF-8">
+    <title>Camping Community - Show & Go</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap');
 
-  /* Navigation button */
-  .back-btn {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    background: #facc15;
-    color: #000;
-    padding: 0.6rem 1rem;
-    border-radius: 0.5rem;
-    font-weight: bold;
-    z-index: 100;
-    transition: background 0.3s;
-  }
-  .back-btn:hover { background: #fbbf24; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a; /* Fallback */
+            color: #fff;
+            overflow-x: hidden;
+        }
 
-  /* Starry night background */
-  .star {
-    position: absolute;
-    background: #fff;
-    border-radius: 50%;
-    opacity: 0.8;
-    animation: twinkle 3s infinite ease-in-out alternate;
-  }
-  @keyframes twinkle {
-    0% { opacity: 0.2; transform: scale(0.5); }
-    50% { opacity: 1; transform: scale(1.2); }
-    100% { opacity: 0.2; transform: scale(0.5); }
-  }
+        /* --- STAR BACKGROUND (Applied to specific sections now) --- */
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: twinkle 3s infinite ease-in-out alternate;
+            pointer-events: none;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.1; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0.1; transform: scale(0.5); }
+        }
 
-  /* Titles */
-  h1 { text-align: center; margin: 4rem 0 2rem; color: #facc15; font-size: clamp(3rem, 8vw, 5rem); font-weight: 700; }
-  h2,h3 { text-align: center; margin-bottom: 1rem; color: #facc15; }
-  h2 { font-size: clamp(1.5rem, 5vw, 2.5rem); }
-  h3 { font-size: clamp(1.2rem, 4vw, 1.8rem); }
+        /* SILHOUETTES & MIST */
+        .silhouette { 
+            position: absolute; 
+            bottom: 0; 
+            width: 100%; 
+            height: 180px; 
+            background-repeat: no-repeat; 
+            background-size: cover; 
+            background-position: bottom center;
+            opacity: 0.4; 
+            z-index: 1; 
+            pointer-events: none; 
+        }
+        .silhouette.trees { background-image: url('https://i.ibb.co/J5R6Z3q/trees.png'); }
+        .silhouette.tents { background-image: url('https://i.ibb.co/8bLxkF3/tents.png'); }
 
-  p { text-align: center; color: #d1d5db; line-height: 1.6; margin-bottom: 1rem; }
+        .mist { 
+            position: absolute; 
+            bottom: 0; left:0; 
+            width:100%; height:100%; 
+            pointer-events:none; 
+            background: url('https://i.ibb.co/qxJZyXK/mist.png') repeat-x; 
+            background-size: cover; 
+            opacity: 0.15; 
+            animation: mistMove 90s linear infinite; 
+            z-index: 2;
+        }
+        @keyframes mistMove { from { background-position: 0 0; } to { background-position: 2000px 0; } }
 
-  .section { padding: 3rem 1rem; max-width: 900px; margin:auto; position:relative; z-index:2; }
-  .section .cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:1.5rem; margin-top:2rem; }
-  .card { background: rgba(255,255,255,0.05); padding:1rem; border-radius:1rem; box-shadow:0 10px 20px rgba(0,0,0,0.3); transition: transform 0.3s; }
-  .card:hover { transform: translateY(-5px); }
+        /* CAROUSEL */
+        .carousel-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 1000px; 
+            height: 500px; 
+            margin: 0 auto; 
+            perspective: 1200px; 
+            z-index: 10; 
+        }
+        .carousel { 
+            position: relative; 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 1rem; 
+        }
+        .carousel img {
+            position: absolute; top:0; left:0; width: 100%; height: 100%;
+            object-fit: cover; border-radius: 1rem; opacity: 0;
+            transform: scale(0.85); transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+            border: 2px solid transparent;
+        }
+        .carousel img.active { 
+            opacity: 1; 
+            transform: scale(1); 
+            z-index: 3; 
+            border-color: rgba(250, 204, 21, 0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 40px rgba(250,204,21,0.2);
+        }
+        .carousel img.prev {
+            opacity: 0.4; transform: translateX(-15%) scale(0.8); z-index: 2; filter: blur(3px) brightness(0.6);
+        }
+        .carousel img.next {
+            opacity: 0.4; transform: translateX(15%) scale(0.8); z-index: 2; filter: blur(3px) brightness(0.6);
+        }
 
-  /* Silhouette backgrounds */
-  .silhouette { position:absolute; bottom:0; width:100%; height:150px; background-repeat:no-repeat; background-size:cover; opacity:0.3; z-index:1; }
-  .silhouette.trees { background-image:url('https://i.ibb.co/J5R6Z3q/trees.png'); }
-  .silhouette.tents { background-image:url('https://i.ibb.co/8bLxkF3/tents.png'); }
+        .arrow { 
+            position: absolute; top: 50%; transform: translateY(-50%); 
+            background: rgba(15, 23, 42, 0.8); color: #facc15; 
+            width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; cursor: pointer; user-select: none; 
+            transition: all 0.3s; z-index: 20; border: 1px solid rgba(250, 204, 21, 0.3);
+            backdrop-filter: blur(4px);
+        }
+        .arrow:hover { background: #facc15; color: #0f172a; transform: translateY(-50%) scale(1.1); }
+        .arrow-left { left: 1rem; }
+        .arrow-right { right: 1rem; }
 
-  /* Carousel */
-  .carousel-container { position: relative; width: 90%; max-width: 900px; height: 450px; margin: 3rem auto; perspective: 1200px; }
-  .carousel { position: relative; width: 100%; height: 100%; border-radius: 1rem; overflow: hidden; z-index:3; }
-  .carousel img {
-    position: absolute; top:0; left:0; width: 100%; height: 100%;
-    object-fit: cover; border-radius: 1rem; opacity: 0;
-    transform: scale(0.8); transition: all 1s ease-in-out;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 60px rgba(250,204,21,0.3);
-    filter: brightness(0.95);
-  }
-  .carousel img.active { opacity: 1; transform: scale(1); z-index: 3; }
-  .carousel img.prev,.carousel img.next { opacity: 0.5; transform: scale(0.7); z-index: 2; filter: blur(2px) brightness(0.7); }
-
-  /* Mist overlay */
-  .mist { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; background: url('https://i.ibb.co/qxJZyXK/mist.png') repeat-x; background-size: cover; opacity: 0.25; animation: mistMove 60s linear infinite; border-radius: 1rem; }
-  @keyframes mistMove { 0% { background-position:0 0; } 100% { background-position:1000px 0; } }
-
-  /* Carousel arrows */
-  .arrow { position:absolute; top:50%; transform:translateY(-50%); background: rgba(0,0,0,0.5); color: #facc15; font-size:2rem; padding:0.5rem 1rem; border-radius:0.5rem; cursor:pointer; user-select:none; transition: background 0.3s; z-index:5; }
-  .arrow:hover { background: rgba(0,0,0,0.8); }
-  .arrow-left { left: -3rem; }
-  .arrow-right { right: -3rem; }
-  @media(max-width:768px){ 
-    .carousel-container{ height: 300px; } 
-    .arrow-left{ left:-1.5rem; } 
-    .arrow-right{ right:-1.5rem; } 
-  }
-
-  /* Gallery cards */
-  .gallery-card img { width:100%; height:200px; object-fit:cover; border-radius:0.75rem; }
-</style>
+        @media(max-width:768px){ 
+            .carousel-container { height: 300px; } 
+            .arrow-left { left: 0.5rem; width: 40px; height: 40px; } 
+            .arrow-right { right: 0.5rem; width: 40px; height: 40px; } 
+        }
+    </style>
 </head>
-<body>
+<body class="bg-slate-900">
 
-<a href="index.html" class="back-btn">&#8592; Back to Home</a>
+<!-- FIXED NAVBAR -->
+<nav class="bg-slate-900/95 border-b border-yellow-500/20 sticky top-0 z-[1000] w-full backdrop-blur-md shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-20">
+        <a href="index.html" class="flex items-center space-x-3 group">
+            <img src="assets/images/logo.png" alt="Logo" class="h-12 w-12 object-contain transition-transform group-hover:scale-110">
+            <div class="flex flex-col leading-none">
+                <span class="text-xl font-black text-yellow-400 tracking-tighter">SHOW & GO</span>
+                <span class="text-[10px] text-white tracking-[0.2em] font-bold">REPAIR SHOP</span>
+            </div>
+        </a>
+        
+        <!-- Desktop Nav -->
+        <div class="hidden lg:flex items-center space-x-8">
+            <div class="flex items-center space-x-6 text-sm font-semibold text-gray-300">
+                <a href="index.html" class="hover:text-yellow-400 transition">Home</a>
+                <a href="shop.html" class="hover:text-yellow-400 transition">Shop</a>
+                <a href="about.html" class="hover:text-yellow-400 transition">About</a>
+                <a href="camping.html" class="text-yellow-400 transition underline underline-offset-8 decoration-2">Community</a>
+                <a href="store-locator.html" class="hover:text-yellow-400 transition">Location</a>
+                <a href="account.html" class="hover:text-yellow-400 transition">My Account</a>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="quote.html" class="bg-yellow-400 text-black px-5 py-2.5 rounded-full font-bold text-xs uppercase hover:bg-yellow-300 transition shadow-[0_0_15px_rgba(250,204,21,0.3)]">Get Quote</a>
+                <a href="inquiry.html" class="bg-transparent border-2 border-yellow-400 text-yellow-400 px-5 py-2 rounded-full font-bold text-xs uppercase hover:bg-yellow-400 hover:text-black transition">Be a Partner</a>
+            </div>
+        </div>
 
-<h1>Camping Community</h1>
+        <!-- Mobile Toggle -->
+        <button id="mobileMenuBtn" class="lg:hidden text-yellow-400 text-3xl focus:outline-none">
+            <i id="mobileIcon" class="fa-solid fa-bars"></i>
+        </button>
+    </div>
 
-<!-- Silhouettes -->
-<div class="silhouette trees"></div>
-<div class="silhouette tents"></div>
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden lg:hidden bg-slate-800 border-b border-yellow-500/20 p-6 space-y-4 shadow-2xl absolute w-full">
+        <a href="index.html" class="block text-white font-medium hover:text-yellow-400 transition">Home</a>
+        <a href="shop.html" class="block text-white font-medium hover:text-yellow-400 transition">Shop</a>
+        <a href="about.html" class="block text-white font-medium hover:text-yellow-400 transition">About</a>
+        <a href="camping.html" class="block text-yellow-400 font-bold">Community</a>
+        <a href="store-locator.html" class="block text-white font-medium hover:text-yellow-400 transition">Location</a>
+        <a href="account.html" class="block text-white font-medium hover:text-yellow-400 transition">My Account</a>
+        <hr class="border-gray-700 my-4">
+        <div class="grid grid-cols-2 gap-3">
+            <a href="quote.html" class="bg-yellow-400 text-black py-3 rounded-xl font-bold text-center text-sm uppercase shadow-lg">Get Quote</a>
+            <a href="inquiry.html" class="bg-transparent border-2 border-yellow-400 text-yellow-400 py-3 rounded-xl font-bold text-center text-sm uppercase">Partner</a>
+        </div>
+    </div>
+</nav>
 
-<!-- Carousel -->
-<div class="carousel-container">
-  <div class="carousel" id="carousel"></div>
-  <div class="mist"></div>
-  <div class="arrow arrow-left" id="prev">&#10094;</div>
-  <div class="arrow arrow-right" id="next">&#10095;</div>
-</div>
+<!-- HERO SECTION -->
+<header class="relative pt-24 pb-32 text-center overflow-hidden" id="star-container">
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 z-0"></div>
+    <!-- Stars injected via JS will go here -->
+    
+    <div class="relative z-10 max-w-4xl mx-auto px-6">
+        <h4 class="text-yellow-400 font-bold tracking-widest uppercase mb-3 text-sm md:text-base">Into The Wild</h4>
+        <h1 class="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight drop-shadow-lg">
+            Camping <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">Community</span>
+        </h1>
+        <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto font-light leading-relaxed mb-8">
+            Explore nature, connect with fellow campers, and push your off-road vehicles to the limit. Join the Show & Go family on our next great adventure.
+        </p>
+        <a href="#events" class="inline-flex items-center space-x-2 text-yellow-400 font-semibold hover:text-yellow-300 transition">
+            <span>View Upcoming Events</span>
+            <i class="fa-solid fa-arrow-down animate-bounce"></i>
+        </a>
+    </div>
+</header>
 
-<!-- Section: Welcome -->
-<div class="section">
-  <h2>Welcome to Our Camping Community</h2>
-  <p>Explore nature, connect with fellow campers, and enjoy exciting events. We welcome everyone, from beginners to seasoned adventurers.</p>
-</div>
+<!-- CAROUSEL SECTION -->
+<section class="relative bg-slate-900 py-16 overflow-hidden">
+    <!-- Silhouettes & Mist contained strictly here -->
+    <div class="mist"></div>
+    <div class="silhouette trees"></div>
+    <div class="silhouette tents"></div>
 
-<!-- Section: Events -->
-<div class="section">
-  <h2>Upcoming Events</h2>
-  <div class="cards">
-    <div class="card"><h3>Glamping Weekend</h3><p>Luxury tents, gourmet meals, and starlit skies.</p></div>
-    <div class="card"><h3>Family Campout</h3><p>Fun activities, hiking, and campfire storytelling.</p></div>
-    <div class="card"><h3>Off-Road Adventure</h3><p>Combine camping with 4x4 trail adventure for thrill-seekers.</p></div>
+    <div class="max-w-7xl mx-auto px-4 relative z-10">
+        <div class="carousel-container">
+            <div class="carousel" id="carousel"></div>
+            <div class="arrow arrow-left" id="prev"><i class="fa-solid fa-chevron-left"></i></div>
+            <div class="arrow arrow-right" id="next"><i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+    </div>
+</section>
+
+<!-- EVENTS SECTION -->
+<section id="events" class="py-20 bg-slate-800 relative z-20 border-t border-slate-700">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Upcoming <span class="text-yellow-400">Events</span></h2>
+            <div class="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Event 1 -->
+            <div class="group bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 hover:border-yellow-400 transition-all duration-300 hover:-translate-y-2 shadow-xl">
+                <div class="p-8">
+                    <div class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-400 group-hover:text-black transition-colors duration-300">
+                        <i class="fa-solid fa-campground text-2xl text-yellow-400 group-hover:text-black"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Glamping Weekend</h3>
+                    <p class="text-gray-400 leading-relaxed mb-6">Luxury tents, gourmet meals, and starlit skies. Experience nature without sacrificing comfort.</p>
+                    <a href="#" class="text-yellow-400 text-sm font-bold uppercase tracking-wider group-hover:underline">Learn More <i class="fa-solid fa-arrow-right ml-1"></i></a>
+                </div>
+            </div>
+
+            <!-- Event 2 -->
+            <div class="group bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 hover:border-yellow-400 transition-all duration-300 hover:-translate-y-2 shadow-xl">
+                <div class="p-8">
+                    <div class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-400 group-hover:text-black transition-colors duration-300">
+                        <i class="fa-solid fa-fire text-2xl text-yellow-400 group-hover:text-black"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Family Campout</h3>
+                    <p class="text-gray-400 leading-relaxed mb-6">Fun activities, hiking, and campfire storytelling. Perfect for all ages and outdoor skill levels.</p>
+                    <a href="#" class="text-yellow-400 text-sm font-bold uppercase tracking-wider group-hover:underline">Learn More <i class="fa-solid fa-arrow-right ml-1"></i></a>
+                </div>
+            </div>
+
+            <!-- Event 3 -->
+            <div class="group bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 hover:border-yellow-400 transition-all duration-300 hover:-translate-y-2 shadow-xl">
+                <div class="p-8">
+                    <div class="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-400 group-hover:text-black transition-colors duration-300">
+                        <i class="fa-solid fa-truck-pickup text-2xl text-yellow-400 group-hover:text-black"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Off-Road Adventure</h3>
+                    <p class="text-gray-400 leading-relaxed mb-6">Combine rugged camping with 4x4 trail adventure. Push your vehicle and your spirit to the limit.</p>
+                    <a href="#" class="text-yellow-400 text-sm font-bold uppercase tracking-wider group-hover:underline">Learn More <i class="fa-solid fa-arrow-right ml-1"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- GALLERY SECTION -->
+<section class="py-20 bg-slate-900 relative z-20">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Gallery <span class="text-yellow-400">Highlights</span></h2>
+            <p class="text-gray-400">Moments captured from our recent trips and setups.</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="galleryGrid">
+            <!-- JS fills this -->
+        </div>
+    </div>
+</section>
+
+<!-- REDESIGNED FOOTER (Imported Verbatim) -->
+<footer class="bg-gray-900 text-gray-300 pt-16 pb-8 border-t-4 border-yellow-400 relative z-30">
+  <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+    
+    <!-- Column 1: Brand & Socials -->
+    <div>
+      <div class="flex items-center space-x-3 mb-6">
+        <img src="assets/images/logo.png" alt="Show & Go Logo" class="h-10 w-10 object-contain">
+        <h2 class="text-xl font-bold text-yellow-400 uppercase tracking-wide">Show & Go</h2>
+      </div>
+      <p class="text-sm text-gray-400 leading-relaxed mb-6">
+        Premium automotive parts and professional services built for enthusiasts who demand excellence. Performance. Precision. Power.
+      </p>
+      <!-- Social Icons -->
+      <div class="flex space-x-4">
+        <a href="https://www.facebook.com/showandgo4x4/" target="_blank" aria-label="Facebook" class="bg-gray-800 p-3 rounded-full text-gray-400 hover:text-white hover:bg-blue-600 transition duration-300">
+          <i class="fab fa-facebook-f w-4 h-4 flex items-center justify-center"></i>
+        </a>
+        <a href="https://www.tiktok.com/@showandgo4x4?is_from_webapp=1&sender_device=pc" target="_blank" aria-label="TikTok" class="bg-gray-800 p-3 rounded-full text-gray-400 hover:text-white hover:bg-black transition duration-300">
+          <i class="fab fa-tiktok w-4 h-4 flex items-center justify-center"></i>
+        </a>
+        <a href="https://www.youtube.com/@showandgo4x4" target="_blank" aria-label="YouTube" class="bg-gray-800 p-3 rounded-full text-gray-400 hover:text-white hover:bg-red-600 transition duration-300">
+          <i class="fab fa-youtube w-4 h-4 flex items-center justify-center"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Column 2: Quick Links -->
+    <div>
+      <h3 class="text-lg font-bold text-white mb-6 border-b border-gray-700 pb-2">Quick Links</h3>
+      <ul class="space-y-3">
+        <li><a href="index.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Home</a></li>
+        <li><a href="shop.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Shop</a></li>
+        <li><a href="store-locator.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Store Locator</a></li>
+        <li><a href="about.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>About Us</a></li>
+        <li><a href="account.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Account</a></li>
+      </ul>
+    </div>
+
+    <!-- Column 3: Our Services -->
+    <div>
+      <h3 class="text-lg font-bold text-white mb-6 border-b border-gray-700 pb-2">Our Services</h3>
+      <ul class="space-y-3">
+        <li><a href="quote.html?service=Tire%20Change" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-tools text-yellow-500 text-xs mr-3"></i>Tire Change</a></li>
+        <li><a href="quote.html?service=Paint%20Job" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-spray-can text-yellow-500 text-xs mr-3"></i>Paint Job</a></li>
+        <li><a href="quote.html?service=Glamping" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-campground text-yellow-500 text-xs mr-3"></i>Glamping</a></li>
+        <li><a href="quote.html?service=4x4%20Set-up" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-truck-pickup text-yellow-500 text-xs mr-3"></i>4x4 Set-up</a></li>
+      </ul>
+    </div>
+
+    <!-- Column 4: Newsletter & Action -->
+    <div>
+      <h3 class="text-lg font-bold text-white mb-6 border-b border-gray-700 pb-2">Stay Connected</h3>
+      <p class="text-sm text-gray-400 mb-4">Subscribe to our newsletter for the latest products and performance tips.</p>
+      <form class="flex mb-4" onsubmit="event.preventDefault();">
+        <input type="email" placeholder="Email Address" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:outline-none focus:border-yellow-400 text-sm text-white" required>
+        <button type="submit" class="bg-yellow-400 text-black px-4 py-2 rounded-r-lg font-semibold hover:bg-yellow-300 transition duration-300">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </form>
+      <div class="mt-4">
+        <a href="quote.html" class="block w-full text-center px-4 py-2 border-2 border-yellow-400 text-yellow-400 text-sm font-bold rounded-lg hover:bg-yellow-400 hover:text-black transition duration-300">
+          Request a Quote
+        </a>
+      </div>
+    </div>
+
   </div>
-</div>
 
-<!-- Section: Tips -->
-<div class="section">
-  <h2>Camping Tips</h2>
-  <div class="cards">
-    <div class="card"><h3>Prepare Your Gear</h3><p>Check tents, sleeping bags, and cooking supplies.</p></div>
-    <div class="card"><h3>Plan Your Meals</h3><p>Bring easy-to-cook meals and snacks.</p></div>
-    <div class="card"><h3>Safety First</h3><p>Carry a first-aid kit, flashlights, and know the terrain.</p></div>
+  <!-- Bottom Copyright Bar -->
+  <div class="max-w-7xl mx-auto px-6 mt-12 pt-6 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+    <p>&copy; 2026 Show & Go Auto Shop. All Rights Reserved.</p>
+    <div class="flex space-x-6 mt-4 md:mt-0">
+      <a href="#" class="hover:text-yellow-400 transition duration-300">Privacy Policy</a>
+      <a href="#" class="hover:text-yellow-400 transition duration-300">Terms of Service</a>
+      <a href="inquiry.html" class="hover:text-yellow-400 transition duration-300">Partner With Us</a>
+    </div>
   </div>
-</div>
-
-<!-- Section: Gallery -->
-<div class="section">
-  <h2>Gallery Highlights</h2>
-  <div class="cards">
-    <div class="gallery-card card"><img src="assets/images/camping/1.png" alt="Camping 1"></div>
-    <div class="gallery-card card"><img src="assets/images/camping/2.png" alt="Camping 2"></div>
-    <div class="gallery-card card"><img src="assets/images/camping/3.png" alt="Camping 3"></div>
-    <div class="gallery-card card"><img src="assets/images/camping/4.png" alt="Camping 4"></div>
-    <div class="gallery-card card"><img src="assets/images/camping/5.png" alt="Camping 5"></div>
-    <div class="gallery-card card"><img src="assets/images/camping/6.png" alt="Camping 6"></div>
-    <div class="gallery-card card"><img src="assets/images/camping/7.png" alt="Camping 7"></div>
-    <div class="gallery-card card"><img src="assets/images/camping/8.png" alt="Camping 8"></div>
-    <div class="gallery-card card"><img src="assets/images/camping/9.png" alt="Camping 9"></div>
-    <div class="gallery-card card"><img src="assets/images/camping/10.png" alt="Camping 10"></div>
-  </div>
-</div>
+</footer>
 
 <script>
-  // Stars background
-  const starCount = 100;
-  for(let i=0;i<starCount;i++){
-    const star = document.createElement('div');
-    star.classList.add('star');
-    star.style.width = `${Math.random()*3+1}px`;
-    star.style.height = star.style.width;
-    star.style.top = `${Math.random()*100}%`;
-    star.style.left = `${Math.random()*100}%`;
-    star.style.animationDuration = `${Math.random()*3+2}s`;
-    star.style.opacity = Math.random();
-    document.body.appendChild(star);
-  }
+    // Stars Background logic (Scoped to Hero Section)
+    const starContainer = document.getElementById('star-container');
+    const starCount = 80;
+    for(let i=0; i<starCount; i++){
+        const star = document.createElement('div');
+        star.classList.add('star');
+        const size = Math.random() * 3 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+        starContainer.appendChild(star);
+    }
 
-  // Carousel
-  const carousel = document.getElementById('carousel');
-  const images = [];
-  for(let i=1;i<=10;i++){ images.push(`assets/images/camping/${i}.png`); }
+    // Carousel and Gallery Grid Logic
+    const carousel = document.getElementById('carousel');
+    const galleryGrid = document.getElementById('galleryGrid');
+    const images = [];
+    
+    // Ensure you have these images in your assets folder
+    for(let i=1; i<=8; i++){ images.push(`assets/images/camping/${i}.png`); }
 
-  images.forEach(src=>{
-    const img = document.createElement('img');
-    img.src = src;
-    carousel.appendChild(img);
-  });
-
-  const imgElements = carousel.querySelectorAll('img');
-  let current = 0;
-
-  function updateCarousel(){
-    imgElements.forEach((img,i)=>{
-      img.classList.remove('active','prev','next');
-      if(i===current) img.classList.add('active');
-      if(i=== (current-1+imgElements.length)%imgElements.length) img.classList.add('prev');
-      if(i=== (current+1)%imgElements.length) img.classList.add('next');
+    images.forEach(src => {
+        // Fill Carousel
+        const img = document.createElement('img');
+        img.src = src;
+        img.onerror = function() { this.src = 'https://via.placeholder.com/1000x500/1e293b/facc15?text=Show+%26+Go+Camping'; };
+        carousel.appendChild(img);
+        
+        // Fill Gallery Grid
+        const gDiv = document.createElement('div');
+        gDiv.className = "group relative overflow-hidden rounded-xl bg-slate-800 aspect-video cursor-pointer";
+        gDiv.innerHTML = `
+            <img src="${src}" onerror="this.src='https://via.placeholder.com/400x300/1e293b/facc15?text=Gallery'" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
+                <i class="fa-solid fa-magnifying-glass text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-2xl drop-shadow-md"></i>
+            </div>
+        `;
+        galleryGrid.appendChild(gDiv);
     });
-  }
 
-  updateCarousel();
-  let autoRotate = setInterval(()=>{
-    current = (current+1)%imgElements.length;
-    updateCarousel();
-  },2500);
+    const imgElements = carousel.querySelectorAll('img');
+    let current = 0;
 
-  document.getElementById('prev').addEventListener('click',()=>{
-    current = (current-1+imgElements.length)%imgElements.length;
-    updateCarousel(); resetInterval();
-  });
-  document.getElementById('next').addEventListener('click',()=>{
-    current = (current+1)%imgElements.length;
-    updateCarousel(); resetInterval();
-  });
+    function updateCarousel(){
+        imgElements.forEach((img, i) => {
+            img.classList.remove('active', 'prev', 'next');
+            if(i === current) img.classList.add('active');
+            if(i === (current - 1 + imgElements.length) % imgElements.length) img.classList.add('prev');
+            if(i === (current + 1) % imgElements.length) img.classList.add('next');
+        });
+    }
 
-  function resetInterval(){
-    clearInterval(autoRotate);
-    autoRotate = setInterval(()=>{
-      current = (current+1)%imgElements.length;
-      updateCarousel();
-    },2500);
-  }
+    // Delay start slightly for smoother load
+    setTimeout(() => { updateCarousel(); }, 100);
+    
+    let autoRotate = setInterval(() => {
+        current = (current + 1) % imgElements.length;
+        updateCarousel();
+    }, 3500); // Slower, more elegant rotation
+
+    document.getElementById('prev').onclick = () => {
+        current = (current - 1 + imgElements.length) % imgElements.length;
+        updateCarousel();
+        resetInterval();
+    };
+    document.getElementById('next').onclick = () => {
+        current = (current + 1) % imgElements.length;
+        updateCarousel();
+        resetInterval();
+    };
+
+    function resetInterval() {
+        clearInterval(autoRotate);
+        autoRotate = setInterval(() => {
+            current = (current + 1) % imgElements.length;
+            updateCarousel();
+        }, 3500);
+    }
+
+    // Navbar Toggle Logic
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileIcon = document.getElementById('mobileIcon');
+
+    mobileBtn.onclick = () => {
+        mobileMenu.classList.toggle('hidden');
+        if (mobileMenu.classList.contains('hidden')) {
+            mobileIcon.classList.replace('fa-xmark', 'fa-bars');
+        } else {
+            mobileIcon.classList.replace('fa-bars', 'fa-xmark');
+        }
+    };
 </script>
 </body>
 </html>

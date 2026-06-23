@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Show & Go Admin Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.35.0/dist/umd/supabase.min.js"></script>
+
+<style>
+  .cursor-zoom-in { cursor: zoom-in; }
+  #quotesTableBody img:active { filter: brightness(1.2); }
+  body { font-family: 'Poppins', sans-serif; }
+  #sidebar { width: 250px; min-height: 100vh; background: #111827; }
+  #sidebar a { display: block; padding: 1rem; color: #fff; font-weight: 600; }
+  #sidebar a.active, #sidebar a:hover { background: #1F2937; color: #FACC15; }
+  .dashboard-section { display: none; }
+  .dashboard-section.active { display: block; }
+  img.preview { height: 60px; width: 60px; object-fit: cover; border-radius: 0.5rem; }
+  .message { padding: 0.5rem 1rem; border-radius: 20px; margin: 0.25rem 0; max-width: 70%; word-wrap: break-word; }
+  .message.visitor { background: #f1f0f0; color: #000; align-self: flex-start; }
+  .message.agent { background: #facc15; color: #000; align-self: flex-end; }
+</style>
+</head>
+<body class="bg-gray-900 text-white flex">
+
+<div id="sidebar" class="flex flex-col">
+  <h1 class="text-2xl font-bold text-yellow-400 text-center py-6 border-b border-yellow-500/20">Dashboard</h1>
+  <a href="#" data-section="categories" class="active">Manage Categories</a>
+  <a href="#" data-section="products">Manage Products</a>
+  <a href="#" data-section="users">Manage Users</a>
+  <a href="#" data-section="livechat" id="liveChatLink">Live Chat<span id="liveChatBadge" class="hidden ml-2 bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-bold"></span></a>
+  <a href="#" data-section="inquiries">Partner Inquiries</a>
+  <a href="#" data-section="quotes">Manage Quotes</a>
+  <a href="#" data-section="orders">Manage Orders</a>
+  <a href="index.html" class="mt-auto mb-4 text-center hover:text-yellow-300 transition">Go to Home</a>
+</div>
+
+<div class="flex-1 p-8 overflow-auto">
+
+  <section id="categories" class="dashboard-section active">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Manage Categories</h2>
+    <form id="categoryForm" class="bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 flex gap-4 items-center">
+      <input type="text" id="categoryName" placeholder="New Category Name" class="p-3 rounded bg-gray-700 text-white flex-1" required>
+      <button type="submit" class="bg-yellow-400 text-black px-6 py-3 rounded font-semibold hover:bg-yellow-300 transition">Add</button>
+    </form>
+    <table class="w-full bg-gray-800 rounded-2xl table-auto text-center">
+      <thead class="bg-gray-700 text-yellow-400">
+        <tr><th class="p-3">ID</th><th class="p-3">Name</th><th class="p-3">Actions</th></tr>
+      </thead>
+      <tbody id="categoriesTable"></tbody>
+    </table>
+  </section>
+
+  <section id="products" class="dashboard-section">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Manage Products</h2>
+    <form id="productForm" class="bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 space-y-4">
+      <input type="text" id="productName" placeholder="Product Name" class="p-3 rounded bg-gray-700 text-white w-full" required>
+      <input type="number" id="productPrice" placeholder="Price" class="p-3 rounded bg-gray-700 text-white w-full" required>
+      <input type="number" id="productStock" placeholder="Stock" class="p-3 rounded bg-gray-700 text-white w-full" required>
+      <select id="productCategory" class="p-3 rounded bg-gray-700 text-white w-full" required>
+        <option value="">Select Category</option>
+      </select>
+      <input type="file" id="productImage" accept="image/*" class="p-2 rounded bg-gray-700 w-full">
+      <button type="submit" class="bg-yellow-400 text-black px-6 py-3 rounded font-semibold hover:bg-yellow-300 transition">Save Product</button>
+    </form>
+    <table class="w-full bg-gray-800 rounded-2xl table-auto text-center">
+      <thead class="bg-gray-700 text-yellow-400">
+        <tr><th class="p-3">ID</th><th class="p-3">Name</th><th class="p-3">Price</th><th class="p-3">Stock</th><th class="p-3">Category</th><th class="p-3">Image</th><th class="p-3">Actions</th></tr>
+      </thead>
+      <tbody id="productsTableBody"></tbody>
+    </table>
+  </section>
+
+  <section id="users" class="dashboard-section">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Manage Users</h2>
+    <table class="w-full bg-gray-800 rounded-2xl table-auto text-center">
+      <thead class="bg-gray-700 text-yellow-400">
+        <tr><th class="p-3">ID</th><th class="p-3">Username</th><th class="p-3">Email</th><th class="p-3">Contact</th><th class="p-3">Address</th><th class="p-3">Actions</th></tr>
+      </thead>
+      <tbody id="usersTableBody"></tbody>
+    </table>
+  </section>
+
+  <section id="inquiries" class="dashboard-section">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Partner Inquiries</h2>
+    <div class="overflow-x-auto bg-gray-800 rounded-2xl border border-gray-700 shadow-2xl">
+      <table class="w-full table-auto text-left">
+        <thead class="bg-gray-700 text-yellow-400">
+          <tr><th class="p-4">Partner Name</th><th class="p-4">Business Info</th><th class="p-4">Details/Notes</th><th class="p-4">Status</th><th class="p-4 text-center">Actions</th></tr>
+        </thead>
+        <tbody id="inquiriesTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="orders" class="dashboard-section">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">My Sales</h2>
+    <div class="flex overflow-x-auto border-b border-gray-700 mb-6 bg-gray-800 rounded-t-lg">
+      <button onclick="filterOrders('all')" class="flex-1 min-w-[100px] py-3 text-xs font-bold border-b-2 border-yellow-500 text-yellow-500" id="tab-all">All</button>
+      <button onclick="filterOrders('pending')" class="flex-1 min-w-[100px] py-3 text-xs font-bold text-gray-400" id="tab-pending">To Pay</button>
+      <button onclick="filterOrders('preparing')" class="flex-1 min-w-[100px] py-3 text-xs font-bold text-gray-400" id="tab-preparing">To Ship</button>
+      <button onclick="filterOrders('shipped')" class="flex-1 min-w-[100px] py-3 text-xs font-bold text-gray-400" id="tab-shipped">Shipping</button>
+      <button onclick="filterOrders('delivered')" class="flex-1 min-w-[100px] py-3 text-xs font-bold text-gray-400" id="tab-delivered">Completed</button>
+    </div>
+    <div id="ordersCardContainer" class="space-y-4"></div>
+  </section>
+
+  <section id="quotes" class="dashboard-section">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Service Quotes</h2>
+    <table class="w-full bg-gray-800 rounded-2xl table-auto text-left">
+      <thead class="bg-gray-700 text-yellow-400">
+        <tr><th class="p-4">Customer</th><th class="p-4">Vehicle & Plate</th><th class="p-4">Requested Service</th><th class="p-4">Status</th><th class="p-4">Photos</th><th class="p-4">Actions</th></tr>
+      </thead>
+      <tbody id="quotesTableBody"></tbody>
+    </table>
+  </section>
+
+  <section id="livechat" class="dashboard-section">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Live Chat</h2>
+    <div class="flex gap-4">
+      <div class="flex-[0.3] flex flex-col border border-yellow-500 rounded p-4 h-[500px] overflow-y-auto" id="chatList"></div>
+      <div class="flex-1 flex flex-col border border-yellow-500 rounded p-4 h-[500px]">
+        <div id="chatMessages" class="flex-1 overflow-y-auto mb-2 flex flex-col p-2"></div>
+        <div class="flex gap-2">
+          <input type="text" id="agentMessageInput" placeholder="Type your reply..." class="flex-1 p-2 rounded bg-gray-700 text-white">
+          <button id="sendAgentMessage" class="bg-yellow-400 text-black px-4 py-2 rounded">Send</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="galleryModal" class="fixed inset-0 bg-black/90 z-[100] hidden flex-col items-center justify-center p-8">
+    <button onclick="closeGallery()" class="absolute top-5 right-5 text-white text-4xl hover:text-yellow-400">&times;</button>
+    <h3 class="text-yellow-400 text-xl font-bold mb-4">Quote Photos</h3>
+    <div id="galleryContent" class="flex flex-wrap gap-4 justify-center overflow-y-auto max-w-5xl"></div>
+</div>
+
+<script>
+// --- SUPABASE CONFIG ---
+const SUPABASE_URL = "https://jimjbjtlekdytvnpyykw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let allOrders = [];
+let selectedSession = null;
+const messageSound = new Audio("assets/sounds/Ang Mahiwagang Mensahe.mp3");
+
+// --- GLOBAL UTILITIES ---
+function openGallery(photoArray) {
+    const modal = document.getElementById("galleryModal");
+    const content = document.getElementById("galleryContent");
+    content.innerHTML = ""; 
+    photoArray.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.className = "max-w-[300px] max-h-[400px] rounded-lg shadow-2xl border border-gray-700 hover:scale-105 transition cursor-pointer";
+        img.onclick = () => window.open(url, '_blank'); 
+        content.appendChild(img);
+    });
+    modal.classList.replace("hidden", "flex");
+}
+function closeGallery() { document.getElementById("galleryModal").classList.replace("flex", "hidden"); }
+
+async function deleteProduct(id) {
+    if (confirm("Delete this product?")) {
+        await supabaseClient.from('products').delete().eq('id', id);
+        location.reload();
+    }
+}
+
+function filterOrders(status) {
+    document.querySelectorAll('#orders button[id^="tab-"]').forEach(btn => {
+        btn.classList.remove('border-b-2', 'border-yellow-500', 'text-yellow-500');
+        btn.classList.add('text-gray-400');
+    });
+    document.getElementById(`tab-${status}`).classList.add('border-b-2', 'border-yellow-500', 'text-yellow-500');
+    const filtered = status === 'all' ? allOrders : allOrders.filter(o => (o.status || 'pending').toLowerCase() === status);
+    renderOrderCards(filtered);
+}
+
+function renderOrderCards(ordersToDisplay) {
+    const container = document.getElementById("ordersCardContainer");
+    container.innerHTML = ordersToDisplay.length === 0 ? `<div class="text-center py-10 text-gray-500 italic">No orders found.</div>` : "";
+    ordersToDisplay.forEach(order => {
+        const status = (order.status || 'pending').toLowerCase();
+        container.innerHTML += `
+            <div class="bg-gray-800 rounded-lg border border-gray-700 p-4 mb-4">
+                <div class="flex justify-between mb-2"><span class="font-bold">${order.full_name || 'Guest'}</span><span class="uppercase text-yellow-500 text-xs">${status}</span></div>
+                <div class="text-xs text-gray-400">${order.address}</div>
+                <div class="mt-4 flex justify-between items-center">
+                    <button onclick="updateOrderStatus('${order.id}', 'paid')" class="text-[10px] bg-green-600 px-3 py-1.5 rounded">Update Status</button>
+                    <span class="font-bold text-yellow-500">₱${Number(order.total_amount).toLocaleString()}</span>
+                </div>
+            </div>`;
+    });
+}
+
+// --- MAIN ENGINE ---
+document.addEventListener("DOMContentLoaded", async () => {
+    // Auth Check
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = "shop.html"; return; }
+    const { data: profile } = await supabaseClient.from("profiles").select("is_admin, username").eq("id", session.user.id).single();
+    if (!profile?.is_admin) { alert("Access Denied"); return; }
+    const agentName = profile.username || "Agent";
+
+    // PRODUCT FORM SUBMISSION (FIXED)
+    document.getElementById("productForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const imageFile = document.getElementById("productImage").files[0];
+        let imageUrl = "";
+
+        if (imageFile) {
+            const fileName = `${Date.now()}_${imageFile.name}`;
+            const { data: uploadData, error: uploadError } = await supabaseClient.storage.from('product-images').upload(fileName, imageFile);
+            if (uploadError) return alert(uploadError.message);
+            imageUrl = supabaseClient.storage.from('product-images').getPublicUrl(fileName).data.publicUrl;
+        }
+
+        const { error } = await supabaseClient.from('products').insert([{
+            name: document.getElementById("productName").value,
+            price: parseFloat(document.getElementById("productPrice").value),
+            stock: parseInt(document.getElementById("productStock").value),
+            category_id: document.getElementById("productCategory").value,
+            image_url: imageUrl
+        }]);
+
+        if (error) alert(error.message);
+        else { alert("Product added!"); location.reload(); }
+    };
+
+    // CATEGORY FORM SUBMISSION (FIXED)
+    document.getElementById("categoryForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const { error } = await supabaseClient.from('categories').insert([{ name: document.getElementById("categoryName").value }]);
+        if (error) alert(error.message);
+        else location.reload();
+    };
+
+    // DATA LOADERS
+    async function loadAllData() {
+        // Load Categories
+        const { data: cats } = await supabaseClient.from("categories").select("*");
+        const catTable = document.getElementById("categoriesTable");
+        const catSelect = document.getElementById("productCategory");
+        cats?.forEach(c => {
+            catTable.innerHTML += `<tr><td class="p-3">${c.id}</td><td class="p-3">${c.name}</td><td class="p-3"><button class="text-red-500" onclick="deleteCategory(${c.id})">Delete</button></td></tr>`;
+            catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+
+        // Load Products
+        const { data: prods } = await supabaseClient.from("products").select("*");
+        const prodTable = document.getElementById("productsTableBody");
+        prods?.forEach(p => {
+            prodTable.innerHTML += `<tr><td class="p-3">${p.id}</td><td class="p-3">${p.name}</td><td class="p-3">₱${p.price}</td><td class="p-3">${p.stock}</td><td class="p-3">${p.category_id}</td><td class="p-3"><img src="${p.image_url}" class="w-10 mx-auto"></td><td class="p-3"><button onclick="deleteProduct(${p.id})" class="text-red-500">Delete</button></td></tr>`;
+        });
+
+        // Load Orders
+        const { data: orders } = await supabaseClient.from("orders").select("*").order("created_at", { ascending: false });
+        allOrders = orders || [];
+        renderOrderCards(allOrders);
+    }
+
+    // Sidebar Navigation
+    document.querySelectorAll("#sidebar a[data-section]").forEach(link => {
+        link.onclick = (e) => {
+            e.preventDefault();
+            document.querySelectorAll(".dashboard-section").forEach(s => s.classList.remove("active"));
+            document.getElementById(link.dataset.section).classList.add("active");
+            document.querySelectorAll("#sidebar a").forEach(l => l.classList.remove("active"));
+            link.classList.add("active");
+        };
+    });
+
+    loadAllData();
+});
+</script>
+</body>
+</html>

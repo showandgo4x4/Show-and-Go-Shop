@@ -8,9 +8,17 @@
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.35.0/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+  .cursor-zoom-in {
+    cursor: zoom-in;
+}
+
+/* Optional: Add a subtle glow to photos that have been "Seen" */
+#quotesTableBody img:active {
+    filter: brightness(1.2);
+}
 body { font-family: 'Poppins', sans-serif; }
 #sidebar { width: 250px; min-height: 100vh; background: #111827; }
 #sidebar a { display: block; padding: 1rem; color: #fff; font-weight: 600; }
@@ -53,7 +61,7 @@ img.preview { height: 60px; width: 60px; object-fit: cover; border-radius: 0.5re
   Live Chat
   <span id="liveChatBadge" class="hidden ml-2 bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-bold"></span>
 </a>
-
+  <a href="#" data-section="inquiries"><i class="fa fa-handshake"></i> Partner Inquiries</a>
 <a href="#" data-section="quotes">Manage Quotes</a>
   <a href="#" data-section="orders">Manage Orders</a>
   <a href="index.html" class="mt-auto mb-4 text-center hover:text-yellow-300 transition">
@@ -82,36 +90,146 @@ img.preview { height: 60px; width: 60px; object-fit: cover; border-radius: 0.5re
       <tbody id="categoriesTable"></tbody>
     </table>
   </section>
-
+<section id="inquiries" class="dashboard-section">
+    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Partner Inquiries</h2>
+    <div class="overflow-x-auto bg-gray-800 rounded-2xl border border-gray-700 shadow-2xl">
+        <table class="w-full table-auto text-left">
+            <thead class="bg-gray-700 text-yellow-400">
+                <tr>
+                    <th class="p-4">Partner Name</th>
+                    <th class="p-4">Business Info</th>
+                    <th class="p-4">Details/Notes</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="inquiriesTableBody">
+                </tbody>
+        </table>
+    </div>
+</section>
   <!-- PRODUCTS -->
-  <section id="products" class="dashboard-section">
-    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Manage Products</h2>
-    <form id="productForm" class="bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 space-y-4">
-      <input type="text" id="productName" placeholder="Product Name" class="p-3 rounded bg-gray-700 text-white w-full">
-      <input type="number" id="productPrice" placeholder="Price" class="p-3 rounded bg-gray-700 text-white w-full">
-      <input type="number" id="productStock" placeholder="Stock" class="p-3 rounded bg-gray-700 text-white w-full">
-      <select id="productCategory" class="p-3 rounded bg-gray-700 text-white w-full">
-        <option value="">Select Category</option>
-      </select>
-      <input type="file" id="productImage" accept="image/*" class="p-2 rounded bg-gray-700 w-full">
-      <img id="imagePreview" class="preview mt-2">
-      <button type="submit" class="bg-yellow-400 text-black px-6 py-3 rounded font-semibold hover:bg-yellow-300 transition">Save Product</button>
-    </form>
-    <table class="w-full bg-gray-800 rounded-2xl table-auto text-center">
-      <thead class="bg-gray-700 text-yellow-400">
-        <tr>
-          <th class="p-3">ID</th>
-          <th class="p-3">Name</th>
-          <th class="p-3">Price</th>
-          <th class="p-3">Stock</th>
-          <th class="p-3">Category</th>
-          <th class="p-3">Image</th>
-          <th class="p-3">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="productsTableBody"></tbody>
-    </table>
-  </section>
+<section id="products" class="dashboard-section">
+
+  <h2 class="text-3xl font-bold text-yellow-400 mb-6">
+    Manage Products
+  </h2>
+
+  <form id="productForm"
+        class="bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 space-y-4">
+
+    <!-- PRODUCT NAME -->
+    <input
+      type="text"
+      id="productName"
+      placeholder="Product Name"
+      class="p-3 rounded bg-gray-700 text-white w-full"
+    >
+
+    <!-- PRICE -->
+    <input
+      type="number"
+      id="productPrice"
+      placeholder="Price"
+      class="p-3 rounded bg-gray-700 text-white w-full"
+    >
+
+    <!-- STOCK -->
+    <input
+      type="number"
+      id="productStock"
+      placeholder="Stock"
+      class="p-3 rounded bg-gray-700 text-white w-full"
+    >
+
+    <!-- CATEGORY -->
+    <select
+      id="productCategory"
+      class="p-3 rounded bg-gray-700 text-white w-full"
+    >
+      <option value="">Select Category</option>
+    </select>
+
+    <!-- DESCRIPTION -->
+    <textarea
+      id="productDescription"
+      rows="4"
+      placeholder="Product Description"
+      class="p-3 rounded bg-gray-700 text-white w-full resize-none"
+    ></textarea>
+
+    <!-- MAIN IMAGE -->
+    <div>
+      <label class="block text-sm font-semibold text-yellow-400 mb-2">
+        Main Product Image
+      </label>
+
+      <input
+        type="file"
+        id="productImage"
+        accept="image/*"
+        class="p-2 rounded bg-gray-700 w-full"
+      >
+
+      <img
+        id="imagePreview"
+        class="preview mt-3 w-32 h-32 object-contain rounded-xl bg-gray-700 p-2"
+      >
+    </div>
+
+    <!-- VARIANTS -->
+    <div class="border border-gray-700 rounded-2xl p-4 bg-gray-900">
+
+      <div class="flex items-center justify-between mb-4">
+
+        <h3 class="text-lg font-bold text-yellow-400">
+          Product Variants
+        </h3>
+
+        <button
+          type="button"
+          id="addVariantBtn"
+          class="bg-yellow-400 text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-300 transition"
+        >
+          + Add Variant
+        </button>
+
+      </div>
+
+      <div id="variantsContainer" class="space-y-4"></div>
+
+    </div>
+
+    <!-- SAVE -->
+    <button
+      type="submit"
+      class="bg-yellow-400 text-black px-6 py-3 rounded font-semibold hover:bg-yellow-300 transition"
+    >
+      Save Product
+    </button>
+
+  </form>
+
+  <!-- PRODUCTS TABLE -->
+  <table class="w-full bg-gray-800 rounded-2xl table-auto text-center">
+
+    <thead class="bg-gray-700 text-yellow-400">
+      <tr>
+        <th class="p-3">ID</th>
+        <th class="p-3">Name</th>
+        <th class="p-3">Price</th>
+        <th class="p-3">Stock</th>
+        <th class="p-3">Category</th>
+        <th class="p-3">Image</th>
+        <th class="p-3">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody id="productsTableBody"></tbody>
+
+  </table>
+
+</section>
 
   <!-- USERS -->
   <section id="users" class="dashboard-section">
@@ -133,21 +251,37 @@ img.preview { height: 60px; width: 60px; object-fit: cover; border-radius: 0.5re
 
   <!-- ORDERS -->
   <section id="orders" class="dashboard-section">
-    <h2 class="text-3xl font-bold text-yellow-400 mb-6">Manage Orders</h2>
-    <table class="w-full bg-gray-800 rounded-2xl table-auto text-center">
+  <h2 class="text-3xl font-bold text-yellow-400 mb-6">My Sales</h2>
+  
+  <div class="flex overflow-x-auto border-b border-gray-700 mb-6 bg-gray-800 rounded-t-lg">
+  <button onclick="filterOrders('all')" class="flex-1 min-w-[100px] py-3 text-xs font-bold border-b-2 border-yellow-500 text-yellow-500" id="tab-all">All</button>
+  <button onclick="filterOrders('pending')" class="flex-1 min-w-[100px] py-3 text-xs font-bold text-gray-400" id="tab-pending">To Pay</button>
+  <button onclick="filterOrders('preparing')" class="flex-1 min-w-[100px] py-3 text-xs font-bold text-gray-400" id="tab-preparing">To Ship</button>
+  <button onclick="filterOrders('shipped')" class="flex-1 min-w-[100px] py-3 text-xs font-bold text-gray-400" id="tab-shipped">Shipping</button>
+  <button onclick="filterOrders('delivered')" class="flex-1 min-w-[100px] py-3 text-xs font-bold text-gray-400" id="tab-delivered">Completed</button>
+</div>
+
+  <div id="ordersCardContainer" class="space-y-4">
+    </div>
+</section>
+<section id="quotes" class="dashboard-section">
+  <h2 class="text-3xl font-bold text-yellow-400 mb-6">Service Quotes</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full bg-gray-800 rounded-2xl table-auto text-left">
       <thead class="bg-gray-700 text-yellow-400">
         <tr>
-          <th class="p-3">Order ID</th>
-          <th class="p-3">User</th>
-          <th class="p-3">Total</th>
-          <th class="p-3">Status</th>
-          <th class="p-3">Date</th>
+          <th class="p-4">Customer</th>
+          <th class="p-4">Vehicle & Plate</th>
+          <th class="p-4">Requested Service</th>
+          <th class="p-4">Status</th>
+          <th class="p-4">Photos</th>
+          <th class="p-4">Actions</th>
         </tr>
       </thead>
-      <tbody id="ordersTableBody"></tbody>
+      <tbody id="quotesTableBody"></tbody>
     </table>
-  </section>
-
+  </div>
+</section>
   <!-- LIVE CHAT SECTION -->
 <section id="livechat" class="dashboard-section">
   <h2 class="text-3xl font-bold text-yellow-400 mb-6">Live Chat</h2>
@@ -160,9 +294,8 @@ img.preview { height: 60px; width: 60px; object-fit: cover; border-radius: 0.5re
 
     <!-- Chat messages -->
     <div class="flex-1 flex flex-col border border-yellow-500 rounded p-4 h-[500px]">
-      <div class="flex-1 overflow-y-auto mb-2 flex flex-col gap-1" id="chatMessages">
-        <!-- Messages appear here -->
-      </div>
+      <div id="chatMessages" class="flex-1 overflow-y-auto mb-2 flex flex-col p-2">
+    </div>
       <div class="flex gap-2">
         <input type="text" id="agentMessageInput" placeholder="Type your reply..." class="flex-1 p-2 rounded bg-gray-700 text-white">
         <button id="sendAgentMessage" class="bg-yellow-400 text-black px-4 py-2 rounded">Send</button>
@@ -177,435 +310,792 @@ Visitor is typing...
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", async () => {
-  const SUPABASE_URL = "https://jimjbjtlekdytvnpyykw.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+// 1. GLOBAL VARIABLES & CLIENT (Must be at the very top)
+let supabaseClient;
+const messageSound = new Audio("assets/sounds/Ang Mahiwagang Mensahe.mp3");
 
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const messageSound = new Audio("assets/sounds/Ang Mahiwagang Mensahe.mp3")
-  // -------- SESSION & ADMIN CHECK --------
-  const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-  if (sessionError || !session) { alert("Please login first."); window.location.href = "shop.html"; return; }
-
-  const { data: adminProfile, error: adminError } = await supabaseClient
-    .from("profiles")
-    .select("is_admin, username")
-    .eq("id", session.user.id)
-    .single();
-  if (adminError || !adminProfile || !adminProfile.is_admin) { alert("Access denied. Admin only."); return; }
-  const agentName = adminProfile.username || "Agent";
-
-  // -------- SIDEBAR NAVIGATION --------
-  const links = document.querySelectorAll("#sidebar a[data-section]");
-  const sections = document.querySelectorAll(".dashboard-section");
-  links.forEach(link => {
-    link.addEventListener("click", e => {
-      e.preventDefault();
-      sections.forEach(s => s.classList.remove("active"));
-      document.getElementById(link.dataset.section).classList.add("active");
-      links.forEach(l => l.classList.remove("active"));
-      link.classList.add("active");
+// 2. GLOBAL FUNCTIONS (HTML onclick needs these to be "outside")
+function openGallery(photoArray) {
+    const modal = document.getElementById("galleryModal");
+    const content = document.getElementById("galleryContent");
+    content.innerHTML = ""; 
+    photoArray.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.className = "max-w-[300px] max-h-[400px] rounded-lg shadow-2xl border border-gray-700 hover:scale-105 transition cursor-pointer";
+        img.onclick = () => window.open(url, '_blank'); 
+        content.appendChild(img);
     });
-  });
-
-  // -------- CATEGORIES --------
-async function loadCategories() {
-  const { data, error } = await supabaseClient.from("categories").select("*").order("id");
-  if (error) return console.error(error);
-
-  const table = document.getElementById("categoriesTable");
-  const select = document.getElementById("productCategory");
-  table.innerHTML = "";
-  select.innerHTML = `<option value="">Select Category</option>`;
-
-  data.forEach(cat => {
-    // Table row
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="p-3">${cat.id}</td>
-      <td class="p-3">${cat.name}</td>
-      <td class="p-3"><button class="bg-red-500 px-2 py-1 rounded">Delete</button></td>
-    `;
-    tr.querySelector("button").addEventListener("click", async () => {
-      await supabaseClient.from("categories").delete().eq("id", cat.id);
-      loadCategories();
-    });
-    table.appendChild(tr);
-
-    // Dropdown option with ID
-    const option = document.createElement("option");
-    option.value = cat.id; // use ID, not name
-    option.textContent = cat.name;
-    select.appendChild(option);
-  });
-}
-// -------- ADD CATEGORY --------
-document.getElementById("categoryForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const nameInput = document.getElementById("categoryName");
-  const name = nameInput.value.trim();
-  if (!name) return alert("Enter a category name");
-
-  try {
-    const { data, error } = await supabaseClient
-      .from("categories")
-      .insert([{ name }]);
-
-    if (error) throw error;
-
-    nameInput.value = ""; // clear input
-    await loadCategories(); // refresh table & dropdown
-  } catch (err) {
-    alert("Insert failed: " + err.message);
-    console.error(err);
-  }
-});
-// -------- PRODUCTS --------
-async function loadProducts() {
-  try {
-    const { data, error } = await supabaseClient
-      .from("products")
-      .select("id,name,price,stock,category_id,image_url") // match table
-      .order("id");
-
-    if (error) throw error;
-
-    const tbody = document.getElementById("productsTableBody");
-    tbody.innerHTML = "";
-
-    data.forEach(prod => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="p-3">${prod.id}</td>
-        <td class="p-3">${prod.name}</td>
-        <td class="p-3">₱${prod.price}</td>
-        <td class="p-3">${prod.stock}</td>
-        <td class="p-3">${prod.category_id || "-"}</td>
-        <td class="p-3"><img src="${prod.image_url || ''}" class="preview"></td>
-        <td class="p-3 flex justify-center gap-2">
-          <button class="bg-red-500 px-2 py-1 rounded text-sm">Delete</button>
-        </td>
-      `;
-      tr.querySelector("button").addEventListener("click", async () => {
-        await supabaseClient.from("products").delete().eq("id", prod.id);
-        loadProducts();
-      });
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error("Unexpected error loading products:", err);
-  }
+    modal.classList.replace("hidden", "flex");
 }
 
-// -------- ADD PRODUCT --------
-document.getElementById("productForm").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const name = document.getElementById("productName").value.trim();
-  const price = parseFloat(document.getElementById("productPrice").value);
-  const stock = parseInt(document.getElementById("productStock").value);
-  const category_id = parseInt(document.getElementById("productCategory").value);
-  const image_file = document.getElementById("productImage").files[0];
-
-  if (!name || isNaN(price) || isNaN(stock) || isNaN(category_id)) {
-    alert("Please fill all fields correctly.");
-    return;
-  }
-
-  let image_url = "";
-  if (image_file) {
-    const fileExt = image_file.name.split(".").pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const { data, error } = await supabaseClient.storage
-      .from("product-images") // make sure bucket exists
-      .upload(fileName, image_file);
-
-    if (error) {
-      alert("Image upload failed: " + error.message);
-      return;
-    }
-
-    image_url = supabaseClient.storage.from("product-images").getPublicUrl(fileName).data.publicUrl;
-  }
-
-  const { data, error } = await supabaseClient
-    .from("products")
-    .insert([{ name, price, stock, category_id, image_url }]);
-
-  if (error) {
-    alert("Insert failed: " + error.message);
-    return;
-  }
-
-  e.target.reset();
-  document.getElementById("imagePreview").src = "";
-  loadProducts();
-});
-  // -------- USERS --------
-  async function loadUsers() {
-    const { data, error } = await supabaseClient.from("profiles").select("*").order("email");
-    if (error) return console.error(error);
-    const tbody = document.getElementById("usersTableBody");
-    tbody.innerHTML = "";
-    data.forEach(user => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="p-3">${user.id}</td>
-        <td class="p-3">${user.username || "-"}</td>
-        <td class="p-3">${user.email || "-"}</td>
-        <td class="p-3">${user.contact || "-"}</td>
-        <td class="p-3">${user.address || "-"}</td>
-        <td class="p-3"><button class="bg-red-500 px-3 py-1 rounded text-sm">Delete</button></td>
-      `;
-      tr.querySelector("button").addEventListener("click", async () => {
-        if (!confirm("Delete this user?")) return;
-        await supabaseClient.from("profiles").delete().eq("id", user.id);
-        loadUsers();
-      });
-      tbody.appendChild(tr);
-    });
-  }
-
-  // -------- ORDERS --------
-  async function loadOrders() {
-    const { data: orders, error } = await supabaseClient.from("orders").select("*").order("id");
-    if (error) return console.error(error);
-    const tbody = document.getElementById("ordersTableBody");
-    tbody.innerHTML = "";
-    for (const order of orders) {
-      const { data: userProfile } = await supabaseClient.from("profiles").select("username,email").eq("id", order.user_id).maybeSingle();
-      const tr = document.createElement("tr");
-      const orderDate = new Date(order.created_at).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" });
-      tr.innerHTML = `
-        <td class="p-3 text-xs">${order.id}</td>
-        <td class="p-3">${userProfile?.username || userProfile?.email || "Unknown"}</td>
-        <td class="p-3">₱${Number(order.total).toLocaleString()}</td>
-        <td class="p-3">
-          <span class="status-text">${order.status}</span>
-          <div class="flex justify-center gap-2 mt-1">
-            <button class="bg-green-500 px-2 py-1 rounded text-xs status-btn" data-status="Completed">Completed</button>
-            <button class="bg-yellow-500 px-2 py-1 rounded text-xs status-btn" data-status="Pending">Pending</button>
-            <button class="bg-red-500 px-2 py-1 rounded text-xs status-btn" data-status="Cancelled">Cancelled</button>
-          </div>
-        </td>
-        <td class="p-3">${orderDate}</td>
-      `;
-      tr.querySelectorAll(".status-btn").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          await supabaseClient.from("orders").update({ status: btn.dataset.status }).eq("id", order.id);
-          loadOrders();
-        });
-      });
-      tbody.appendChild(tr);
-    }
-  }
-
-// -------- LIVE CHAT --------
-const chatListDiv = document.getElementById("chatList");
-const chatMessagesDiv = document.getElementById("chatMessages");
-const agentInput = document.getElementById("agentMessageInput");
-const sendBtn = document.getElementById("sendAgentMessage");
-
-
-let selectedSession = null;
-let displayedMessageIds = new Set(); // track displayed messages
-let loadedSessionButtons = new Map();
-
-// Display message in chat window
-function displayMessage(sender, message, username, id) {
-
-  if (displayedMessageIds.has(id)) return;
-
-  displayedMessageIds.add(id);
-
-  const div = document.createElement("div");
-
-  div.className =
-    sender === "agent"
-      ? "mb-2 p-2 bg-yellow-400 text-black rounded self-end"
-      : "mb-2 p-2 bg-gray-600 text-white rounded self-start";
-
-  div.textContent = username + ": " + message;
-
-  chatMessagesDiv.appendChild(div);
-
-  chatMessagesDiv.scrollTop =
-    chatMessagesDiv.scrollHeight;
+function closeGallery() {
+    document.getElementById("galleryModal").classList.replace("flex", "hidden");
 }
+const variantsContainer =
+  document.getElementById("variantsContainer");
 
-// Load all chat sessions
-async function loadLiveChatSessions() {
+const addVariantBtn =
+  document.getElementById("addVariantBtn");
 
-  const { data: sessions } = await supabaseClient
-    .from("chat_sessions")
-    .select("*")
-    .order("created_at");
+function createVariantRow(data = {}) {
 
-  if (!sessions) return;
+  const row = document.createElement("div");
 
-sessions.forEach(session => {
+  row.className =
+    "variant-row border border-gray-700 rounded-xl p-4 bg-gray-800";
 
-  if (!session.session_id) return;
+  row.innerHTML = `
 
-  if (loadedSessionButtons.has(session.session_id)) return;
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-  const btn = document.createElement("button");
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">
+          Variant Color
+        </label>
 
-  btn.className =
-    "mb-2 px-3 py-2 rounded bg-gray-700 hover:bg-gray-600 w-full";
+        <input
+          type="text"
+          class="variant-color p-3 rounded bg-gray-700 text-white w-full"
+          placeholder="Black"
+          value="${data.color || ""}"
+        >
+      </div>
 
-  btn.innerHTML = `
-    <span class="flex items-center gap-2">
-      <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-      ${session.visitor_name || "Visitor"}
-    </span>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">
+          Variant Image
+        </label>
+
+        <input
+          type="file"
+          class="variant-img-file p-2 rounded bg-gray-700 text-white w-full"
+          accept="image/*"
+        >
+      </div>
+
+      <div class="flex items-end">
+        <button
+          type="button"
+          class="removeVariant bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg w-full"
+        >
+          Remove
+        </button>
+      </div>
+
+    </div>
+
+    <img
+      src="${data.img || 'assets/images/Default.png'}"
+      class="variant-preview mt-4 w-28 h-28 object-contain rounded-xl bg-gray-700 p-2"
+    >
   `;
 
-  btn.onclick = () => selectSession(session.session_id);
+  const fileInput =
+    row.querySelector(".variant-img-file");
 
-  chatListDiv.appendChild(btn);
+  const preview =
+    row.querySelector(".variant-preview");
 
-  loadedSessionButtons.set(session.session_id, btn);
+  // preview uploaded image
+  fileInput.addEventListener("change", e => {
 
-});
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    preview.src = URL.createObjectURL(file);
+
+  });
+
+  row.querySelector(".removeVariant")
+    .onclick = () => row.remove();
+
+  variantsContainer.appendChild(row);
 }
 
-// Select a chat session
-async function selectSession(sessionId) {
-  if (!sessionId) return;
-  selectedSession = sessionId;
-  chatMessagesDiv.innerHTML = "";
+addVariantBtn.onclick = () => createVariantRow();
+function openEditProductModal(product) {
+    document.getElementById("editProductId").value = product.id;
+    document.getElementById("editProductName").value = product.name;
+    document.getElementById("editProductPrice").value = product.price;
+    document.getElementById("editProductStock").value = product.stock;
+    document.getElementById("editProductImage").value = product.image_url;
+    document.getElementById("editProductModal").classList.replace("hidden", "flex");
+}
 
-  try {
-    // Mark visitor messages as read
-    await supabaseClient
-      .from("chats")
-      .update({ read_by_agent: true })
-      .eq("session_id", sessionId)
-      .eq("sender", "visitor")
-      .eq("read_by_agent", false);
+function closeEditModal() {
+    document.getElementById("editProductModal").classList.replace("flex", "hidden");
+}
 
-    // Load messages
-    const { data: messages, error } = await supabaseClient
-      .from("chats")
-      .select("*")
-      .eq("session_id", sessionId)
-      .order("created_at", { ascending: true });
+async function saveProductEdit() {
+    const id = document.getElementById("editProductId").value;
+    const updates = {
+        name: document.getElementById("editProductName").value,
+        price: parseFloat(document.getElementById("editProductPrice").value),
+        stock: parseInt(document.getElementById("editProductStock").value),
+        image_url: document.getElementById("editProductImage").value
+    };
+    const { error } = await supabaseClient.from('products').update(updates).eq('id', id);
+    if (error) alert("Update failed: " + error.message);
+    else closeEditModal();
+}
 
-    if (error) throw error;
+async function deleteProduct(id) {
+    if (!confirm("Delete this product?")) return;
+    const { error } = await supabaseClient.from('products').delete().eq('id', id);
+    if (error) alert(error.message);
+}
 
-    // Get visitor name
-    const { data: sessionData } = await supabaseClient
-      .from("chat_sessions")
-      .select("visitor_name")
-      .eq("session_id", sessionId)
-      .maybeSingle();
+async function deleteQuote(id) {
+    if (!confirm("Delete this quote?")) return;
+    const { error } = await supabaseClient.from('quotes').delete().eq('id', id);
+    if (error) alert(error.message);
+}
+async function deleteInquiry(id) {
+    if (!confirm("Are you sure you want to remove this inquiry?")) return;
+    const { error } = await supabaseClient.from('partner_inquiries').delete().eq('id', id);
+    if (error) alert("Delete failed: " + error.message);
+}
 
-    const visitorName = sessionData?.visitor_name || "Visitor";
+async function updateInquiryStatus(id, newStatus) {
+    const { error } = await supabaseClient.from('partner_inquiries').update({ status: newStatus }).eq('id', id);
+    if (error) alert("Status update failed: " + error.message);
+}
+// --- MOVE THESE TO THE GLOBAL FUNCTIONS SECTION (Top of your script) ---
 
-    if (!messages || messages.length === 0) {
-      chatMessagesDiv.innerHTML = "<p class='text-gray-400'>No messages yet.</p>";
-    } else {
-      messages.forEach(msg => {
-        const displayName = msg.sender === "agent" ? agentName : visitorName;
-        displayMessage(msg.sender, msg.message, displayName, msg.id);
-      });
+let allOrders = []; // Store data globally so filters can reach it
+
+function renderOrderCards(ordersToDisplay) {
+    const container = document.getElementById("ordersCardContainer");
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (ordersToDisplay.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-gray-500 italic">No orders found here.</div>`;
+        return;
     }
 
-    // Reload sessions to update badges
-    loadLiveChatSessions(false);
-  } catch (err) {
-    console.error("Select session error:", err);
-  }
+    ordersToDisplay.forEach(order => {
+        const date = new Date(order.created_at).toLocaleDateString();
+        const currentStatus = (order.status || 'pending').toLowerCase();
+        
+        // Define status colors and the NEXT step button
+        let statusDisplayColor = "text-orange-500";
+        let actionButton = "";
+
+        if (currentStatus === 'pending') {
+            statusDisplayColor = "text-red-400";
+            actionButton = `<button onclick="updateOrderStatus('${order.id}', 'preparing')" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] px-3 py-1.5 rounded font-bold">Move to Preparing</button>`;
+        } else if (currentStatus === 'preparing') {
+            statusDisplayColor = "text-yellow-500";
+            actionButton = `<button onclick="updateOrderStatus('${order.id}', 'shipped')" class="bg-purple-600 hover:bg-purple-500 text-white text-[10px] px-3 py-1.5 rounded font-bold">Mark as Shipped</button>`;
+        } else if (currentStatus === 'shipped') {
+            statusDisplayColor = "text-blue-400";
+            actionButton = `<button onclick="updateOrderStatus('${order.id}', 'delivered')" class="bg-green-600 hover:bg-green-500 text-white text-[10px] px-3 py-1.5 rounded font-bold">Confirm Delivery</button>`;
+        } else if (currentStatus === 'delivered') {
+            statusDisplayColor = "text-green-500";
+            actionButton = `<span class="text-[10px] text-gray-500 italic">Transaction Finished</span>`;
+        }
+
+        container.innerHTML += `
+            <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden shadow-lg mb-4">
+                <div class="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-800/50">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded">ORDER</span>
+                        <span class="font-bold text-sm text-gray-200">${order.full_name || 'Guest'}</span>
+                    </div>
+                    <span class="text-xs font-bold uppercase ${statusDisplayColor}">${currentStatus}</span>
+                </div>
+                <div class="p-4 flex gap-4">
+                    <div class="w-16 h-16 bg-gray-700 rounded-lg flex items-center justify-center text-3xl shadow-inner">📦</div>
+                    <div class="flex-1">
+                        <div class="text-sm font-bold text-white mb-1">Order #${order.id.substring(0,8)}</div>
+                        <div class="text-xs text-gray-400 leading-relaxed">${order.address || 'No address'}</div>
+                        <div class="text-[10px] text-gray-500 mt-2">Date: ${date}</div>
+                    </div>
+                </div>
+                <div class="p-4 bg-gray-900/40 flex justify-between items-center border-t border-gray-700">
+                    <div>${actionButton}</div>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-400">Total:</span>
+                        <span class="text-xl font-bold text-yellow-500 ml-2">₱${Number(order.total_amount).toLocaleString()}</span>
+                    </div>
+                </div>
+            </div>`;
+    });
 }
 
-// Send message as agent
-sendBtn.addEventListener("click", async () => {
-  const text = agentInput.value.trim();
-  if (!text || !selectedSession) return;
+function filterOrders(status) {
+    // 1. Reset all tab colors
+    document.querySelectorAll('#orders button[id^="tab-"]').forEach(btn => {
+        btn.classList.remove('border-b-2', 'border-yellow-500', 'text-yellow-500');
+        btn.classList.add('text-gray-400');
+    });
+    // 2. Highlight active tab
+    const activeTab = document.getElementById(`tab-${status}`);
+    if(activeTab) {
+        activeTab.classList.add('border-b-2', 'border-yellow-500', 'text-yellow-500');
+        activeTab.classList.remove('text-gray-400');
+    }
+    // 3. Filter the data
+    const filtered = status === 'all' ? allOrders : allOrders.filter(o => o.status.toLowerCase() === status);
+    renderOrderCards(filtered);
+}
+async function updateOrderStatus(orderId, newStatus) {
+    // 1. Confirm with the admin first
+    const confirmMsg = `Move order to ${newStatus.toUpperCase()}?`;
+    if (!confirm(confirmMsg)) return;
 
-  try {
+    // 2. Update Supabase
     const { error } = await supabaseClient
-      .from("chats")
-      .insert([{
-        session_id: selectedSession,
-        sender: "agent",
-        message: text,
-        read_by_agent: true,
-        user_id: session.user.id,
-        username: agentName
-      }]);
+        .from('orders')
+        .update({ status: newStatus }) // This sends 'preparing', 'shipped', etc.
+        .eq('id', orderId);
 
-    if (error) throw error;
+    if (error) {
+        alert("Update failed: " + error.message);
+    } else {
+        // 3. Refresh the data locally
+        console.log(`Order ${orderId} is now ${newStatus}`);
+        loadOrders(); 
+    }
+}
+// --- SHOPEE STYLE ORDER FUNCTIONS ---
+function renderOrderCards(ordersToDisplay) {
+    const container = document.getElementById("ordersCardContainer");
+    if (!container) return;
+    container.innerHTML = "";
 
-    displayMessage("agent", text, agentName, Date.now());
-    agentInput.value = "";
-  } catch (err) {
-    alert("Send failed: " + err.message);
-  }
-});
-
-// Real-time subscription for new chat messages
-const chatChannel = supabaseClient.channel("live-chats");
-
-chatChannel.on(
-  "postgres_changes",
-  { event: "INSERT", schema: "public", table: "chats" },
-  async payload => {
-    const msg = payload.new;
-
-    if (msg.sender === "visitor") {
-      messageSound.play().catch(() => {});
+    if (ordersToDisplay.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-gray-500 italic">No orders found here.</div>`;
+        return;
     }
 
-    await loadLiveChatSessions();
+    ordersToDisplay.forEach(order => {
+        const date = new Date(order.created_at).toLocaleDateString();
+        const status = (order.status || 'pending').toLowerCase();
 
-    if (msg.session_id === selectedSession) {
-      const { data } = await supabaseClient
-        .from("chat_sessions")
-        .select("visitor_name")
-        .eq("session_id", msg.session_id)
-        .maybeSingle();
+        // 1. COLORS: Visual cues for your workflow
+        let statusColor = 'text-orange-500'; // Pending/Unpaid
+        if (status === 'paid') statusColor = 'text-yellow-500';      // Just paid, needs action!
+        if (status === 'preparing') statusColor = 'text-blue-400';   // You are packing it
+        if (status === 'shipped') statusColor = 'text-purple-400';   // Out for delivery
+        if (status === 'delivered') statusColor = 'text-green-500';  // Finally done
 
-      const username = msg.sender === "agent" ? agentName : data?.visitor_name || "Visitor";
+        // 2. THE LOGICAL FLOW: What do you need to do next?
+        let actionButton = "";
 
-      displayMessage(msg.sender, msg.message, username, msg.id);
+        if (status === 'pending') {
+            // Step 1: Customer hasn't paid yet, or you're confirming payment
+            actionButton = `<button onclick="updateOrderStatus('${order.id}', 'paid')" class="text-[10px] bg-green-600 hover:bg-green-500 text-white font-bold px-3 py-1.5 rounded transition">Confirm Payment</button>`;
+        } 
+        else if (status === 'paid') {
+            // Step 2: Now that it's paid, YOU prepare it.
+            actionButton = `<button onclick="updateOrderStatus('${order.id}', 'preparing')" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded transition">Pack & Prepare</button>`;
+        } 
+        else if (status === 'preparing') {
+            // Step 3: It's packed, now give it to the rider/courier
+            actionButton = `<button onclick="updateOrderStatus('${order.id}', 'shipped')" class="text-[10px] bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 py-1.5 rounded transition">Mark as Shipped</button>`;
+        } 
+        else if (status === 'shipped') {
+            // Step 4: Final stage
+            actionButton = `<button onclick="updateOrderStatus('${order.id}', 'delivered')" class="text-[10px] bg-green-600 hover:bg-green-500 text-white font-bold px-3 py-1.5 rounded transition">Mark Delivered</button>`;
+        }
+        else {
+            actionButton = `<span class="text-[10px] text-gray-500 italic">Order Completed</span>`;
+        }
+
+        container.innerHTML += `
+            <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden shadow-lg mb-4">
+                <div class="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-800/50">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded">MALL</span>
+                        <span class="font-bold text-sm text-gray-200">${order.full_name || 'Guest User'}</span>
+                    </div>
+                    <span class="text-xs font-bold uppercase ${statusColor}">${status}</span>
+                </div>
+                <div class="p-4 flex gap-4">
+                    <div class="w-20 h-20 bg-gray-700 rounded-lg flex items-center justify-center text-3xl shadow-inner">📦</div>
+                    <div class="flex-1">
+                        <div class="text-sm font-bold text-white mb-1">Order #${order.id.substring(0,8)}</div>
+                        <div class="text-xs text-gray-400 leading-relaxed">${order.address || 'No address provided'}</div>
+                        <div class="text-[10px] text-gray-500 mt-2 italic">Placed on: ${date}</div>
+                    </div>
+                </div>
+                <div class="p-4 bg-gray-900/40 flex justify-between items-center border-t border-gray-700">
+                    <div class="flex gap-2">
+                        ${actionButton}
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-400 font-medium">Order Total:</span>
+                        <span class="text-xl font-bold text-yellow-500 ml-2">₱${Number(order.total_amount).toLocaleString()}</span>
+                    </div>
+                </div>
+            </div>`;
+    });
+}
+
+function filterOrders(status) {
+    document.querySelectorAll('#orders button[id^="tab-"]').forEach(btn => {
+        btn.classList.remove('border-b-2', 'border-yellow-500', 'text-yellow-500');
+        btn.classList.add('text-gray-400');
+    });
+    const activeTab = document.getElementById(`tab-${status}`);
+    if(activeTab) {
+        activeTab.classList.add('border-b-2', 'border-yellow-500', 'text-yellow-500');
+        activeTab.classList.remove('text-gray-400');
     }
-  }
-);
+    const filtered = status === 'all' ? allOrders : allOrders.filter(o => (o.status || 'pending').toLowerCase() === status);
+    renderOrderCards(filtered);
+}
+async function loadOrders() {
+        const { data, error } = await supabaseClient
+            .from("orders")
+            .select("*")
+            .order("created_at", { ascending: false });
+        
+        if (error) {
+            console.error("Supabase Error:", error.message);
+            return;
+        }
 
-chatChannel.subscribe();
+        // Save to the global variable so filterOrders() can see it
+        allOrders = data; 
+        
+        // Render the Shopee-style cards
+        renderOrderCards(allOrders);
+    }
+// 3. MAIN ENGINE (Runs when page loads)
+document.addEventListener("DOMContentLoaded", async () => {
+    const SUPABASE_URL = "https://jimjbjtlekdytvnpyykw.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let selectedSession = null;
+
+    // --- ADMIN AUTH CHECK ---
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = "shop.html"; return; }
+
+    const { data: adminProfile } = await supabaseClient
+        .from("profiles").select("is_admin, username").eq("id", session.user.id).single();
+    
+    if (!adminProfile?.is_admin) { alert("Access Denied"); return; }
+    const agentName = adminProfile.username || "Agent";
+
+    // --- DATA LOADERS (Loaders stay inside because they don't have HTML onclicks) ---
+    async function loadCategories() {
+        const { data } = await supabaseClient.from("categories").select("*").order("id");
+        const table = document.getElementById("categoriesTable");
+        const select = document.getElementById("productCategory");
+        table.innerHTML = "";
+        select.innerHTML = `<option value="">Select Category</option>`;
+        data?.forEach(cat => {
+            table.innerHTML += `<tr><td class="p-3">${cat.id}</td><td class="p-3">${cat.name}</td><td class="p-3"><button class="bg-red-500 px-2 py-1 rounded text-xs" onclick="deleteCategory(${cat.id})">Delete</button></td></tr>`;
+            select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+        });
+    }
+// Add this inside your DOMContentLoaded listener
+const productForm = document.getElementById("productForm");
+
+productForm.onsubmit = async (e) => {
+    e.preventDefault(); // This stops the page from refreshing!
+const description =
+  document.getElementById("productDescription").value;
+
+const variants = [];
+
+const variantRows =
+  document.querySelectorAll(".variant-row");
+
+for (const row of variantRows) {
+
+  const color =
+    row.querySelector(".variant-color").value;
+
+  // THIS WAS MISSING
+  const file =
+    row.querySelector(".variant-img-file").files[0];
+
+  let imageUrl = "";
+
+  if (file) {
+
+    const filePath =
+        `variants/${Date.now()}-${file.name}`;
+
+    const { error: uploadError } =
+        await supabaseClient.storage
+            .from("product-images")
+            .upload(filePath, file);
+
+    if (uploadError) {
+        alert("Variant upload failed: " + uploadError.message);
+        return;
+    }
+
+    const { data: urlData } =
+        supabaseClient.storage
+            .from("product-images")
+            .getPublicUrl(filePath);
+
+    imageUrl = urlData.publicUrl;
+}
+
+  variants.push({
+    color: color,
+    img: imageUrl
+  });
+}
+    const name = document.getElementById("productName").value;
+    const price = parseFloat(document.getElementById("productPrice").value);
+    const stock = parseInt(document.getElementById("productStock").value);
+    const categoryId = document.getElementById("productCategory").value;
+    const imageFile =
+    document.getElementById("productImage").files[0];
+
+let imageUrl = "";
+
+if (imageFile) {
+
+    const filePath =
+        `products/${Date.now()}-${imageFile.name}`;
+
+    const { error: uploadError } =
+        await supabaseClient.storage
+            .from("product-images")
+            .upload(filePath, imageFile);
+
+    if (uploadError) {
+
+        alert(
+            "Image upload failed: " +
+            uploadError.message
+        );
+
+        return;
+    }
+
+    const { data: urlData } =
+        supabaseClient.storage
+            .from("product-images")
+            .getPublicUrl(filePath);
+
+    imageUrl = urlData.publicUrl;
+}
+
+    // Insert into Supabase
+    const { error } = await supabaseClient
+    .from('products')
+    .insert([{
+        name,
+        price,
+        stock,
+        category_id: categoryId,
+        description,
+        variants,
+        image_url: imageUrl
+    }]);
+
+    if (error) {
+        alert("Error adding product: " + error.message);
+    } else {
+        alert("Product added successfully!");
+        productForm.reset();
+        document.getElementById("imagePreview").src = "";
+        loadProducts(); // Refresh the table
+    }
+};
+    // Inside your loadAllData or loadProducts function
+async function loadProducts() {
+    const { data: prods } = await supabaseClient.from("products").select("*").order("id");
+    const prodTable = document.getElementById("productsTableBody");
+    prodTable.innerHTML = "";
+
+    prods?.forEach(p => {
+        // We wrap the image in a button that calls openGallery
+        // We pass [p.image_url] as an array because openGallery expects an array
+        const imageHtml = p.image_url 
+            ? `<button onclick="openGallery(['${p.image_url}'])" class="hover:opacity-80 transition">
+                 <img src="${p.image_url}" class="w-10 h-10 object-cover rounded mx-auto border border-gray-600 cursor-zoom-in">
+               </button>`
+            : `<span class="text-gray-600 text-xs">No Image</span>`;
+
+        prodTable.innerHTML += `
+            <tr class="border-b border-gray-700/50 hover:bg-gray-700/30 transition">
+                <td class="p-3 text-gray-400 text-xs">${p.id}</td>
+                <td class="p-3 font-bold">${p.name}</td>
+                <td class="p-3 text-yellow-500 font-semibold">₱${Number(p.price).toLocaleString()}</td>
+                <td class="p-3">${p.stock}</td>
+                <td class="p-3 text-xs text-gray-400">${p.category_id || "-"}</td>
+                <td class="p-3">${imageHtml}</td>
+                <td class="p-3 flex gap-2 justify-center">
+                    <button onclick='openEditProductModal(${JSON.stringify(p)})' class="text-blue-400 hover:text-blue-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </button>
+                    <button onclick="deleteProduct(${p.id})" class="text-red-500 hover:text-red-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </td>
+            </tr>`;
+    });
+}
+const categoryForm = document.getElementById("categoryForm");
+categoryForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("categoryName").value;
+
+    const { error } = await supabaseClient
+        .from('categories')
+        .insert([{ name }]);
+
+    if (error) alert(error.message);
+    else {
+        categoryForm.reset();
+        loadCategories();
+    }
+};
+    async function loadUsers() {
+        const { data } = await supabaseClient.from("profiles").select("*").order("email");
+        const tbody = document.getElementById("usersTableBody");
+        tbody.innerHTML = "";
+        data?.forEach(user => {
+            tbody.innerHTML += `<tr><td class="p-3 text-xs">${user.id.substring(0,8)}</td><td class="p-3">${user.username || '-'}</td><td class="p-3">${user.email}</td><td class="p-3">${user.contact || '-'}</td><td class="p-3 text-xs truncate max-w-[150px]">${user.address || '-'}</td><td class="p-3"><button class="text-red-500" onclick="deleteUser('${user.id}')"><i class="fa fa-trash"></i></button></td></tr>`;
+        });
+    }
+
+    async function loadQuotes() {
+        const { data } = await supabaseClient.from("quotes").select("*").order("created_at", { ascending: false });
+        const tbody = document.getElementById("quotesTableBody");
+        tbody.innerHTML = "";
+        data?.forEach(quote => {
+            const photos = Array.isArray(quote.photos) ? quote.photos : [];
+            const photoHtml = photos.length > 0 ? `
+                <div class="relative inline-block cursor-pointer" onclick='openGallery(${JSON.stringify(photos)})'>
+                    <img src="${photos[0]}" class="w-10 h-10 object-cover rounded border border-yellow-500">
+                    ${photos.length > 1 ? `<span class="absolute -top-2 -right-2 bg-yellow-500 text-black text-[10px] px-1 rounded-full">+${photos.length-1}</span>` : ''}
+                </div>` : `<span class="text-gray-500 text-xs italic">No photos</span>`;
+
+            tbody.innerHTML += `<tr class="border-b border-gray-700 hover:bg-gray-800/50 transition">
+                <td class="p-4"><b>${quote.name}</b><div class="text-xs text-gray-400">${quote.phone}</div></td>
+                <td class="p-4 text-sm">${quote.vehicle || 'N/A'}<br><span class="text-xs font-mono text-gray-500">${quote.plate || ''}</span></td>
+                <td class="p-4"><span class="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-[10px]">${quote.service}</span></td>
+                <td class="p-4">
+                    <select class="bg-gray-900 text-xs p-1 rounded border border-gray-600">
+                        <option value="New" ${quote.status === 'New' ? 'selected' : ''}>New</option>
+                        <option value="Done" ${quote.status === 'Done' ? 'selected' : ''}>Done</option>
+                    </select>
+                </td>
+                <td class="p-4">${photoHtml}</td>
+                <td class="p-4"><button class="text-red-500" onclick="deleteQuote('${quote.id}')"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+        });
+    }
+
+    async function loadChatSessions() {
+        const { data: sessions } = await supabaseClient.from("chat_sessions").select("*").order("created_at", { ascending: false });
+        const list = document.getElementById("chatList");
+        list.innerHTML = "";
+        sessions?.forEach(s => {
+            const btn = document.createElement("button");
+            btn.className = `mb-2 p-3 rounded w-full text-left transition ${selectedSession === s.session_id ? 'bg-yellow-400 text-black' : 'bg-gray-700 hover:bg-gray-600'}`;
+            btn.innerHTML = `<div class="font-bold text-sm">${s.visitor_name || 'Visitor'}</div><div class="text-[10px] opacity-70">${s.session_id.substring(0,8)}</div>`;
+            btn.onclick = () => selectSession(s.session_id);
+            list.appendChild(btn);
+        });
+    }
+
+    // 1. SELECT SESSION: Loads history and clears the box
+async function selectSession(sid) {
+    selectedSession = sid;
+    
+    // Refresh the list UI to show which one is active (yellow)
+    loadChatSessions(); 
+
+    const { data: messages, error } = await supabaseClient
+        .from("chats")
+        .select("*")
+        .eq("session_id", sid)
+        .order("created_at", { ascending: true });
+
+    const box = document.getElementById("chatMessages");
+    box.innerHTML = "";
+    
+    messages?.forEach(m => appendMessageToUI(m));
+    box.scrollTop = box.scrollHeight;
+}
+
+// 2. APPEND MESSAGE: A helper to keep code DRY (Don't Repeat Yourself)
+function appendMessageToUI(m) {
+    const box = document.getElementById("chatMessages");
+    const div = document.createElement("div");
+    
+    // Messenger-style bubbles: Agent on right (yellow), Visitor on left (gray)
+    const isAgent = m.sender === 'agent';
+    div.className = `p-3 rounded-2xl mb-2 max-w-[80%] text-sm shadow-sm ${
+        isAgent 
+        ? 'bg-yellow-400 text-black self-end rounded-tr-none' 
+        : 'bg-gray-700 text-white self-start rounded-tl-none'
+    }`;
+    
+    div.textContent = m.message;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+// 3. SEND MESSAGE: Fixed with the variables from your context
+document.getElementById("sendAgentMessage").onclick = async () => {
+    const input = document.getElementById("agentMessageInput");
+    const val = input.value.trim();
+    
+    if (!val || !selectedSession) return;
+
+    const { error } = await supabaseClient
+        .from("chats")
+        .insert([{ 
+            session_id: selectedSession, 
+            sender: 'agent', 
+            message: val, 
+            username: agentName // Ensure agentName is defined globally
+        }]);
+
+    if (!error) {
+        input.value = "";
+        // No need to call selectSession() here if Real-time is on!
+    }
+};
+
+// 4. REAL-TIME: Listen for new messages while the admin is watching
 supabaseClient
-.channel("typing")
-.on("broadcast", { event: "typing" }, payload => {
+    .channel('admin-chat-feed')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
+        const newMsg = payload.new;
+        
+        // If the message belongs to the current open chat, show it immediately
+        if (newMsg.session_id === selectedSession) {
+            appendMessageToUI(newMsg);
+        }
+        
+        // Always refresh the session list to show the latest snippet/order
+        loadChatSessions();
+    })
+    .subscribe();
+    async function loadInquiries() {
+    const { data } = await supabaseClient.from("partner_inquiries").select("*").order("created_at", { ascending: false });
+    const tbody = document.getElementById("inquiriesTableBody");
+    tbody.innerHTML = "";
+    
+    data?.forEach(inq => {
+        tbody.innerHTML += `
+            <tr class="border-b border-gray-700 hover:bg-gray-700/30 transition">
+                <td class="p-4">
+                    <div class="font-bold text-white">${inq.full_name}</div>
+                    <div class="text-xs text-gray-400">${inq.email}</div>
+                    <div class="text-xs text-gray-400">${inq.phone}</div>
+                </td>
+                <td class="p-4 text-sm">
+                    <div class="text-yellow-500 font-semibold">${inq.business_name || 'Individual'}</div>
+                    <div class="text-xs text-gray-400">${inq.address || 'No address provided'}</div>
+                </td>
+                <td class="p-4 text-xs text-gray-300 max-w-xs break-words">${inq.notes || '-'}</td>
+                <td class="p-4">
+                    <select class="bg-gray-900 text-xs p-1 rounded border border-gray-600 focus:border-yellow-500 outline-none" 
+                            onchange="updateInquiryStatus('${inq.id}', this.value)">
+                        <option value="New" ${inq.status === 'New' ? 'selected' : ''}>New</option>
+                        <option value="Contacted" ${inq.status === 'Contacted' ? 'selected' : ''}>Contacted</option>
+                        <option value="Partnered" ${inq.status === 'Partnered' ? 'selected' : ''}>Partnered</option>
+                        <option value="Declined" ${inq.status === 'Declined' ? 'selected' : ''}>Declined</option>
+                    </select>
+                </td>
+                <td class="p-4 text-center">
+                    <button onclick="deleteInquiry('${inq.id}')" class="text-red-500 hover:text-red-400 transition">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+    });
+}
 
-  const indicator = document.getElementById("typingIndicator");
+// Add loadInquiries() to your Promise.all at the bottom
+// --- INITIALIZATION ---
+    await Promise.all([
+        loadCategories(), 
+        loadProducts(), 
+        loadUsers(), 
+        loadOrders(), 
+        loadQuotes(), 
+        loadChatSessions(), 
+        loadInquiries()
+    ]);
 
-if (indicator) {
-  indicator.classList.remove("hidden");
+// Add the real-time listener to your channel
+supabaseClient.channel('dashboard-master-sync')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'partner_inquiries' }, () => loadInquiries())
+    // ... keep your other .on listeners here ...
+    .subscribe();
 
-  setTimeout(() => {
-    indicator.classList.add("hidden");
-  }, 2000);
-  }
+    // --- REAL-TIME SYNC ---
+    supabaseClient.channel('admin-master-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'quotes' }, () => loadQuotes())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => loadOrders())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => loadUsers())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => loadProducts())
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, async (p) => {
+            if (p.new.sender === "visitor") messageSound.play().catch(()=>{});
+            await loadChatSessions();
+            if (selectedSession === p.new.session_id) selectSession(selectedSession);
+        })
+        .subscribe();
 
-})
-.subscribe();
+    // --- INITIALIZATION ---
+    await Promise.all([loadCategories(), loadProducts(), loadUsers(), loadOrders(), loadQuotes(), loadChatSessions()]);
 
-// ✅ Only call subscribe once
-// Request notification permission
-if (Notification.permission !== "granted") Notification.requestPermission();
-
-
-  // -------- INITIAL LOADS --------
-  await loadCategories();
-  await loadProducts();
-  await loadUsers();
-  await loadOrders();
-  await loadLiveChatSessions();
+    // --- UI NAVIGATION ---
+    document.querySelectorAll("#sidebar a[data-section]").forEach(link => {
+        link.onclick = (e) => {
+            e.preventDefault();
+            document.querySelectorAll(".dashboard-section").forEach(s => s.classList.remove("active"));
+            document.getElementById(link.dataset.section).classList.add("active");
+            document.querySelectorAll("#sidebar a").forEach(l => l.classList.remove("active"));
+            link.classList.add("active");
+        };
+    });
 });
-</script>
 
+</script>
+<div id="galleryModal" class="fixed inset-0 bg-black/90 z-[100] hidden flex-col items-center justify-center p-8">
+    <button onclick="closeGallery()" class="absolute top-5 right-5 text-white text-4xl hover:text-yellow-400">&times;</button>
+    <h3 class="text-yellow-400 text-xl font-bold mb-4">Quote Photos</h3>
+    <div id="galleryContent" class="flex flex-wrap gap-4 justify-center overflow-y-auto max-w-5xl">
+        </div>
+</div>
+<div id="editProductModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[100] p-4">
+    <div class="space-y-1">
+    <label class="text-xs text-gray-400 uppercase">Variants (JSON Format)</label>
+    <textarea id="editProductVariants" placeholder='[{"color":"Red","price_adder":0,"stock":10}]' 
+        class="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white text-xs h-20"></textarea>
+</div>
+<div class="space-y-4">
+    <textarea id="editProductDesc" placeholder="Product Description" class="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white text-sm"></textarea>
+    
+    <label class="text-[10px] text-gray-400 uppercase">Variants (JSON Format)</label>
+    <textarea id="editProductVariants" placeholder='[{"color":"Red","img":"url"}]' class="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white text-xs h-20"></textarea>
+</div>
+    <div class="bg-gray-900 border border-gray-700 p-6 rounded-xl w-full max-w-md shadow-2xl">
+        <h2 class="text-xl font-bold text-yellow-400 mb-4">Edit Product</h2>
+        <input type="hidden" id="editProductId">
+        <div class="space-y-4">
+            <input type="text" id="editProductName" placeholder="Product Name" class="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white">
+            <input type="number" id="editProductPrice" placeholder="Price" class="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white">
+            <input type="number" id="editProductStock" placeholder="Stock" class="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white">
+            <input type="text" id="editProductImage" placeholder="Image URL" class="w-full p-2 bg-gray-800 border border-gray-600 rounded text-white">
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+            <button onclick="closeEditModal()" class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">Cancel</button>
+            <button onclick="saveProductEdit()" class="px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400">Save Changes</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>

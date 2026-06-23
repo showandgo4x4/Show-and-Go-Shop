@@ -9,45 +9,144 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
   <link rel="icon" href="assets/images/logo.png" type="image/x-icon">
- 
+ <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4901234187373337"
+     crossorigin="anonymous"></script>
 <style>
-  /* ================= CHAT BUBBLE ================= */
-#chat-bubble,
-#chat-box{
-pointer-events:auto;
+/* ================= IMPROVED CHAT UI ================= */
+#chat-bubble {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  width: 60px;
+  height: 60px;
+  background: #fbbf24;
+  color: #111827;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(251, 191, 36, 0.4);
+  z-index: 100000;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-#chat-bubble{
-position:fixed;
-bottom:20px;
-right:20px;
-width:60px;
-height:60px;
-background:#fbbf24;
-color:#111827;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:28px;
-cursor:pointer;
-box-shadow:0 8px 20px rgba(0,0,0,.4);
-z-index:999999;
-transition:.3s;
-}
-#chat-bubble,
+
+#chat-bubble:hover { transform: scale(1.1) rotate(5deg); }
+
 #chat-box {
-  pointer-events: auto !important;
-  z-index: 100000 !important;
+  position: fixed;
+  bottom: 95px;
+  right: 25px;
+  width: 380px;
+  height: 580px;
+  background: #0f172a;
+  border-radius: 20px;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  z-index: 100000;
 }
 
-#chat-messages,
+#chat-box.show { display: flex; animation: slideIn 0.3s ease-out; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+#chat-header {
+  background: rgba(17, 24, 39, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.chat-status-dot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+/* Messages Area */
+#chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-container { display: flex; align-items: flex-end; gap: 8px; }
+.message-container.user { flex-direction: row-reverse; }
+
+.message {
+  max-width: 80%;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  border-radius: 18px;
+}
+
+.bot .message { 
+  background: #1f2937; 
+  color: #e5e7eb; 
+  border-bottom-left-radius: 4px; 
+}
+
+.user .message { 
+  background: #fbbf24; 
+  color: #111827; 
+  font-weight: 500;
+  border-bottom-right-radius: 4px; 
+}
+
+/* Input Area */
 #chat-input-area {
-  pointer-events: auto !important;
-}
-#chat-bubble:hover{
-transform:scale(1.1);
+  padding: 15px;
+  background: #111827;
+  display: flex;
+  gap: 10px;
 }
 
+#chat-input {
+  flex: 1;
+  background: #1f2937;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 10px 15px;
+  color: white;
+  outline: none;
+}
+
+#send-btn {
+  background: #fbbf24;
+  color: #111827;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+#send-btn:hover { background: #f59e0b; }
+
+@media (max-width: 640px) {
+  #chat-box { width: 92%; right: 4%; bottom: 100px; height: 75vh; }
+}
 
 /* ================= CHAT BOX ================= */
 
@@ -176,46 +275,59 @@ border-radius:3px;
 
 /* ================= MESSAGE BUBBLES ================= */
 
-.message-container{
-display:flex;
-align-items:flex-end;
-margin-bottom:10px;
+/* 1. The Row Container */
+.message-container {
+    display: flex;
+    width: 100%;
+    margin-bottom: 15px;
+    align-items: flex-end;
+    clear: both; /* Prevents floating issues */
 }
 
-.message-container.bot{
-justify-content:flex-start;
+/* 2. BOT (Agent) - Left Aligned */
+.message-container.bot {
+    justify-content: flex-start;
+    flex-direction: row; /* Icon then Text */
 }
 
-.message-container.user{
-justify-content:flex-end;
+.message-container.bot .message {
+    background: #e5e7eb; /* Light Gray */
+    color: #1f2937;
+    margin-left: 8px;
+    border-radius: 12px 12px 12px 0px;
 }
 
-.message-icon{
-width:28px;
-height:28px;
-border-radius:50%;
-background-size:cover;
-background-position:center;
-margin:0 6px;
+/* 3. USER (Visitor) - Right Aligned */
+.message-container.user {
+    justify-content: flex-end !important;
+    flex-direction: row; /* In JS we manually swapped the order, so keep row here */
+    margin-left: auto; /* Force to right */
 }
 
-.message{
-max-width:85%;
-padding:12px 16px;
-font-size:15px;
-line-height:1.5;
+.message-container.user .message {
+    background: #facc15 !important; /* Show & Go Yellow */
+    color: #000;
+    margin-right: 8px;
+    border-radius: 12px 12px 0px 12px;
+    text-align: right;
 }
 
-.message-container.bot .message{
-background:#1f2937;
-color:#e5e7eb;
-border-bottom-left-radius:4px;
+/* 4. Common Message Styling */
+.message {
+    padding: 10px 14px;
+    max-width: 75%;
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-.message-container.user .message{
-background:#fbbf24;
-color:black;
-border-bottom-right-radius:4px;
+.message-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
 }
 
 
@@ -357,86 +469,87 @@ padding-bottom:env(safe-area-inset-bottom);
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  // Elements
   const bubble = document.getElementById("chat-bubble");
   const box = document.getElementById("chat-box");
   const closeBtn = document.getElementById("close-chat");
+  const messagesContainer = document.getElementById("chat-messages");
+  const input = document.getElementById("chat-input");
+  const sendBtn = document.getElementById("send-btn");
 
-  bubble.addEventListener("click", () => box.classList.add("show"));
-  closeBtn.addEventListener("click", () => box.classList.remove("show"));
-
-  // Supabase client
+  // Config & State
   const supabaseUrl = "https://jimjbjtlekdytvnpyykw.supabase.co";
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
   const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-  const messageSound = new Audio("assets/sounds/Ang Mahiwagang Mensahe.mp3")
-  const messages = document.getElementById("chat-messages");
-  const input = document.getElementById("chat-input");
-  const sendBtn = document.getElementById("send-btn");
-  input.addEventListener("focus",()=>{
-setTimeout(()=>{
-messages.scrollTop = messages.scrollHeight;
-},300);
-});
+  const messageSound = new Audio("assets/sounds/Ang Mahiwagang Mensahe.mp3");
 
-bubble.addEventListener("click",()=>{
-document.body.style.overflow="hidden";
-});
-
-closeBtn.addEventListener("click",()=>{
-document.body.style.overflow="auto";
-});
   // ----------------------------
-  // Helper Functions
+  // UI Logic
   // ----------------------------
-  function generateSessionId() {
-    return 'sess_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-  }
+  const toggleChat = (isOpen) => {
+    box.classList.toggle("show", isOpen);
+    document.body.style.overflow = isOpen ? "hidden" : "auto";
+    if (isOpen) {
+      scrollToBottom();
+      if (!bubble.dataset.sessionId) initConnection();
+    }
+  };
 
-  async function ensureChatSession(visitorName) {
+  const scrollToBottom = () => {
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  };
+
+  bubble.addEventListener("click", () => toggleChat(true));
+  closeBtn.addEventListener("click", () => toggleChat(false));
+
+  // ----------------------------
+  // Core Functions
+  // ----------------------------
+  async function initConnection() {
     let sessionId = localStorage.getItem("visitorSessionId");
+    let visitorName = localStorage.getItem("visitorName");
+
     if (!sessionId) {
-      sessionId = generateSessionId();
-
-      const { error } = await supabaseClient.from("chat_sessions").insert([{
-        session_id: sessionId,
-        visitor_name: visitorName
-      }]);
-
-      if (error) {
-        console.error("Insert session failed:", error);
-        return null;
-      }
-
+      visitorName = prompt("Enter your name") || "Visitor";
+      sessionId = 'sess_' + Date.now();
+      
+      const { error } = await supabaseClient.from("chat_sessions").insert([
+        { session_id: sessionId, visitor_name: visitorName }
+      ]);
+      
+      if (error) return console.error("Session creation failed:", error);
+      
       localStorage.setItem("visitorSessionId", sessionId);
+      localStorage.setItem("visitorName", visitorName);
     }
-    return sessionId;
+
+    bubble.dataset.sessionId = sessionId;
+    loadChatHistory(sessionId);
+    subscribeToUpdates(sessionId);
   }
 
-  function addMessage(sender, text) {
+  function addMessage(sender, text, playSound = false) {
+    const isUser = sender === "user"; // "user" = the Visitor
     const container = document.createElement("div");
+    
+    // We keep the sender class so we can style them differently in CSS
     container.className = `message-container ${sender}`;
+    
+    const iconUrl = isUser ? 'https://i.imgur.com/8Km9tLL.png' : 'assets/images/logo.png';
+    
+    // Visitor (User): Text then Icon (Right side)
+    // Agent (Bot): Icon then Text (Left side)
+    container.innerHTML = isUser 
+      ? `<div class="message">${text}</div><div class="message-icon" style="background-image: url('${iconUrl}')"></div>`
+      : `<div class="message-icon" style="background-image: url('${iconUrl}')"></div><div class="message">${text}</div>`;
 
-    const icon = document.createElement("div");
-    icon.className = "message-icon";
-    icon.style.backgroundImage = sender === "user"
-      ? "url('https://i.imgur.com/8Km9tLL.png')"
-      : "url('assets/images/logo.png')";
+    messagesContainer.appendChild(container);
+    scrollToBottom();
 
-    const bubbleMsg = document.createElement("div");
-    bubbleMsg.className = "message";
-    bubbleMsg.innerText = text;
-
-    if (sender === "user") {
-      container.appendChild(bubbleMsg);
-      container.appendChild(icon);
-    } else {
-      container.appendChild(icon);
-      container.appendChild(bubbleMsg);
+    if (playSound && sender === "bot") {
+      messageSound.play().catch(e => console.log("Audio play blocked"));
     }
-
-    messages.appendChild(container);
-    messages.scrollTop = messages.scrollHeight;
-  }
+}
 
   async function loadChatHistory(sessionId) {
     const { data, error } = await supabaseClient
@@ -445,72 +558,60 @@ document.body.style.overflow="auto";
       .eq("session_id", sessionId)
       .order("created_at", { ascending: true });
 
-    if (error) console.error(error);
-    else data.forEach(msg => {
-      addMessage(msg.sender === "visitor" ? "user" : "bot", msg.message);
-    });
+    if (!error && data) {
+      messagesContainer.innerHTML = ''; // Clear welcome text if history exists
+      data.forEach(msg => addMessage(msg.sender === "visitor" ? "user" : "bot", msg.message));
+    }
+  }
+
+  function subscribeToUpdates(sessionId) {
+    supabaseClient.channel(`chat_session_${sessionId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chats',
+        filter: `session_id=eq.${sessionId}`
+      }, payload => {
+        if (payload.new.sender === 'agent') {
+          addMessage('bot', payload.new.message, true);
+        }
+      })
+      .subscribe();
   }
 
   async function sendMessage() {
     const text = input.value.trim();
-    if (!text) return;
-    input.value = "";
-
     const sessionId = bubble.dataset.sessionId;
-    if (!sessionId) return alert("Chat session not initialized.");
 
+    if (!text || !sessionId) return;
+
+    input.value = "";
     addMessage("user", text);
 
-    const { error } = await supabaseClient.from("chats").insert([{
-      session_id: sessionId,
-      sender: "visitor",
-      message: text
-    }]);
+    const { error } = await supabaseClient.from("chats").insert([
+      { session_id: sessionId, sender: "visitor", message: text }
+    ]);
 
-    if (error) console.error("Insert error:", error);
+    if (error) console.error("Message send error:", error);
   }
 
   // ----------------------------
   // Event Listeners
   // ----------------------------
-  bubble.addEventListener("click", async () => {
-    box.classList.add("show");
-
-    // Only create session once
-    if (!bubble.dataset.sessionId) {
-      const visitorName = prompt("Enter your name") || "Visitor";
-      const sessionId = await ensureChatSession(visitorName);
-      if (!sessionId) return;
-
-      bubble.dataset.sessionId = sessionId;
-
-      // Load previous messages
-      loadChatHistory(sessionId);
-
-      // Subscribe to new messages from agents
-      supabaseClient.channel(`chat_session_${sessionId}`)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chats',
-          filter: `session_id=eq.${sessionId}`
-        }, payload => {
-          if (payload.new.sender === 'agent') addMessage('bot', payload.new.message);
-        })
-        .subscribe();
-        supabaseClient
-        .channel("typing")
-        .send({
-        type: "broadcast",
-        event: "typing",
-        payload: { session_id: sessionId }
-        });
-    }
-  });
-
-  closeBtn.addEventListener("click", () => box.classList.remove("show"));
   sendBtn.addEventListener("click", sendMessage);
   input.addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
+  
+  // Real Typing Indicator Broadcast
+  input.addEventListener("input", () => {
+    const sessionId = bubble.dataset.sessionId;
+    if (sessionId) {
+      supabaseClient.channel("typing").send({
+        type: "broadcast",
+        event: "typing",
+        payload: { session_id: sessionId, isTyping: true }
+      });
+    }
+  });
 });
 </script>
   <style>
@@ -641,65 +742,32 @@ font-size:20px;
 <body class="bg-gray-800 text-white">
 
 <div id="chat-bubble">💬</div>
-
 <div id="chat-box">
-  <!-- Header -->
   <div id="chat-header">
-    <img src="assets/images/logo.png" class="chat-logo">
-    <div>
-      <div class="chat-title">Show & Go Support</div>
-      <div class="chat-status">We'll be back online soon</div>
+    <div class="flex items-center gap-3">
+      <img src="assets/images/logo.png" class="chat-logo w-8 h-8 rounded-lg">
+      <div>
+        <div class="chat-title">Show & Go Support</div>
+        <div class="chat-status text-[10px] uppercase tracking-wider text-gray-400">
+          <span class="chat-status-dot"></span> Online
+        </div>
+      </div>
     </div>
-    <button id="close-chat">✕</button>
+    <button id="close-chat" class="text-gray-400 hover:text-white">✕</button>
   </div>
 
-  <!-- Greeting -->
-  <div class="chat-greeting">
-    <h3>Hi there 👋</h3>
-    <p>How can we help?</p>
-  </div>
-
-  <div class="chat-recent">
-    <div class="recent-avatar">S</div>
-    <div class="recent-text">
-      <strong>Show & Go Support</strong>
-      <p>Welcome to Show & Go Repair Shop. How can we assist you today?</p>
+  <div id="chat-messages">
+    <div class="message-container bot">
+      <div class="message">Hi there! 👋 How can we help you with your car today?</div>
     </div>
   </div>
-
-  <div id="chat-messages"></div>
 
   <div id="chat-input-area">
-    <input type="text" id="chat-input" placeholder="Send us a message">
-    <button id="send-btn">
-      <i class="fa-solid fa-paper-plane"></i>
-    </button>
-  </div>
-
-  <div class="chat-help">
-    <input type="text" placeholder="Search for help">
-    <ul>
-      <li>How to request a quote?</li>
-      <li>How to check my repair status?</li>
-      <li>What services do you offer?</li>
-    </ul>
-  </div>
-
-  <div class="chat-nav">
-    <div class="nav-item active">
-      <i class="fa-solid fa-house"></i>
-      <span>Home</span>
-    </div>
-    <div class="nav-item">
-      <i class="fa-solid fa-message"></i>
-      <span>Messages</span>
-    </div>
-    <div class="nav-item">
-      <i class="fa-solid fa-circle-question"></i>
-      <span>Help</span>
-    </div>
+    <input type="text" id="chat-input" placeholder="Ask about services or quotes...">
+    <button id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
   </div>
 </div>
+
 <div id="infoOverlay" onclick="hideInfo()" style="
   display:none;
   position:fixed;
@@ -724,8 +792,8 @@ font-size:20px;
   >
   
   <!-- Shop Name -->
-  <h1 class="text-sm sm:text-lg md:text-xl font-bold text-yellow-400 truncate">
-    Show & Go Tires and Repair Shop
+  <h1 class="text-sm sm:text-lg md:text-xl font-bold text-yellow-400 whitespace-nowrap">
+    Show & Go Repair Shop
   </h1>
 </div>
 
@@ -1094,21 +1162,6 @@ mobileBtn.addEventListener('click', () => {
   </div>
 </section>
 
-<!-- FOLLOW US -->
-<section class="py-16 bg-gray-900 text-center">
-  <h2 class="text-3xl font-bold mb-8 text-yellow-400">Follow Us</h2>
-  <div class="flex justify-center gap-3 follow-us-icons">
-    <a href="https://www.facebook.com/showandgo4x4/" target="_blank" class="hover:scale-110 transition duration-300 hover:text-blue-500">
-      <i class="fab fa-facebook"></i>
-    </a>
-    <a href="https://www.tiktok.com/@showandgo4x4?is_from_webapp=1&sender_device=pc" target="_blank" class="hover:scale-110 transition duration-300 hover:text-blue-300">
-      <i class="fab fa-tiktok"></i>
-    </a>
-    <a href="https://www.youtube.com/@showandgo4x4" target="_blank" class="hover:scale-110 transition duration-300 hover:text-red-500">
-      <i class="fab fa-youtube"></i>
-    </a>
-  </div>
-</section>
 <!-- STORE LOCATOR -->
 <section class="py-20 px-8 text-center bg-gray-900/80">
   <h2 class="text-4xl section-title mb-12" data-aos="fade-up">Find a Show & Go Store</h2>
@@ -1120,9 +1173,84 @@ mobileBtn.addEventListener('click', () => {
   </a>
 </section>
 
-<!-- FOOTER -->
-<footer class="bg-black text-gray-400 text-center py-8 border-t border-yellow-500/20">
-  <p>&copy; 2026 Show & Go Auto Shop. All Rights Reserved.</p>
+<!-- REDESIGNED FOOTER -->
+<footer class="bg-gray-900 text-gray-300 pt-16 pb-8 border-t-4 border-yellow-400">
+  <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+    
+    <!-- Column 1: Brand & Socials -->
+    <div>
+      <div class="flex items-center space-x-3 mb-6">
+        <img src="assets/images/logo.png" alt="Show & Go Logo" class="h-10 w-10 object-contain">
+        <h2 class="text-xl font-bold text-yellow-400 uppercase tracking-wide">Show & Go</h2>
+      </div>
+      <p class="text-sm text-gray-400 leading-relaxed mb-6">
+        Premium automotive parts and professional services built for enthusiasts who demand excellence. Performance. Precision. Power.
+      </p>
+      <!-- Social Icons -->
+      <div class="flex space-x-4">
+        <a href="https://www.facebook.com/showandgo4x4/" target="_blank" aria-label="Facebook" class="bg-gray-800 p-3 rounded-full text-gray-400 hover:text-white hover:bg-blue-600 transition duration-300">
+          <i class="fab fa-facebook-f w-4 h-4 flex items-center justify-center"></i>
+        </a>
+        <a href="https://www.tiktok.com/@showandgo4x4?is_from_webapp=1&sender_device=pc" target="_blank" aria-label="TikTok" class="bg-gray-800 p-3 rounded-full text-gray-400 hover:text-white hover:bg-black transition duration-300">
+          <i class="fab fa-tiktok w-4 h-4 flex items-center justify-center"></i>
+        </a>
+        <a href="https://www.youtube.com/@showandgo4x4" target="_blank" aria-label="YouTube" class="bg-gray-800 p-3 rounded-full text-gray-400 hover:text-white hover:bg-red-600 transition duration-300">
+          <i class="fab fa-youtube w-4 h-4 flex items-center justify-center"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Column 2: Quick Links -->
+    <div>
+      <h3 class="text-lg font-bold text-white mb-6 border-b border-gray-700 pb-2">Quick Links</h3>
+      <ul class="space-y-3">
+        <li><a href="index.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Home</a></li>
+        <li><a href="shop.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Shop</a></li>
+        <li><a href="store-locator.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Store Locator</a></li>
+        <li><a href="about.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>About Us</a></li>
+        <li><a href="account.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Account</a></li>
+      </ul>
+    </div>
+
+    <!-- Column 3: Our Services -->
+    <div>
+      <h3 class="text-lg font-bold text-white mb-6 border-b border-gray-700 pb-2">Our Services</h3>
+      <ul class="space-y-3">
+        <li><a href="quote.html?service=Tire%20Change" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-tools text-yellow-500 text-xs mr-3"></i>Tire Change</a></li>
+        <li><a href="quote.html?service=Paint%20Job" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-spray-can text-yellow-500 text-xs mr-3"></i>Paint Job</a></li>
+        <li><a href="quote.html?service=Glamping" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-campground text-yellow-500 text-xs mr-3"></i>Glamping</a></li>
+        <li><a href="quote.html?service=4x4%20Set-up" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-truck-pickup text-yellow-500 text-xs mr-3"></i>4x4 Set-up</a></li>
+      </ul>
+    </div>
+
+    <!-- Column 4: Newsletter & Action -->
+    <div>
+      <h3 class="text-lg font-bold text-white mb-6 border-b border-gray-700 pb-2">Stay Connected</h3>
+      <p class="text-sm text-gray-400 mb-4">Subscribe to our newsletter for the latest products and performance tips.</p>
+      <form class="flex mb-4" onsubmit="event.preventDefault();">
+        <input type="email" placeholder="Email Address" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:outline-none focus:border-yellow-400 text-sm text-white" required>
+        <button type="submit" class="bg-yellow-400 text-black px-4 py-2 rounded-r-lg font-semibold hover:bg-yellow-300 transition duration-300">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </form>
+      <div class="mt-4">
+        <a href="quote.html" class="block w-full text-center px-4 py-2 border-2 border-yellow-400 text-yellow-400 text-sm font-bold rounded-lg hover:bg-yellow-400 hover:text-black transition duration-300">
+          Request a Quote
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Copyright Bar -->
+  <div class="max-w-7xl mx-auto px-6 mt-12 pt-6 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+    <p>&copy; 2026 Show & Go Auto Shop. All Rights Reserved.</p>
+    <div class="flex space-x-6 mt-4 md:mt-0">
+      <a href="#" class="hover:text-yellow-400 transition duration-300">Privacy Policy</a>
+      <a href="#" class="hover:text-yellow-400 transition duration-300">Terms of Service</a>
+      <a href="inquiry.html" class="hover:text-yellow-400 transition duration-300">Partner With Us</a>
+    </div>
+  </div>
 </footer>
 
 <!-- SCRIPTS -->

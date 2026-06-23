@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join the Crew - Show & Go Auto Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a;
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .register-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(250, 204, 21, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        input:focus {
+            border-color: #facc15 !important;
+            box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2);
+        }
+        .glass-btn { transition: all 0.3s ease; }
+        .glass-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(250, 204, 21, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="w-full max-w-md px-4 py-10">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <a href="index.html" class="inline-flex flex-col items-center group">
+                <img src="assets/images/logo.png" alt="Logo" class="h-16 w-16 object-contain mb-2 transition-transform group-hover:scale-110">
+                <span class="text-xl font-black text-yellow-400 tracking-tighter">SHOW & GO</span>
+                <span class="text-[10px] text-white tracking-[0.3em] font-bold uppercase">Registration</span>
+            </a>
+        </div>
+
+        <div class="register-card p-8 rounded-3xl">
+            <h2 class="text-2xl font-bold mb-2 text-center text-yellow-400">Create Account</h2>
+            <p class="text-slate-400 text-sm text-center mb-8">Start your journey with us today.</p>
+
+            <form id="registerForm" class="space-y-4">
+                <!-- Username -->
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 ml-1">Full Name</label>
+                    <input type="text" id="regName" required 
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl outline-none transition text-sm"
+                        placeholder="John Doe">
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 ml-1">Email Address</label>
+                    <input type="email" id="regEmail" required 
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl outline-none transition text-sm"
+                        placeholder="john@example.com">
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 ml-1">Password</label>
+                    <input type="password" id="regPassword" required 
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl outline-none transition text-sm"
+                        placeholder="••••••••">
+                </div>
+
+                <button type="submit" id="registerBtn" 
+                    class="glass-btn w-full bg-yellow-400 text-black font-black py-4 rounded-xl uppercase tracking-widest text-xs mt-4">
+                    Create My Account
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-slate-700/50 text-center">
+                <p class="text-slate-400 text-sm">
+                    Already part of the crew? 
+                    <a href="login.html" class="text-yellow-400 font-bold hover:underline">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://jimjbjtlekdytvnpyykw.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const registerForm = document.getElementById('registerForm');
+        const registerBtn = document.getElementById('registerBtn');
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            registerBtn.disabled = true;
+            registerBtn.innerText = "CREATING ACCOUNT...";
+
+            try {
+                // 1. Sign up user
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: { full_name: name } // Meta-data
+                    }
+                });
+
+                if (error) throw error;
+
+                if (data.user) {
+                    // 2. Insert into your profiles table manually to ensure account page works
+                    const { error: profileError } = await supabaseClient
+                        .from('profiles')
+                        .insert([
+                            { id: data.user.id, username: name, email: email }
+                        ]);
+
+                    alert("Registration Successful! Please check your email for a verification link.");
+                    window.location.href = "login.html";
+                }
+
+            } catch (err) {
+                alert("Registration Error: " + err.message);
+                registerBtn.disabled = false;
+                registerBtn.innerText = "CREATE MY ACCOUNT";
+            }
+        });
+    </script>
+</body>
+</html>

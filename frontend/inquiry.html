@@ -1,296 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
-  <link rel="icon" href="assets/images/logo.png" type="image/x-icon">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Become a Partner - Show & Go Auto Shop</title>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<style>
-/* Reset & Body */
-body {
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  background: #f3f4f6;
-  color: #1f2937;
-  scroll-behavior: smooth;
-  overflow-x: hidden;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Become a Partner - Show & Go Auto Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="assets/images/logo.png" type="image/x-icon">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap');
 
-/* Navigation */
-nav {
-  background: #1e3a8a;
-  color: #fff;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-}
-nav a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: all 0.2s;
-  margin: 0.2rem 0;
-}
-nav a:hover { background: #2563eb; }
-nav span { font-weight: 600; font-size: 1.1rem; margin: 0.2rem 0; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            scroll-behavior: smooth;
+            margin: 0;
+            overflow-x: hidden;
+        }
 
-/* Side Decorations */
-.side-deco-left, .side-deco-right {
-  position: fixed;
-  top: 0;
-  width: 100px;
-  height: 100%;
-  z-index: -1;
-  overflow: hidden;
-}
+        /* --- SUBTLE BACKGROUND AMBIENT GLOWS --- */
+        .glow-orb-1 {
+            position: absolute; width: 400px; height: 400px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(234,179,8,0.06) 0%, rgba(0,0,0,0) 70%);
+            top: 10%; left: -100px; z-index: -1; pointer-events: none;
+        }
+        .glow-orb-2 {
+            position: absolute; width: 500px; height: 500px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(59,130,246,0.05) 0%, rgba(0,0,0,0) 70%);
+            top: 40%; right: -150px; z-index: -1; pointer-events: none;
+        }
 
-/* Floating Animations */
-@keyframes floatUpDown {
-  0% { transform: translateY(0) rotate(var(--rotate)); }
-  50% { transform: translateY(-15px) rotate(var(--rotate)); }
-  100% { transform: translateY(0) rotate(var(--rotate)); }
-}
-@keyframes floatDiagonal {
-  0% { transform: translate(0,0) rotate(var(--rotate)); }
-  50% { transform: translate(20px, -15px) rotate(var(--rotate)); }
-  100% { transform: translate(0,0) rotate(var(--rotate)); }
-}
+        /* --- INTERSECTION OBSERVER ANIMATION CLASS --- */
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reveal-element.visible { opacity: 1; transform: translateY(0); }
 
-/* Left Side */
-.side-deco-left {
-  left: 0;
-  background: linear-gradient(to bottom, #fbbf24, #fef3c7);
-}
-.side-deco-left::before, .side-deco-left::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.25);
-  --rotate: -15deg;
-}
-.side-deco-left::before {
-  width: 60px; height: 60px; top: 15%; left: 10px;
-  animation: floatUpDown 4s ease-in-out infinite;
-}
-.side-deco-left::after {
-  width: 100px; height: 100px; bottom: 10%; left: -20px;
-  animation: floatUpDown 6s ease-in-out infinite;
-}
-
-/* Right Side */
-.side-deco-right {
-  right: 0;
-  background: linear-gradient(to bottom, #93c5fd, #bfdbfe);
-}
-.side-deco-right::before, .side-deco-right::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.25);
-  --rotate: 15deg;
-}
-.side-deco-right::before {
-  width: 70px; height: 70px; top: 10%; right: 10px;
-  animation: floatUpDown 4.5s ease-in-out infinite;
-}
-.side-deco-right::after {
-  width: 120px; height: 120px; bottom: 5%; right: -30px;
-  animation: floatUpDown 6.5s ease-in-out infinite;
-}
-
-/* Container */
-.container {
-  max-width: 900px;
-  margin: 3rem auto;
-  padding: 2rem;
-}
-
-/* Sections */
-.section {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 2rem;
-  margin-bottom: 3rem;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.6s ease-out;
-}
-.section.visible { opacity: 1; transform: translateY(0); }
-
-/* Headings */
-h1, h2 { text-align: center; color: #1e3a8a; }
-h1 { font-size: 2.5rem; margin-bottom: 1rem; }
-h2 { font-size: 1.8rem; margin-top: 2rem; margin-bottom: 1rem; }
-
-/* Paragraphs */
-p {
-  font-size: 1.1rem;
-  color: #374151;
-  line-height: 1.7;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-/* Images */
-.partner-image {
-  width: 80%;
-  max-width: 500px;
-  display: block;
-  margin: 1.5rem auto;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-}
-
-/* Benefits list */
-.benefits {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-.benefit-card {
-  background: #fef3c7;
-  border-radius: 12px;
-  padding: 1.5rem;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-  transition: transform 0.3s;
-}
-.benefit-card:hover { transform: translateY(-5px); }
-.benefit-card i { font-size: 2rem; color: #f59e0b; margin-bottom: 0.5rem; display:block; }
-.benefit-card p { font-size: 1rem; color: #374151; margin-top: 0.5rem; }
-
-/* Form */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-input, textarea {
-  padding: 0.85rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  font-size: 1rem;
-  width: 100%;
-  transition: all 0.2s;
-}
-input:focus, textarea:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
-}
-button {
-  padding: 0.85rem 1.5rem;
-  background: #2563eb;
-  color: #fff;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-button:hover { background: #1e40af; }
-
-/* Responsive */
-@media(max-width: 640px){
-  nav { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-  nav div {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap; /* allow text to wrap */
-    justify-content: space-between;
-  }
-  nav span {
-    white-space: normal; /* allow multi-line if needed */
-    overflow-wrap: break-word;
-  }
-}
-</style>
+        /* --- CUSTOM FORM INPUT OVERRIDES --- */
+        input, textarea {
+            width: 100%;
+            padding: 0.85rem 1.25rem;
+            border: 1px solid rgba(226, 232, 240, 0.1);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: rgba(30, 41, 59, 0.5);
+            color: #ffffff;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #facc15;
+            background: rgba(30, 41, 59, 0.9);
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.15);
+        }
+    </style>
 </head>
-<body>
+<body class="bg-slate-900">
 
-<!-- Side decorations -->
-<div class="side-deco-left"></div>
-<div class="side-deco-right"></div>
+<div class="glow-orb-1"></div>
+<div class="glow-orb-2"></div>
 
-<!-- Navigation -->
-<nav>
-  <div><a href="index.html"><i class="fa fa-home"></i> Home</a></div>
-  <div><span>Become a Partner</span></div>
+<nav class="bg-slate-900/95 border-b border-yellow-500/20 sticky top-0 z-[1000] w-full backdrop-blur-md shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-20">
+        <a href="index.html" class="flex items-center space-x-3 group">
+            <img src="assets/images/logo.png" alt="Logo" class="h-12 w-12 object-contain transition-transform group-hover:scale-110">
+            <div class="flex flex-col leading-none">
+                <span class="text-xl font-black text-yellow-400 tracking-tighter">SHOW & GO</span>
+                <span class="text-[10px] text-white tracking-[0.2em] font-bold">REPAIR SHOP</span>
+            </div>
+        </a>
+
+        <div class="hidden lg:flex items-center space-x-8">
+            <div class="flex items-center space-x-6 text-sm font-semibold text-gray-300">
+                <a href="index.html" class="hover:text-yellow-400 transition">Home</a>
+                <a href="shop.html" class="hover:text-yellow-400 transition">Shop</a>
+                <a href="about.html" class="hover:text-yellow-400 transition">About</a>
+                <a href="camping.html" class="hover:text-yellow-400 transition">Community</a>
+                <a href="store-locator.html" class="hover:text-yellow-400 transition">Location</a>
+                <a href="account.html" class="hover:text-yellow-400 transition">My Account</a>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="quote.html" class="bg-yellow-400 text-black px-5 py-2.5 rounded-full font-bold text-xs uppercase hover:bg-yellow-300 transition shadow-[0_0_15px_rgba(250,204,21,0.3)]">Get Quote</a>
+                <a href="inquiry.html" class="bg-transparent border-2 border-yellow-400 text-yellow-400 px-5 py-2 rounded-full font-bold text-xs uppercase hover:bg-yellow-400 hover:text-black transition">Partner</a>
+            </div>
+        </div>
+
+        <button id="mobileMenuBtn" class="lg:hidden text-yellow-400 text-3xl focus:outline-none">
+            <i id="mobileIcon" class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <div id="mobileMenu" class="hidden lg:hidden bg-slate-800 border-b border-yellow-500/20 p-6 space-y-4 shadow-2xl absolute w-full left-0">
+        <a href="index.html" class="block text-white font-medium hover:text-yellow-400 transition">Home</a>
+        <a href="shop.html" class="block text-white font-medium hover:text-yellow-400 transition">Shop</a>
+        <a href="about.html" class="block text-white font-medium hover:text-yellow-400 transition">About</a>
+        <a href="camping.html" class="block text-white font-medium hover:text-yellow-400 transition">Community</a>
+        <a href="store-locator.html" class="block text-white font-medium hover:text-yellow-400 transition">Location</a>
+        <a href="account.html" class="block text-white font-medium hover:text-yellow-400 transition">My Account</a>
+        <hr class="border-gray-700 my-4">
+        <div class="grid grid-cols-2 gap-3">
+            <a href="quote.html" class="bg-yellow-400 text-black py-3 rounded-xl font-bold text-center text-sm uppercase shadow-lg">Get Quote</a>
+            <a href="inquiry.html" class="bg-transparent border-2 border-yellow-400 text-yellow-400 py-3 rounded-xl font-bold text-center text-sm uppercase">Partner</a>
+        </div>
+    </div>
 </nav>
 
-<div class="container">
+<main class="max-w-5xl mx-auto px-6 py-16">
+    
+    <section class="reveal-element mb-20 text-center">
+        <h4 class="text-yellow-400 font-bold tracking-widest uppercase mb-2 text-xs md:text-sm">B2B Opportunities</h4>
+        <h1 class="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
+            Become a <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500">Partner</span>
+        </h1>
+        <p class="text-gray-400 max-w-2xl mx-auto mb-12 text-base md:text-lg leading-relaxed">
+            Join the Show & Go network. Scale your business footprint through our dedicated enthusiast community, elite outdoor events, and high-performance support infrastructure.
+        </p>
+        <div class="relative inline-block w-full overflow-hidden rounded-2xl group border border-slate-700 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            <img src="assets/images/ShopFront.jpg" alt="Partnership" class="w-full object-cover max-h-[450px] transition-transform duration-700 group-hover:scale-105 filter brightness-90">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+            <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-slate-950 px-10 py-3.5 rounded-t-xl font-black shadow-2xl uppercase text-xs tracking-widest">
+                Growth Starts Here
+            </div>
+        </div>
+    </section>
 
-  <!-- Hero Section -->
-  <div class="section fade-in">
-    <h1>Become a Partner</h1>
-    <p>Grow your business with Show & Go Auto Shop. Partner with us to access exclusive opportunities, events, and support designed to maximize your success.</p>
-    <img src="assets/images/ShopFront.jpg" alt="Partnership" class="partner-image">
+    <section class="reveal-element mb-24 pt-4">
+        <div class="text-center mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-3">Why Partner With Us?</h2>
+            <div class="w-16 h-1 bg-yellow-400 mx-auto rounded-full"></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-slate-800/40 backdrop-blur-sm border border-slate-700 rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 hover:border-yellow-400/50 shadow-lg group">
+                <div class="w-14 h-14 bg-yellow-400/10 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-yellow-400/20 group-hover:bg-yellow-400 group-hover:text-black transition-all duration-300">
+                    <i class="fa fa-users text-xl text-yellow-400 group-hover:text-black"></i>
+                </div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Large Network</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">Direct entry route to a dedicated community of active 4x4 drivers and outdoor campers.</p>
+            </div>
+            <div class="bg-slate-800/40 backdrop-blur-sm border border-slate-700 rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 hover:border-yellow-400/50 shadow-lg group">
+                <div class="w-14 h-14 bg-blue-400/10 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-blue-400/20 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
+                    <i class="fa fa-bullhorn text-xl text-blue-400 group-hover:text-white"></i>
+                </div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Co-Marketing</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">Collaborative media features, targeted social showcases, and high-visibility community event placements.</p>
+            </div>
+            <div class="bg-slate-800/40 backdrop-blur-sm border border-slate-700 rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 hover:border-yellow-400/50 shadow-lg group">
+                <div class="w-14 h-14 bg-green-400/10 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-green-400/20 group-hover:bg-green-500 group-hover:text-white transition-all duration-300">
+                    <i class="fa fa-chart-line text-xl text-green-400 group-hover:text-white"></i>
+                </div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">Sales Growth</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">Expand your brand authority and unlock new sustainable corporate revenue streams.</p>
+            </div>
+            <div class="bg-slate-800/40 backdrop-blur-sm border border-slate-700 rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 hover:border-yellow-400/50 shadow-lg group">
+                <div class="w-14 h-14 bg-purple-400/10 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-purple-400/20 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300">
+                    <i class="fa fa-id-badge text-xl text-purple-400 group-hover:text-white"></i>
+                </div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-white mb-2">VIP Support</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">Unrestricted backend priority assistance and specialized strategic insights from our management team.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="reveal-element bg-slate-800/50 border border-slate-700/60 p-8 md:p-12 rounded-3xl shadow-2xl relative">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-400/10 to-transparent rounded-tr-3xl pointer-events-none"></div>
+        <div class="mb-10">
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Partnership Inquiry</h2>
+            <p class="text-sm text-gray-400">Fill out the detailed application form below. Our corporate relations team will review and reply within 48 hours.</p>
+        </div>
+        
+        <form id="partnerForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col space-y-2">
+                    <label class="text-[10px] font-black uppercase text-yellow-400/80 tracking-wider ml-1">Full Name</label>
+                    <input type="text" id="partnerName" placeholder="John Doe" required>
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <label class="text-[10px] font-black uppercase text-yellow-400/80 tracking-wider ml-1">Email Address</label>
+                    <input type="email" id="partnerEmail" placeholder="john@business.com" required>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col space-y-2">
+                    <label class="text-[10px] font-black uppercase text-yellow-400/80 tracking-wider ml-1">Phone Number</label>
+                    <input type="tel" id="partnerPhone" placeholder="+63 900 000 0000" required>
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <label class="text-[10px] font-black uppercase text-yellow-400/80 tracking-wider ml-1">Business Name</label>
+                    <input type="text" id="partnerBusiness" placeholder="Auto Parts Co.">
+                </div>
+            </div>
+
+            <div class="flex flex-col space-y-2">
+                <label class="text-[10px] font-black uppercase text-yellow-400/80 tracking-wider ml-1">Business Address</label>
+                <input type="text" id="partnerAddress" placeholder="123 Street, City, Country">
+            </div>
+
+            <div class="flex flex-col space-y-2">
+                <label class="text-[10px] font-black uppercase text-yellow-400/80 tracking-wider ml-1">Additional Notes</label>
+                <textarea id="partnerNotes" placeholder="Tell us a bit about your business and how you'd like to collaborate..." rows="4"></textarea>
+            </div>
+            
+            <div class="pt-2">
+                <button type="submit" id="submitBtn" class="w-full bg-yellow-400 text-slate-950 py-4 rounded-xl font-black uppercase tracking-widest hover:bg-yellow-300 transition-all duration-300 shadow-xl shadow-yellow-500/10 active:scale-[0.99]">
+                    Send Inquiry
+                </button>
+            </div>
+        </form>
+    </section>
+</main>
+
+<footer class="bg-slate-950 text-gray-300 pt-16 pb-8 border-t-4 border-yellow-400 mt-20">
+  <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+    
+    <div>
+      <div class="flex items-center space-x-3 mb-6">
+        <img src="assets/images/logo.png" alt="Show & Go Logo" class="h-10 w-10 object-contain">
+        <h2 class="text-xl font-bold text-yellow-400 uppercase tracking-wide">Show & Go</h2>
+      </div>
+      <p class="text-sm text-gray-400 leading-relaxed mb-6">
+        Premium automotive parts and professional services built for enthusiasts who demand excellence. Performance. Precision. Power.
+      </p>
+      <div class="flex space-x-4">
+        <a href="https://www.facebook.com/showandgo4x4/" target="_blank" aria-label="Facebook" class="bg-slate-800 p-3 rounded-full text-gray-400 hover:text-white hover:bg-blue-600 transition duration-300">
+          <i class="fab fa-facebook-f w-4 h-4 flex items-center justify-center"></i>
+        </a>
+        <a href="https://www.tiktok.com/@showandgo4x4?is_from_webapp=1&sender_device=pc" target="_blank" aria-label="TikTok" class="bg-slate-800 p-3 rounded-full text-gray-400 hover:text-white hover:bg-black transition duration-300">
+          <i class="fab fa-tiktok w-4 h-4 flex items-center justify-center"></i>
+        </a>
+        <a href="https://www.youtube.com/@showandgo4x4" target="_blank" aria-label="YouTube" class="bg-slate-800 p-3 rounded-full text-gray-400 hover:text-white hover:bg-red-600 transition duration-300">
+          <i class="fab fa-youtube w-4 h-4 flex items-center justify-center"></i>
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-lg font-bold text-white mb-6 border-b border-gray-800 pb-2">Quick Links</h3>
+      <ul class="space-y-3">
+        <li><a href="index.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Home</a></li>
+        <li><a href="shop.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Shop</a></li>
+        <li><a href="store-locator.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Store Locator</a></li>
+        <li><a href="about.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>About Us</a></li>
+        <li><a href="account.html" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-chevron-right text-yellow-500 text-xs mr-3"></i>Account</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="text-lg font-bold text-white mb-6 border-b border-gray-800 pb-2">Our Services</h3>
+      <ul class="space-y-3">
+        <li><a href="quote.html?service=Tire%20Change" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-tools text-yellow-500 text-xs mr-3"></i>Tire Change</a></li>
+        <li><a href="quote.html?service=Paint%20Job" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-spray-can text-yellow-500 text-xs mr-3"></i>Paint Job</a></li>
+        <li><a href="quote.html?service=Glamping" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-campground text-yellow-500 text-xs mr-3"></i>Glamping</a></li>
+        <li><a href="quote.html?service=4x4%20Set-up" class="text-sm hover:text-yellow-400 transition duration-300 flex items-center"><i class="fas fa-truck-pickup text-yellow-500 text-xs mr-3"></i>4x4 Set-up</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="text-lg font-bold text-white mb-6 border-b border-gray-800 pb-2">Stay Connected</h3>
+      <p class="text-sm text-gray-400 mb-4">Subscribe to our newsletter for the latest products and performance tips.</p>
+      <form class="flex mb-4" onsubmit="event.preventDefault();">
+        <input type="email" placeholder="Email Address" class="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-l-lg focus:outline-none focus:border-yellow-400 text-sm text-white" required>
+        <button type="submit" class="bg-yellow-400 text-black px-4 py-2 rounded-r-lg font-semibold hover:bg-yellow-300 transition duration-300">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </form>
+      <div class="mt-4">
+        <a href="quote.html" class="block w-full text-center px-4 py-2 border-2 border-yellow-400 text-yellow-400 text-sm font-bold rounded-lg hover:bg-yellow-400 hover:text-black transition duration-300">
+          Request a Quote
+        </a>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Why Partner Section -->
-  <div class="section fade-in">
-    <h2>Why Partner with Us?</h2>
-    <p>Collaborate with a trusted automotive brand, increase your visibility, and expand your market reach. Our partners enjoy personalized support and growth opportunities.</p>
-  </div>
-
-  <!-- Benefits Section -->
-  <div class="section fade-in">
-    <h2>Benefits of Partnership</h2>
-    <div class="benefits">
-      <div class="benefit-card"><i class="fa fa-users"></i><p>Access a growing network of auto enthusiasts</p></div>
-      <div class="benefit-card"><i class="fa fa-calendar-alt"></i><p>Participate in exclusive events and promotions</p></div>
-      <div class="benefit-card"><i class="fa fa-handshake"></i><p>Dedicated support and training for your business</p></div>
-      <div class="benefit-card"><i class="fa fa-cogs"></i><p>Flexible partnership options to fit your needs</p></div>
-      <div class="benefit-card"><i class="fa fa-bullseye"></i><p>Boost your brand visibility and credibility</p></div>
-      <div class="benefit-card"><i class="fa fa-gift"></i><p>Special offers and incentives for partners</p></div>
+  <div class="max-w-7xl mx-auto px-6 mt-12 pt-6 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+    <p>&copy; 2026 Show & Go Auto Shop. All Rights Reserved.</p>
+    <div class="flex space-x-6 mt-4 md:mt-0">
+      <a href="#" class="hover:text-yellow-400 transition duration-300">Privacy Policy</a>
+      <a href="#" class="hover:text-yellow-400 transition duration-300">Terms of Service</a>
+      <a href="inquiry.html" class="hover:text-yellow-400 transition duration-300">Partner With Us</a>
     </div>
   </div>
+</footer>
 
-  <!-- Inquiry Form Section -->
-  <div class="section fade-in">
-    <h2>Submit Your Inquiry</h2>
-    <form id="partnerForm">
-      <input type="text" placeholder="Full Name" required>
-      <input type="email" placeholder="Email Address" required>
-      <input type="tel" placeholder="Contact Number" required>
-      <input type="text" placeholder="Business Name (Optional)">
-      <input type="text" placeholder="Business ABN (Optional)">
-      <input type="text" placeholder="Business Address">
-      <textarea placeholder="Additional Notes (Optional)" rows="4"></textarea>
-      <button type="submit">Submit Inquiry</button>
-    </form>
-  </div>
-
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Fade-in on scroll
-const sections = document.querySelectorAll('.fade-in');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if(entry.isIntersecting){
-      entry.target.classList.add('visible');
-      observer.unobserve(entry.target);
-    }
-  });
-}, {threshold:0.2});
-sections.forEach(section => observer.observe(section));
+    // 1. Navbar Toggle Logic
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileIcon = document.getElementById('mobileIcon');
 
-// Form submission
-const form = document.getElementById('partnerForm');
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  alert('Thank you! Your inquiry has been submitted. We will contact you soon.');
-  form.reset();
-});
+    mobileMenuBtn.onclick = () => {
+        const isHidden = mobileMenu.classList.toggle('hidden');
+        mobileIcon.className = isHidden ? 'fa-solid fa-bars' : 'fa-solid fa-xmark';
+    };
+
+    // 2. Intersection Observer for Scroll Animations
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal-element').forEach(s => observer.observe(s));
+
+    // 3. Supabase Integration
+    const SUPABASE_URL = "https://jimjbjtlekdytvnpyykw.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const form = document.getElementById('partnerForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerText;
+        submitBtn.innerText = "SENDING...";
+
+        const { error } = await supabaseClient.from('partner_inquiries').insert([{
+            full_name: document.getElementById('partnerName').value,
+            email: document.getElementById('partnerEmail').value,
+            phone: document.getElementById('partnerPhone').value,
+            business_name: document.getElementById('partnerBusiness').value,
+            address: document.getElementById('partnerAddress').value,
+            notes: document.getElementById('partnerNotes').value,
+            status: 'New'
+        }]);
+
+        if (error) {
+            alert('Submission failed: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+        } else {
+            alert('Your inquiry has been sent! We will review it shortly.');
+            form.reset();
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+        }
+    };
 </script>
 
 </body>

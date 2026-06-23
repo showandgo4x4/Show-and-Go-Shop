@@ -1,369 +1,648 @@
 <!DOCTYPE html>
 <html lang="en">
-  <link rel="icon" href="assets/images/logo.png" type="image/x-icon">
 <head>
-<meta charset="UTF-8">
-<title>Shop - Show & Go Auto Shop</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-html { scroll-behavior: smooth; }
-</style>
+    <meta charset="UTF-8">
+    <title>Shop - Show & Go Auto Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/images/logo.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .product-name {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 3rem; 
+            line-height: 1.5rem;
+            word-break: break-word;
+        }
+        body { font-family: 'Poppins', sans-serif; scroll-behavior: smooth; }
+        /* Shift body content on large screens so the side cart doesn't cover products */
+        @media (min-width: 1024px) { body { padding-right: 18rem; } } 
+        
+        .product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .product-card:hover { transform: translateY(-5px); }
+        
+        nav { background: #0f172a; border-bottom: 1px solid rgba(250, 204, 21, 0.1); }
+        .cart-badge { 
+            position: absolute; top: -8px; right: -12px; 
+            background: #facc15; color: #000; 
+            font-size: 10px; font-weight: 800; 
+            height: 18px; width: 18px; 
+            display: flex; align-items: center; justify-content: center; 
+            border-radius: 50%; border: 2px solid #0f172a;
+        }
+    </style>
 </head>
-<body class="bg-black text-white">
+<body class="bg-gray-50 text-slate-900">
 
-<!-- ================= NAVBAR ================= -->
-<nav class="bg-black border-b border-gray-800 px-4 md:px-8 py-3 flex justify-between items-center sticky top-0 z-50">
-  <a href="index.html"><img src="assets/images/logo.png" class="h-12"></a>
-  
-  <!-- Desktop links -->
-  <div class="hidden md:flex items-center space-x-8 text-sm font-medium">
-    <a href="index.html" class="text-gray-300 hover:text-white transition">Home</a>
-    <a href="shop.html" class="text-gray-300 hover:text-white transition">Shop</a>
-    <a href="cart.html" class="relative text-gray-300 hover:text-white transition">
-      Cart
-      <span id="cartCount" class="absolute -top-2 -right-4 bg-yellow-500 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full font-semibold">0</span>
-    </a>
-    <div class="h-5 w-px bg-gray-700"></div>
-    <div id="authTabs" class="flex items-center space-x-4">
-      <a href="#" id="loginBtn" class="px-4 py-2 rounded-md text-sm font-medium border border-gray-600 text-gray-300 hover:border-yellow-500 hover:text-yellow-400 transition">Sign In</a>
-      <a href="#" id="registerBtn" class="px-4 py-2 rounded-md text-sm font-semibold bg-yellow-500 text-black hover:bg-yellow-400 transition">Create Account</a>
-      <div id="userDropdown" class="relative hidden">
-        <button id="userMenuBtn" class="px-4 py-2 rounded-md text-sm font-medium border border-gray-600 text-gray-300 hover:border-yellow-500 hover:text-yellow-400 transition">Account ▾</button>
-        <div id="userMenu" class="hidden absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded-md shadow-lg overflow-hidden">
-          <a href="account.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 transition">My Account</a>
-          <button id="authLogoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition">Logout</button>
+<nav class="sticky top-0 z-[1000] w-full transition-all shadow-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-20">
+        <a href="index.html" class="flex items-center space-x-3 group">
+            <img src="assets/images/logo.png" alt="Logo" class="h-12 w-12 object-contain transition-transform group-hover:scale-110">
+            <div class="flex flex-col leading-none">
+                <span class="text-xl font-black text-yellow-400 tracking-tighter">SHOW & GO</span>
+                <span class="text-[10px] text-white tracking-[0.2em] font-bold">REPAIR SHOP</span>
+            </div>
+        </a>
+
+        <div class="hidden lg:flex items-center space-x-8">
+            <div class="flex items-center space-x-6 text-sm font-semibold text-gray-300">
+                <a href="index.html" class="hover:text-yellow-400 transition">Home</a>
+                <a href="shop.html" class="text-yellow-400 underline underline-offset-8 decoration-2 font-bold">Shop</a>
+                <a href="cart.html" class="relative hover:text-yellow-400 transition">
+                    Cart <span id="cartCount" class="cart-badge">0</span>
+                </a>
+                <a href="about.html" class="hover:text-yellow-400 transition">About</a>
+                <a href="camping.html" class="hover:text-yellow-400 transition">Community</a>
+            </div>
+
+            <div id="authTabs" class="flex items-center space-x-3">
+                <div id="guestLinks" class="flex space-x-3">
+                    <button onclick="location.href='login.html'" class="border border-yellow-400/50 text-yellow-400 px-5 py-2 rounded-full font-bold text-xs uppercase hover:bg-yellow-400 hover:text-black transition">Sign In</button>
+                    <button onclick="location.href='register.html'" class="bg-yellow-400 text-black px-5 py-2 rounded-full font-bold text-xs uppercase hover:bg-yellow-300 transition shadow-lg shadow-yellow-400/20">Join</button>
+                </div>
+                <div id="userDropdown" class="relative hidden">
+                    <button id="userMenuBtn" class="flex items-center space-x-2 bg-slate-800 text-white px-4 py-2 rounded-full text-xs font-bold border border-slate-700 hover:border-yellow-400 transition">
+                        <span>MY ACCOUNT</span>
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div id="userMenu" class="hidden absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-xl shadow-2xl overflow-hidden py-2">
+                        <a href="account.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition">Profile & Orders</a>
+                        <button id="authLogoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition">Logout</button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Mobile: Home, Cart, and Auth -->
-  <div id="mobileNav" class="flex md:hidden space-x-4 items-center relative">
-    <a href="index.html" class="text-gray-300 hover:text-white transition">Home</a>
-    <a href="cart.html" class="relative text-gray-300 hover:text-white transition">
-      Cart
-      <span id="cartCountMobile" class="absolute -top-2 -right-4 bg-yellow-500 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full font-semibold">0</span>
-    </a>
-    <div id="mobileAuthContainer" class="flex space-x-2 items-center"></div>
-  </div>
+        <div class="lg:hidden flex items-center space-x-5">
+            <a href="cart.html" class="relative text-yellow-400 text-xl">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cartCountMobile" class="cart-badge">0</span>
+            </a>
+            <button id="mobileMenuBtn" class="text-yellow-400 text-3xl"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </div>
+
+    <div id="mobileMenu" class="hidden lg:hidden bg-slate-900 border-b border-yellow-500/20 p-6 space-y-4">
+        <a href="index.html" class="block text-white font-medium">Home</a>
+        <a href="shop.html" class="block text-yellow-400 font-bold">Shop</a>
+        <a href="about.html" class="block text-white font-medium">About</a>
+        <a href="account.html" class="block text-white font-medium">My Account</a>
+        <div id="mobileAuthContainer" class="pt-4 flex flex-col gap-3"></div>
+    </div>
 </nav>
 
-<!-- ================= SHOP ================= -->
-<section class="p-4 md:p-12">
-  <div class="max-w-6xl mx-auto">
-    <div class="flex justify-between items-center mb-6 md:mb-8">
-      <h2 class="text-2xl md:text-3xl font-bold text-yellow-400">Shop Products</h2>
-      <select id="categorySelect" class="bg-gray-900 border border-yellow-500 px-3 py-1 md:px-4 md:py-2 rounded text-sm md:text-base">
-        <option value="All">All Categories</option>
-      </select>
+<header class="bg-slate-900 py-12 px-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">PREMIUM <span class="text-yellow-400">PARTS</span></h1>
+            <p class="text-slate-400 text-sm mt-2">Quality tested components for your vehicle.</p>
+        </div>
+        <div class="w-full md:w-auto">
+            <label class="text-[10px] font-bold text-yellow-500 uppercase tracking-widest mb-2 block">Filter by Category</label>
+            <select id="categorySelect" class="w-full md:w-64 bg-slate-800 text-white border border-slate-700 px-4 py-3 rounded-xl focus:ring-2 focus:ring-yellow-400 outline-none appearance-none cursor-pointer">
+                <option value="All">All Categories</option>
+            </select>
+        </div>
     </div>
-    <div id="productsList" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-8"></div>
-  </div>
+</header>
+
+<section class="max-w-7xl mx-auto p-6 md:py-12">
+    <div id="productsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
 </section>
 
-<!-- ================= AUTH MODAL ================= -->
-<div id="authModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 opacity-0 transition-opacity duration-300">
-  <div id="authModalBox" class="bg-gray-900 w-full max-w-md p-6 md:p-8 rounded-xl border border-gray-800 shadow-2xl relative transform scale-95 transition-all duration-300">
-    <div class="flex justify-center space-x-8 mb-6 text-sm font-semibold">
-      <button id="loginTab" class="text-yellow-400 border-b-2 border-yellow-400 pb-2">Sign In</button>
-      <button id="registerTab" class="text-gray-500 hover:text-gray-300 pb-2 transition">Create Account</button>
+<div id="quickViewModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[100] p-4">
+    <div class="bg-white rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl flex flex-col md:flex-row relative">
+        <button onclick="closeQuickView()" class="absolute top-4 right-4 text-gray-400 hover:text-black z-10">
+            <i class="fa-solid fa-circle-xmark text-2xl"></i>
+        </button>
+
+        <div class="md:w-1/2 bg-slate-50 flex items-center justify-center p-8">
+            <img id="qvImage" src="" class="max-h-[350px] object-contain transition-all duration-300">
+        </div>
+
+        <div class="md:w-1/2 p-8 flex flex-col">
+            <div id="qvCategory" class="text-[10px] font-bold text-yellow-600 uppercase tracking-widest mb-1">Category</div>
+            <h2 id="qvName" class="text-2xl font-black text-slate-900 mb-2">Product Name</h2>
+            
+            <div class="flex items-center space-x-4 mb-4">
+                <span id="qvPrice" class="text-3xl font-bold text-slate-900">₱0.00</span>
+                <span id="qvStock" class="text-xs text-gray-400 font-medium bg-gray-100 px-2 py-1 rounded">Stock: 0</span>
+            </div>
+
+            <p id="qvDesc" class="text-gray-500 text-sm mb-6 leading-relaxed">Description...</p>
+
+            <div class="mb-8">
+                <h4 class="text-xs font-bold text-slate-900 mb-3 uppercase tracking-widest">Color Family</h4>
+                <div id="variantOptions" class="flex flex-wrap gap-2">
+                    </div>
+            </div>
+
+            <button id="qvAddToCartBtn" class="w-full bg-yellow-400 text-black py-4 rounded-xl font-bold hover:bg-yellow-500 transition-all flex items-center justify-center space-x-2 shadow-lg shadow-yellow-200">
+                <i class="fa-solid fa-cart-plus"></i>
+                <span>Add to Cart</span>
+            </button>
+        </div>
     </div>
-    <form id="authForm" class="flex flex-col space-y-4">
-      <input id="authUsername" type="text" placeholder="Username" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none">
-      <input id="authContact" type="text" placeholder="Contact Number" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none hidden">
-      <input id="authAddress" type="text" placeholder="Address" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none hidden">
-      <input id="authEmail" type="email" placeholder="Email" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none">
-      <input id="authPassword" type="password" placeholder="Password" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none">
-      <input id="authConfirmPassword" type="password" placeholder="Confirm Password" class="px-4 py-3 rounded-md bg-black border border-gray-700 focus:border-yellow-500 outline-none hidden">
-      <button type="submit" class="mt-2 py-3 rounded-md bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition">Continue</button>
-    </form>
-    <p id="authMessage" class="text-red-400 text-sm mt-3"></p>
-    <button id="closeAuth" class="absolute top-4 right-4 text-gray-500 hover:text-white text-lg">×</button>
-  </div>
 </div>
+
+<div id="sideCart" class="fixed top-0 right-0 h-full w-72 bg-white shadow-2xl z-[60] flex flex-col border-l border-slate-100 hidden lg:flex">
+    <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+        <h2 class="font-bold text-sm"><i class="fa fa-shopping-basket mr-2 text-yellow-400"></i> My Order</h2>
+        <span id="sideCartCount" class="bg-yellow-400 text-black text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+    </div>
+    
+    <div id="sideCartItems" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
+        </div>
+
+    <div class="p-4 border-t bg-white shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+        <div class="flex justify-between items-center mb-4">
+            <span class="text-slate-500 text-xs font-medium">Total Amount</span>
+            <span id="sideCartTotal" class="text-lg font-black text-slate-900">₱0</span>
+        </div>
+        <button onclick="location.href='cart.html'" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-yellow-400 hover:text-black transition-all shadow-lg shadow-slate-200">
+            Check Out
+        </button>
+    </div>
+</div>
+
 <script>
-document.addEventListener("DOMContentLoaded", async () => {
-  // ========== SUPABASE ==========
-  const supabaseUrl = "https://jimjbjtlekdytvnpyykw.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-  let loggedInUser = null;
-  let cart = [];
-  let products = [];
-  let isRegister = true;
-
-  // ========== DOM ELEMENTS ==========
-  const loginBtn = document.getElementById("loginBtn");
-  const registerBtn = document.getElementById("registerBtn");
-  const userDropdown = document.getElementById("userDropdown");
-  const authLogoutBtn = document.getElementById("authLogoutBtn");
-  const userMenuBtn = document.getElementById("userMenuBtn");
-const userMenu = document.getElementById("userMenu");
-
-// Toggle dropdown
-userMenuBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  userMenu.classList.toggle("hidden");
-});
-
-// Close when clicking outside
-document.addEventListener("click", (e) => {
-  if (!userMenu.contains(e.target) && !userMenuBtn.contains(e.target)) {
-    userMenu.classList.add("hidden");
-  }
-});
-  const mobileAuthContainer = document.getElementById("mobileAuthContainer");
-  const authModal = document.getElementById("authModal");
-  const closeAuth = document.getElementById("closeAuth");
-  const loginTab = document.getElementById("loginTab");
-  const registerTab = document.getElementById("registerTab");
-  const authForm = document.getElementById("authForm");
-  const authUsername = document.getElementById("authUsername");
-  const authContact = document.getElementById("authContact");
-  const authAddress = document.getElementById("authAddress");
-  const authEmail = document.getElementById("authEmail");
-  const authPassword = document.getElementById("authPassword");
-  const authConfirmPassword = document.getElementById("authConfirmPassword");
-  const authMessage = document.getElementById("authMessage");
-  const productList = document.getElementById("productsList");
-  const categorySelect = document.getElementById("categorySelect");
-
-  // ========== MODAL FUNCTIONS ==========
-  function showModal(){ authModal.classList.remove("hidden"); setTimeout(()=>authModal.classList.add("opacity-100"),10); }
-  function hideModal(){ authModal.classList.remove("opacity-100"); setTimeout(()=>authModal.classList.add("hidden"),300); }
-
-  function updateAuthUI(){
-    if(loggedInUser){
-      loginBtn.classList.add("hidden");
-      registerBtn.classList.add("hidden");
-      userDropdown.classList.remove("hidden");
-    } else {
-      loginBtn.classList.remove("hidden");
-      registerBtn.classList.remove("hidden");
-      userDropdown.classList.add("hidden");
-    }
-    updateMobileAuthUI();
-  }
-
-  // ========== SWITCH TABS & SHOW FIELDS ==========
-  loginBtn.addEventListener("click", () => { showModal(); loginTab.click(); });
-  registerBtn.addEventListener("click", () => { showModal(); registerTab.click(); });
-
-  loginTab.addEventListener("click", ()=>{
-    isRegister = false;
-    loginTab.classList.add("text-yellow-400","border-b-2","border-yellow-400");
-    registerTab.classList.remove("text-yellow-400","border-b-2","border-yellow-400");
-    authConfirmPassword.classList.add("hidden");
-    authContact.classList.add("hidden");
-    authAddress.classList.add("hidden");
-    authMessage.textContent="";
-  });
-
-  registerTab.addEventListener("click", ()=>{
-    isRegister = true;
-    registerTab.classList.add("text-yellow-400","border-b-2","border-yellow-400");
-    loginTab.classList.remove("text-yellow-400","border-b-2","border-yellow-400");
-    authConfirmPassword.classList.remove("hidden");
-    authContact.classList.remove("hidden");
-    authAddress.classList.remove("hidden");
-    authMessage.textContent="";
-  });
-
-  closeAuth.addEventListener("click", hideModal);
-
-  // ========== FORM SUBMIT ==========
-  authForm.addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    authMessage.textContent="";
-
-    const username = authUsername.value.trim() || "";
-    const contact = authContact.value.trim() || "";
-    const address = authAddress.value.trim() || "";
-    const email = authEmail.value.trim();
-    const password = authPassword.value.trim();
-    const confirm = authConfirmPassword.value.trim();
-
-    try{
-      if(isRegister){
-        if(password !== confirm){ authMessage.textContent="Passwords do not match!"; return; }
-
-        // Signup via Supabase Auth
-        const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
-        if(signupError){ authMessage.textContent = signupError.message; return; }
-
-        // Insert profile into "profiles"
-        const { error: profileError } = await supabase.from("profiles").insert([{
-          id: signupData.user.id,
-          username,
-          email,
-          contact,
-          address,
-          payments: JSON.stringify([]),
-          is_admin: false
-        }]);
-
-        if(profileError){ authMessage.textContent="Signed up, but profile error: "+profileError.message; return; }
-
-        authMessage.textContent="Registered! Please check your email.";
-        isRegister = false;
-        loginTab.click();
-
-      } else {
-        // LOGIN
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if(error){ authMessage.textContent = error.message; return; }
-        loggedInUser = data.user.id;
-        hideModal();
-        updateAuthUI();
-        await loadCart();
-      }
-    } catch(err){ console.error(err); authMessage.textContent="Something went wrong"; }
-  });
-
-  // ========== LOGOUT ==========
-  authLogoutBtn.addEventListener("click", async ()=>{
-    await supabase.auth.signOut();
-    loggedInUser = null;
-    cart = [];
-    updateAuthUI();
-  });
-
-  // ========== MOBILE AUTH ==========
-  function updateMobileAuthUI(){
-    mobileAuthContainer.innerHTML="";
-    if(loggedInUser){
-      const accBtn = document.createElement("button");
-      accBtn.textContent="Account ▾";
-      accBtn.className="px-3 py-1 border border-gray-600 rounded text-gray-300 hover:border-yellow-500 hover:text-yellow-400 text-sm relative z-50";
-      const menu = document.createElement("div");
-      menu.className="hidden absolute top-10 right-0 w-40 bg-gray-900 border border-gray-800 rounded-md shadow-lg overflow-hidden z-50";
-      menu.innerHTML=`
-        <a href="account.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 transition">My Account</a>
-        <button id="mobileLogoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition">Logout</button>
-      `;
-      accBtn.addEventListener("click", e=>{ e.stopPropagation(); menu.classList.toggle("hidden"); });
-      document.addEventListener("click", e=>{ if(!menu.contains(e.target) && !accBtn.contains(e.target)) menu.classList.add("hidden"); });
-      mobileAuthContainer.appendChild(accBtn);
-      mobileAuthContainer.appendChild(menu);
-      menu.querySelector("#mobileLogoutBtn").addEventListener("click", async ()=>{
-        await supabase.auth.signOut();
-        loggedInUser=null; cart=[];
-        updateAuthUI();
-      });
-    } else {
-      const loginBtnMobile = document.createElement("button");
-      loginBtnMobile.textContent="Sign In";
-      loginBtnMobile.className="px-3 py-1 border border-gray-600 rounded text-gray-300 hover:border-yellow-500 hover:text-yellow-400 text-sm";
-      loginBtnMobile.addEventListener("click", ()=>loginBtn.click());
-      const registerBtnMobile = document.createElement("button");
-      registerBtnMobile.textContent="Create Account";
-      registerBtnMobile.className="px-3 py-1 bg-yellow-500 text-black rounded text-sm hover:bg-yellow-400";
-      registerBtnMobile.addEventListener("click", ()=>registerBtn.click());
-      mobileAuthContainer.appendChild(loginBtnMobile);
-      mobileAuthContainer.appendChild(registerBtnMobile);
-    }
-  }
-
-  // ========== PRODUCTS & CART ==========
-  async function loadCategories(){
-    const { data } = await supabase.from("categories").select("*").order("id");
-    categorySelect.innerHTML = '<option value="All">All Categories</option>';
-    data.forEach(c=> categorySelect.appendChild(Object.assign(document.createElement("option"),{ value:c.name, textContent:c.name })));
-  }
-
-  async function loadProducts() {
-  // Fetch products with their category name using foreign key
-  const { data, error } = await supabase
-    .from("products")
-    .select(`id, name, price, stock, image_url, categories(name)`) // join categories
-    .order("id");
-
-  if (error) {
-    console.error("Error loading products:", error);
-    return;
-  }
-
-  // Map to local products array
-  products = data.map(p => ({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    stock: p.stock ?? 0,
-    category: p.categories?.name || "Uncategorized", // category name from relation
-    img: p.image_url || "assets/images/Default.png"
-  }));
-
-  renderProducts(categorySelect.value);
+// Global functions for HTML
+function closeQuickView() {
+    const modal = document.getElementById("quickViewModal");
+    modal.classList.replace("flex", "hidden");
 }
 
-  function renderProducts(filter="All"){
-    productList.innerHTML="";
-    products.filter(p=>filter==="All"||p.category===filter).forEach(p=>{
-      const card = document.createElement("div");
-      card.className=`bg-gray-900 p-2 md:p-4 rounded-xl flex flex-col items-center transform transition duration-300 hover:scale-105 hover:shadow-xl hover:bg-gray-800 cursor-pointer`;
-      card.innerHTML=`
-        <div class="overflow-hidden rounded-lg w-full h-48 flex items-center justify-center bg-gray-800">
-  <img src="${p.img}" class="max-w-full max-h-full object-contain transition-transform duration-300 hover:scale-110">
-</div>
-        <h3 class="text-yellow-400 font-bold mt-1 md:mt-3 text-sm md:text-base">${p.name}</h3>
-        <p class="mt-1 text-xs md:text-sm">₱${p.price}</p>
-        <p class="mt-1 text-xs md:text-sm">Stock: <span>${p.stock}</span></p>
-      `;
-      const btn=document.createElement("button");
-      btn.textContent="Add to Cart";
-      btn.className="bg-green-500 px-2 py-1 md:px-4 md:py-2 mt-2 rounded text-black font-semibold hover:bg-green-400 transition text-xs md:text-sm";
-      btn.onclick=async ()=>{
-        if(!loggedInUser){ alert("Please login first!"); return; }
-        await addToCart(p.id);
-        updateCartCount();
-      };
-      card.appendChild(btn);
-      productList.appendChild(card);
-    });
-    updateCartCount();
-  }
+document.addEventListener("DOMContentLoaded", async () => {
+    const supabaseUrl = "https://jimjbjtlekdytvnpyykw.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  async function loadCart(){
-    if(!loggedInUser) return;
-    const { data } = await supabase.from("carts").select("*").eq("user_id", loggedInUser);
-    cart = data || [];
-    updateCartCount();
-  }
+    let loggedInUser = null;
+    let cart = [];
+    let products = [];
 
-  async function addToCart(productId){
-    const product = products.find(p=>p.id===productId);
-    if(!product || product.stock<=0){ alert("Out of stock"); return; }
-    let existing = cart.find(c=>c.product_id===productId);
-    if(existing){
-      existing.quantity++;
-      await supabase.from("carts").update({ quantity:existing.quantity }).eq("id",existing.id);
-    } else {
-      const { data } = await supabase.from("carts").insert([{ user_id:loggedInUser, product_id:productId, quantity:1 }]).select().maybeSingle();
-      cart.push(data);
+    // UI elements
+    const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+    const userMenuBtn = document.getElementById("userMenuBtn");
+    const userMenu = document.getElementById("userMenu");
+
+    mobileMenuBtn.onclick = () => mobileMenu.classList.toggle("hidden");
+    userMenuBtn.onclick = (e) => { e.stopPropagation(); userMenu.classList.toggle("hidden"); };
+    document.onclick = () => userMenu.classList.add("hidden");
+
+    function updateAuthUI() {
+        const guestLinks = document.getElementById("guestLinks");
+        const userDropdown = document.getElementById("userDropdown");
+        if (loggedInUser) {
+            guestLinks.classList.add("hidden");
+            userDropdown.classList.remove("hidden");
+        } else {
+            guestLinks.classList.remove("hidden");
+            userDropdown.classList.add("hidden");
+        }
+        updateMobileAuthUI();
     }
-    product.stock--;
-    await supabase.from("products").update({ stock:product.stock }).eq("id",productId);
-    renderProducts(categorySelect.value);
-  }
 
-  function updateCartCount(){ 
-    const count = cart.reduce((sum,c)=>sum+c.quantity,0); 
-    document.getElementById("cartCount").textContent = count;
-    document.getElementById("cartCountMobile").textContent = count;
-  }
+    function updateMobileAuthUI() {
+        const container = document.getElementById("mobileAuthContainer");
+        if(!container) return;
+        container.innerHTML = loggedInUser 
+            ? `<button onclick="location.href='account.html'" class="w-full bg-slate-800 text-white p-3 rounded-xl font-bold">My Account</button>
+               <button id="mobileLogout" class="w-full border border-red-500 text-red-500 p-3 rounded-xl font-bold">Logout</button>`
+            : `<button onclick="location.href='login.html'" class="w-full bg-yellow-400 text-black p-3 rounded-xl font-bold">Sign In</button>
+               <button onclick="location.href='register.html'" class="w-full border border-yellow-400 text-yellow-400 p-3 rounded-xl font-bold">Join</button>`;
+        
+        if(loggedInUser) {
+            document.getElementById("mobileLogout").onclick = () => document.getElementById("authLogoutBtn").click();
+        }
+    }
 
-  categorySelect.addEventListener("change", ()=>renderProducts(categorySelect.value));
+    document.getElementById("authLogoutBtn").onclick = async () => {
+        await supabase.auth.signOut();
+        loggedInUser = null;
+        cart = [];
+        updateAuthUI();
+        updateCartCount();
+        renderSideCart();
+    };
 
-  // ========== INIT ==========
-  const { data: { session } } = await supabase.auth.getSession();
-  if(session) loggedInUser = session.user.id;
-  updateAuthUI();
-  await loadCategories();
-  await loadProducts();
-  await loadCart();
+    async function loadProducts() {
+        const { data } = await supabase.from("products").select("*, categories(name)").order("id");
+        products = data.map(p => ({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            description: p.description,
+            variants: p.variants,
+            stock: p.stock ?? 0,
+            category: p.categories?.name || "Uncategorized",
+            img: p.image_url || "assets/images/Default.png"
+        }));
+        renderProducts();
+    }
+
+    function renderProducts() {
+        const list = document.getElementById("productsList");
+        const filter = document.getElementById("categorySelect").value;
+        list.innerHTML = "";
+        
+        products.filter(p => filter === "All" || p.category === filter).forEach(p => {
+            const card = document.createElement("div");
+            card.className = "product-card bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl";
+            card.onclick = () => openQuickView(p);
+
+            card.innerHTML = `
+                <div class="h-48 rounded-xl bg-slate-50 flex items-center justify-center mb-4 overflow-hidden relative">
+                    <img src="${p.img}" class="h-full w-full object-contain p-4 hover:scale-110 transition duration-500">
+                    ${p.stock <= 0 ? '<div class="absolute inset-0 bg-white/60 flex items-center justify-center"><span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded">SOLD OUT</span></div>' : ''}
+                </div>
+                <div class="text-[10px] font-bold text-yellow-600 uppercase tracking-widest mb-1">${p.category}</div>
+                <h3 class="font-bold text-slate-900 mb-1 product-name">${p.name}</h3>
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-xl font-black text-slate-900">₱${Number(p.price).toLocaleString()}</p>
+                    </div>
+                    <button id="addBtn-${p.id}" ${p.stock <= 0 ? 'disabled' : ''} class="bg-slate-900 text-white h-10 w-10 rounded-lg hover:bg-yellow-400 hover:text-black transition flex items-center justify-center relative z-10 disabled:opacity-50">
+                        <i class="fa-solid fa-cart-plus"></i>
+                    </button>
+                </div>
+            `;
+            
+            card.querySelector(`#addBtn-${p.id}`).onclick = (e) => {
+                e.stopPropagation(); 
+                addToCart(p.id);
+            };
+            list.appendChild(card);
+        });
+    }
+
+    function openQuickView(p) {
+        const modal = document.getElementById("quickViewModal");
+        
+        document.getElementById("qvName").textContent = p.name;
+        document.getElementById("qvPrice").textContent = `₱${Number(p.price).toLocaleString()}`;
+        document.getElementById("qvImage").src = p.img;
+        document.getElementById("qvCategory").textContent = p.category;
+        document.getElementById("qvStock").textContent = `Available: ${p.stock}`;
+        document.getElementById("qvDesc").textContent = p.description || "Premium quality auto part.";
+
+        const variantContainer = document.getElementById("variantOptions");
+        variantContainer.innerHTML = ""; 
+
+       let selectedVariant = null;
+
+let vars = [];
+
+try {
+    vars = typeof p.variants === "string"
+        ? JSON.parse(p.variants)
+        : p.variants || [];
+} catch {
+    vars = [];
+}
+
+vars.forEach((v, index) => {
+
+    const btn = document.createElement("button");
+
+    btn.className = `
+        variant-btn
+        border
+        rounded-xl
+        overflow-hidden
+        w-20
+        hover:border-yellow-500
+        transition
+        bg-white
+    `;
+
+    btn.innerHTML = `
+        <div class="h-14 bg-gray-50 flex items-center justify-center">
+            <img src="${v.img || p.img}" class="h-full object-contain">
+        </div>
+
+        <div class="text-[10px] font-semibold p-2 text-center">
+            ${v.color}
+        </div>
+    `;
+
+    btn.onclick = () => {
+
+        selectedVariant = v.color;
+
+        document.getElementById("qvImage").src = v.img || p.img;
+
+        document.querySelectorAll(".variant-btn").forEach(el => {
+            el.classList.remove(
+                "border-yellow-500",
+                "ring-2",
+                "ring-yellow-400"
+            );
+        });
+
+        btn.classList.add(
+            "border-yellow-500",
+            "ring-2",
+            "ring-yellow-400"
+        );
+    };
+
+    variantContainer.appendChild(btn);
+
+    // auto select first variant
+    if (index === 0) {
+        btn.click();
+    }
+});
+
+        const addBtn = document.getElementById("qvAddToCartBtn");
+        addBtn.onclick = () => addToCart(p.id, selectedVariant);
+        addBtn.disabled = p.stock <= 0;
+        addBtn.innerHTML = p.stock <= 0 ? "OUT OF STOCK" : `<i class="fa-solid fa-cart-plus mr-2"></i> Add to Cart`;
+
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+    }
+
+   async function addToCart(productId, selectedVariant = null) {
+    if (!loggedInUser) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const p = products.find(x => x.id === productId);
+    if (!p) return;
+
+    if (p.stock <= 0) {
+        alert("Out of stock!");
+        return;
+    }
+
+    let existing = cart.find(c =>
+        c.product_id === productId &&
+        c.variant === selectedVariant
+    );
+
+    if (existing) {
+
+        existing.quantity++;
+
+        await supabase
+            .from("carts")
+            .update({ quantity: existing.quantity })
+            .eq("id", existing.id);
+
+    } else {
+
+        const { data, error } = await supabase
+            .from("carts")
+            .insert([{
+                user_id: loggedInUser,
+                product_id: productId,
+                quantity: 1,
+                variant: selectedVariant
+            }])
+            .select()
+            .single();
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        cart.push({
+            ...data,
+            products: {
+                name: p.name,
+                price: p.price,
+                image_url: p.img
+            }
+        });
+    }
+
+    p.stock--;
+
+    await supabase
+        .from("products")
+        .update({ stock: p.stock })
+        .eq("id", productId);
+
+    updateCartCount();
+    renderSideCart();
+    renderProducts();
+}
+
+    async function loadCart() {
+        if (!loggedInUser) return;
+        const { data, error } = await supabase
+            .from("carts")
+            .select("*, products(*)")
+            .eq("user_id", loggedInUser);
+
+        if (error) { console.error(error); return; }
+        cart = data || [];
+        updateCartCount();
+        renderSideCart(); 
+    }
+
+    // --- ATTACH TO WINDOW SO ONCLICK WORKS ---
+
+window.updateCartQty = async (productId, variant, change) => {
+
+    console.log("update qty clicked");
+
+    const item = cart.find(c =>
+        String(c.product_id) === String(productId) &&
+        String(c.variant || "") === String(variant || "")
+    );
+
+    if (!item) {
+        console.log("item not found");
+        return;
+    }
+
+    const product = products.find(p =>
+        String(p.id) === String(productId)
+    );
+
+    if (!product) {
+        console.log("product not found");
+        return;
+    }
+
+    if (change > 0 && product.stock <= 0) {
+        alert("No more stock available");
+        return;
+    }
+
+    const newQty = item.quantity + change;
+
+    if (newQty <= 0) {
+        await window.removeFromCart(productId, variant);
+        return;
+    }
+
+    item.quantity = newQty;
+
+    if (change > 0) {
+        product.stock--;
+    } else {
+        product.stock++;
+    }
+
+    renderSideCart();
+    updateCartCount();
+    renderProducts();
+
+    await supabase
+        .from("carts")
+        .update({
+            quantity: newQty
+        })
+        .eq("id", item.id);
+
+    await supabase
+        .from("products")
+        .update({
+            stock: product.stock
+        })
+        .eq("id", product.id);
+};
+
+window.removeFromCart = async (productId, variant) => {
+
+    console.log("remove clicked");
+
+    const itemIndex = cart.findIndex(c =>
+        String(c.product_id) === String(productId) &&
+        String(c.variant || "") === String(variant || "")
+    );
+
+    if (itemIndex === -1) {
+        console.log("item not found");
+        return;
+    }
+
+    const item = cart[itemIndex];
+
+    const product = products.find(p =>
+        String(p.id) === String(productId)
+    );
+
+    if (product) {
+
+        product.stock += item.quantity;
+
+        await supabase
+            .from("products")
+            .update({
+                stock: product.stock
+            })
+            .eq("id", product.id);
+    }
+
+    cart.splice(itemIndex, 1);
+
+    renderSideCart();
+    updateCartCount();
+    renderProducts();
+
+    await supabase
+        .from("carts")
+        .delete()
+        .eq("id", item.id);
+};
+
+function renderSideCart() {
+    const container = document.getElementById("sideCartItems");
+    const totalElem = document.getElementById("sideCartTotal");
+    
+    if (!container) return;
+    container.innerHTML = "";
+    let total = 0;
+
+    if (cart.length === 0) {
+        container.innerHTML = `<p class="text-center text-gray-400 text-[10px] mt-10 italic">Your cart is empty</p>`;
+        if (totalElem) totalElem.textContent = "₱0";
+        return;
+    }
+
+    cart.forEach(item => {
+        const productData = item.products || {};
+
+const itemPrice = Number(productData.price || 0);
+        total += itemPrice * item.quantity;
+        
+        const itemDiv = document.createElement("div");
+        // flex-nowrap and gap-2 stops the squishing
+        itemDiv.className = "flex items-center justify-between bg-white p-2 rounded-xl border border-slate-100 shadow-sm gap-2";
+        
+        itemDiv.innerHTML = `
+            <div class="flex items-center space-x-2 flex-1 min-w-0">
+                <img src="${productData.image_url || 'assets/images/Default.png'}" class="w-8 h-8 object-contain rounded-md bg-slate-50 flex-shrink-0">
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-[10px] font-bold text-slate-800 truncate">${productData.name || 'Product'}</h4>
+                    <p class="text-[8px] text-gray-400">
+    ${item.variant || ""}
+</p>
+                    <p class="text-[9px] text-emerald-600 font-bold">₱${itemPrice.toLocaleString()}</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-1 flex-shrink-0">
+                <div class="flex items-center bg-slate-100 rounded-lg border border-slate-200 overflow-hidden">
+                    <button onclick="updateCartQty('${item.product_id}', '${item.variant || ""}', -1)" class="px-2 py-1 hover:bg-white transition text-[10px] font-bold text-slate-600">-</button>
+                    <span class="px-1 text-[10px] font-black text-slate-900 min-w-[14px] text-center">${item.quantity}</span>
+                    <button onclick="updateCartQty('${item.product_id}', '${item.variant || ""}', 1)" class="px-2 py-1 hover:bg-white transition text-[10px] font-bold text-slate-600">+</button>
+                </div>
+                
+                <button onclick="removeFromCart('${item.product_id}', '${item.variant || ""}')" class="text-red-400 hover:text-red-600 transition-colors p-1">
+                    <i class="fa-solid fa-trash-can text-[11px]"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(itemDiv);
+    });
+
+    if (totalElem) totalElem.textContent = `₱${total.toLocaleString()}`;
+}
+
+    function updateCartCount() {
+        const total = cart.reduce((s, c) => s + c.quantity, 0);
+        const countElem = document.getElementById("cartCount");
+        const countMobileElem = document.getElementById("cartCountMobile");
+        if(countElem) countElem.textContent = total;
+        if(countMobileElem) countMobileElem.textContent = total;
+    }
+
+    // Load Categories
+    const { data: cats } = await supabase.from("categories").select("name");
+    cats?.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = opt.textContent = c.name;
+        document.getElementById("categorySelect").appendChild(opt);
+    });
+
+    document.getElementById("categorySelect").onchange = renderProducts;
+
+    // Get Auth Session
+    const { data: { session } } = await supabase.auth.getSession();
+    if(session) loggedInUser = session.user.id;
+    
+    updateAuthUI();
+    await loadProducts();
+    await loadCart();
+
+    document.getElementById("quickViewModal").onclick = (e) => {
+        if (e.target.id === "quickViewModal") closeQuickView();
+    };
 });
 </script>
 </body>

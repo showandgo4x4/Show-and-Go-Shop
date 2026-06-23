@@ -109,329 +109,188 @@ input:focus, select:focus, textarea:focus { outline:none; border-color:#10b981; 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// 1. GLOBAL SETUP (Accessible by all functions)
+const SUPABASE_URL = "https://jimjbjtlekdytvnpyykw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let loggedInUser = null;
+let cart = [];
+
 document.addEventListener("DOMContentLoaded", async () => {
+    const cartList = document.getElementById("cartList");
+    const cartTotal = document.getElementById("cartTotal");
+    const paymentTotal = document.getElementById("paymentTotal");
 
-  const supabaseUrl = "https://jimjbjtlekdytvnpyykw.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWpianRsZWtkeXR2bnB5eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NDM3NzQsImV4cCI6MjA4ODAxOTc3NH0.SZa7CNAx0SWBNsuDqcnrNYS6iwnOmBJ3tD1mSQETZhE";
-  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-  let loggedInUser = null;
-  let cart = [];
-
-  const cartList = document.getElementById("cartList");
-  const cartTotal = document.getElementById("cartTotal");
-  const paymentTotal = document.getElementById("paymentTotal");
-
-  // ---------------- SESSION ----------------
-  async function checkSession() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if(session) loggedInUser = session.user.id;
-    await loadCart();
-  }
-
-  // ---------------- LOAD CART ----------------
-  async function loadCart() {
-    if(!loggedInUser) return;
-
-    const { data, error } = await supabaseClient.from("carts")
-      .select(`id, product_id, quantity, products(id,name,price,stock,image_url)`)
-      .eq("user_id", loggedInUser)
-      .order("id");
-
-    if(error) { console.error(error); return; }
-
-    cart = data.map(c => ({
-      ...c,
-      product: {
-        id: c.products.id,
-        name: c.products.name,
-        price: c.products.price,
-        stock: c.products.stock,
-        img: c.products.image_url || "assets/images/Default.png"
-      }
-    }));
-
-    renderCart();
-  }
-
-  function renderCart() {
-    cartList.innerHTML = "";
-    let total = 0;
-
-    cart.forEach((c,index)=>{
-      const div = document.createElement("div");
-      div.className="cart-item";
-      div.innerHTML=`
-        <img src="${c.product.img}">
-        <div class="flex-1 ml-4">
-          <h3>${c.product.name}</h3>
-          <p>₱${c.product.price} x ${c.quantity}</p>
-          <div class="cart-controls">
-            <button class="remove-btn" data-index="${index}">Remove</button>
-            <button class="qty-minus" data-index="${index}">-</button>
-            <button class="qty-plus" data-index="${index}">+</button>
-          </div>
-        </div>
-      `;
-      cartList.appendChild(div);
-      total += c.product.price * c.quantity;
-    });
-
-    cartTotal.textContent = `Total: ₱${total.toFixed(2)}`;
-    paymentTotal.textContent = `₱${total.toFixed(2)}`;
-
-    // ✅ ADD THIS LINE (important)
-    attachCartEvents();
-  }
-
-  // =========================
-  // ✅ ADDED FUNCTIONS ONLY
-  // =========================
-
-  function attachCartEvents(){
-    document.querySelectorAll(".remove-btn").forEach(btn=>{
-      btn.addEventListener("click", async ()=>{
-    const index = btn.dataset.index;
-    const item = cart[index];
-
-    // Restore stock
-    await supabaseClient.from("products")
-        .update({ stock: item.product.stock + item.quantity })
-        .eq("id", item.product.id);
-
-    // Delete cart item
-    await supabaseClient.from("carts").delete().eq("id", item.id);
-
-    loadCart();
-});
-    });
-
-    document.querySelectorAll(".qty-minus").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        updateQuantity(btn.dataset.index, -1);
-      });
-    });
-
-    document.querySelectorAll(".qty-plus").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        updateQuantity(btn.dataset.index, 1);
-      });
-    });
-  }
-
-  async function updateQuantity(index, delta){
-    const item = cart[index];
-    const newQty = item.quantity + delta;
-
-    if(newQty <= 0){
-        // Restore stock back to products
-        await supabaseClient.from("products")
-            .update({ stock: item.product.stock + item.quantity })
-            .eq("id", item.product.id);
-
-        // Delete cart
-        await supabaseClient.from("carts").delete().eq("id", item.id);
-    } else {
-        // Update cart quantity
-        await supabaseClient.from("carts")
-            .update({ quantity: newQty })
-            .eq("id", item.id);
-
-        // Adjust product stock accordingly
-        const stockChange = delta * -1; // e.g., qty +1 → stock -1
-        await supabaseClient.from("products")
-            .update({ stock: item.product.stock + stockChange })
-            .eq("id", item.product.id);
+    // ---------------- SESSION ----------------
+    async function checkSession() {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) loggedInUser = session.user.id;
+        await loadCart();
     }
 
-    loadCart();
-}
+    // ---------------- LOAD CART ----------------
+    async function loadCart() {
+        if (!loggedInUser) return;
+        const { data, error } = await supabaseClient.from("carts")
+            .select(`id, product_id, quantity, products(id,name,price,stock,image_url)`)
+            .eq("user_id", loggedInUser)
+            .order("id");
 
-  // =========================
+        if (error) { console.error(error); return; }
 
-  await checkSession();
+        cart = data.map(c => ({
+            ...c,
+            product: {
+                id: c.products.id,
+                name: c.products.name,
+                price: c.products.price,
+                stock: c.products.stock,
+                img: c.products.image_url || "assets/images/Default.png"
+            }
+        }));
+        renderCart();
+    }
 
-});
-</script>
-<script>
-// --- UPDATED PAY BUTTON LOGIC ---
-document.getElementById("pay-button").addEventListener("click", async () => {
-  const payBtn = document.getElementById("pay-button");
-  const qrContainer = document.getElementById("qr-container");
+    function renderCart() {
+        cartList.innerHTML = "";
+        let total = 0;
+        cart.forEach((c, index) => {
+            const div = document.createElement("div");
+            div.className = "cart-item";
+            div.innerHTML = `
+                <img src="${c.product.img}">
+                <div class="flex-1 ml-4">
+                    <h3 class="font-bold text-blue-900">${c.product.name}</h3>
+                    <p class="text-sm text-gray-600">₱${c.product.price} x ${c.quantity}</p>
+                    <div class="cart-controls mt-2">
+                        <button class="remove-btn text-red-500 text-xs" data-index="${index}"><i class="fa fa-trash"></i></button>
+                        <button class="qty-minus" data-index="${index}">-</button>
+                        <button class="qty-plus" data-index="${index}">+</button>
+                    </div>
+                </div>`;
+            cartList.appendChild(div);
+            total += c.product.price * c.quantity;
+        });
+        cartTotal.textContent = `Total: ₱${total.toFixed(2)}`;
+        paymentTotal.textContent = `₱${total.toFixed(2)}`;
+        attachCartEvents();
+    }
 
-  try {
-    payBtn.disabled = true;
-    payBtn.innerHTML = `<i class="fa fa-spinner fa-spin mr-2"></i> Waking up Secure Server...`;
+    function attachCartEvents() {
+        document.querySelectorAll(".remove-btn").forEach(btn => {
+            btn.onclick = async () => {
+                const item = cart[btn.dataset.index];
+                await supabaseClient.from("products").update({ stock: item.product.stock + item.quantity }).eq("id", item.product.id);
+                await supabaseClient.from("carts").delete().eq("id", item.id);
+                loadCart();
+            };
+        });
+        document.querySelectorAll(".qty-minus").forEach(btn => {
+            btn.onclick = () => updateQuantity(btn.dataset.index, -1);
+        });
+        document.querySelectorAll(".qty-plus").forEach(btn => {
+            btn.onclick = () => updateQuantity(btn.dataset.index, 1);
+        });
+    }
 
-    // 1. Gather Data
-    const totalText = document.getElementById("paymentTotal").textContent;
-    const amount = Number(totalText.replace(/[₱,]/g, "").trim());
-    const payer_email = document.getElementById("shippingEmail").value.trim();
-    
-    // Gather shipping info from your form fields
-    const shippingData = {
-        full_name: document.getElementById("shippingName").value,
-        address: document.getElementById("shippingAddress").value,
-        contact: document.getElementById("shippingContact").value,
-        notes: document.getElementById("shippingNotes").value
+    async function updateQuantity(index, delta) {
+        const item = cart[index];
+        const newQty = item.quantity + delta;
+        if (newQty <= 0) {
+            await supabaseClient.from("products").update({ stock: item.product.stock + item.quantity }).eq("id", item.product.id);
+            await supabaseClient.from("carts").delete().eq("id", item.id);
+        } else {
+            await supabaseClient.from("carts").update({ quantity: newQty }).eq("id", item.id);
+            await supabaseClient.from("products").update({ stock: item.product.stock - delta }).eq("id", item.product.id);
+        }
+        loadCart();
+    }
+
+    // --- NAVIGATION LOGIC ---
+    document.getElementById("proceedShipping").onclick = () => switchStep("cartStep", "shippingStep", "stepCart", "stepShipping");
+    document.getElementById("backToCart").onclick = () => switchStep("shippingStep", "cartStep", "stepShipping", "stepCart");
+    document.getElementById("backToShipping").onclick = () => switchStep("reviewStep", "shippingStep", "stepReview", "stepShipping");
+    document.getElementById("backToReview").onclick = () => switchStep("paymentStep", "reviewStep", "stepPayment", "stepReview");
+    document.getElementById("proceedPaymentBtn").onclick = () => {
+        switchStep("reviewStep", "paymentStep", "stepReview", "stepPayment");
+        document.getElementById("paymentTotal").textContent = document.getElementById("cartTotal").textContent.replace("Total: ", "");
     };
 
-    if (!payer_email || !shippingData.full_name || !shippingData.address) {
-      alert("Please ensure all shipping fields are filled out.");
-      payBtn.disabled = false;
-      payBtn.textContent = "Pay";
-      return;
+    document.getElementById("shippingForm").onsubmit = (e) => {
+        e.preventDefault();
+        switchStep("shippingStep", "reviewStep", "stepShipping", "stepReview");
+        document.getElementById("reviewList").innerHTML = `
+            <p><strong>Name:</strong> ${document.getElementById("shippingName").value}</p>
+            <p><strong>Email:</strong> ${document.getElementById("shippingEmail").value}</p>
+            <p><strong>Address:</strong> ${document.getElementById("shippingAddress").value}</p>
+            <p><strong>Contact:</strong> ${document.getElementById("shippingContact").value}</p>
+        `;
+        document.getElementById("reviewTotal").textContent = document.getElementById("cartTotal").textContent;
+    };
+
+    function switchStep(hideId, showId, oldStepId, newStepId) {
+        document.getElementById(hideId).classList.add("hidden");
+        document.getElementById(showId).classList.remove("hidden");
+        document.getElementById(oldStepId).classList.remove("active");
+        document.getElementById(newStepId).classList.add("active");
     }
 
-    const external_id = "order_" + Date.now();
+    // SILENT PING: Wake up server (CORS errors here are safe to ignore, it's just a warmup)
+    fetch("https://show-and-go-shop-backend.onrender.com/ping", { mode: 'no-cors' }).catch(() => {});
 
-    // 2. SAVE TO SUPABASE (The "Proper" Way)
-    // This creates a 'pending' record so you don't lose the address
-    const { error: dbError } = await supabaseClient
-      .from('orders')
-      .insert([{
-        external_id: external_id,
-        user_id: loggedInUser, // From your existing session logic
-        full_name: shippingData.full_name,
-        email: payer_email,
-        address: shippingData.address,
-        contact: shippingData.contact,
-        items: cart, // The array of items currently in the cart
-        total_amount: amount,
-        status: 'pending'
-      }]);
+    await checkSession();
+});
 
-    if (dbError) throw new Error("Failed to save order to database.");
+// --- PAYMENT LOGIC (Now correctly sees supabaseClient) ---
+document.getElementById("pay-button").onclick = async () => {
+    const payBtn = document.getElementById("pay-button");
+    const qrContainer = document.getElementById("qr-container");
 
-    // 3. Connect to Xendit via your Backend
-    const slowLoadingTip = setTimeout(() => {
-        if(payBtn.disabled) payBtn.innerHTML = `<i class="fa fa-clock mr-2"></i> Connecting to Xendit (Almost there)...`;
-    }, 4000);
+    try {
+        payBtn.disabled = true;
+        payBtn.innerHTML = `<i class="fa fa-spinner fa-spin mr-2"></i> Waking up Secure Server...`;
 
-    const res = await fetch("https://show-and-go-shop-backend.onrender.com/create-invoice", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-          external_id, 
-          amount, 
-          payer_email, 
-          description: `Repair Shop Order - ${shippingData.full_name}` 
-      })
-    });
+        const totalText = document.getElementById("paymentTotal").textContent;
+        const amount = Number(totalText.replace(/[₱,]/g, "").trim());
+        const email = document.getElementById("shippingEmail").value.trim();
+        const name = document.getElementById("shippingName").value;
+        const external_id = "order_" + Date.now();
 
-    clearTimeout(slowLoadingTip);
-    const data = await res.json();
+        // 1. Save Order to Supabase first
+        const { error: dbError } = await supabaseClient.from('orders').insert([{
+            external_id, user_id: loggedInUser, full_name: name, email,
+            address: document.getElementById("shippingAddress").value,
+            contact: document.getElementById("shippingContact").value,
+            total_amount: amount, status: 'pending'
+        }]);
 
-    if (data.invoiceUrl) {
-      qrContainer.innerHTML = `
-        <div class="p-6 bg-white border-2 border-green-100 rounded-2xl shadow-xl inline-block transition-all">
-          <h3 class="font-bold mb-4 text-green-600 flex items-center justify-center">
-            <i class="fa fa-qrcode mr-2"></i> Scan to Pay via GCash/Maya
-          </h3>
-          <div class="bg-gray-50 p-2 rounded-lg mb-4">
-            <img src="https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(data.invoiceUrl)}" 
-                 alt="QR Code" class="mx-auto mix-blend-multiply">
-          </div>
-          <div class="space-y-3">
-            <a href="${data.invoiceUrl}" target="_blank" 
-               class="block w-full bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">
-               Direct Pay (GCash App)
-            </a>
-            <p class="text-[10px] text-gray-400 uppercase tracking-widest">Order ID: ${external_id}</p>
-          </div>
-        </div>
-      `;
-      qrContainer.scrollIntoView({ behavior: "smooth" });
-      payBtn.innerHTML = `<i class="fa fa-check mr-2"></i> Invoice Ready`;
-    } else {
-      throw new Error("Invalid response from server");
+        if (dbError) throw new Error("Database Save Failed");
+
+        // 2. Request Xendit Invoice from Backend
+        const res = await fetch("https://show-and-go-shop-backend.onrender.com/create-invoice", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ external_id, amount, payer_email: email, description: `Order for ${name}` })
+        });
+
+        const data = await res.json();
+        if (data.invoiceUrl) {
+            qrContainer.innerHTML = `
+                <div class="p-6 bg-white border-2 border-green-100 rounded-2xl shadow-xl inline-block">
+                    <h3 class="font-bold mb-4 text-green-600"><i class="fa fa-qrcode mr-2"></i> Scan to Pay</h3>
+                    <img src="https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(data.invoiceUrl)}" class="mx-auto mb-4">
+                    <a href="${data.invoiceUrl}" target="_blank" class="block bg-blue-600 text-white px-6 py-3 rounded-xl font-bold">Open GCash/Maya</a>
+                </div>`;
+            payBtn.innerHTML = `<i class="fa fa-check mr-2"></i> Ready`;
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Payment connection failed. Please try again.");
+        payBtn.disabled = false;
+        payBtn.textContent = "Retry Payment";
     }
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong. Please check your connection and try again.");
-    payBtn.disabled = false;
-    payBtn.textContent = "Retry Payment";
-  }
-});
-// STEP NAVIGATION
-const cartStep = document.getElementById("cartStep");
-const shippingStep = document.getElementById("shippingStep");
-const reviewStep = document.getElementById("reviewStep");
-const paymentStep = document.getElementById("paymentStep");
-
-const stepCart = document.getElementById("stepCart");
-const stepShipping = document.getElementById("stepShipping");
-const stepReview = document.getElementById("stepReview");
-const stepPayment = document.getElementById("stepPayment");
-
-// Cart → Shipping
-document.getElementById("proceedShipping").addEventListener("click", () => {
-  cartStep.classList.add("hidden");
-  shippingStep.classList.remove("hidden");
-  stepCart.classList.remove("active");
-  stepShipping.classList.add("active");
-});
-
-// SILENT PING: Wake up Render while they type their address
-  console.log("Waking up server...");
-  fetch("https://show-and-go-shop-backend.onrender.com/ping").catch(() => {});
-
-// Back to Cart
-document.getElementById("backToCart").addEventListener("click", () => {
-  shippingStep.classList.add("hidden");
-  cartStep.classList.remove("hidden");
-  stepShipping.classList.remove("active");
-  stepCart.classList.add("active");
-});
-
-// Shipping → Review
-document.getElementById("shippingForm").addEventListener("submit", (e) => {
-  e.preventDefault(); // prevent form submission
-  shippingStep.classList.add("hidden");
-  reviewStep.classList.remove("hidden");
-  stepShipping.classList.remove("active");
-  stepReview.classList.add("active");
-
-  // Fill review info
-  const reviewList = document.getElementById("reviewList");
-  reviewList.innerHTML = `
-    <p><strong>Name:</strong> ${document.getElementById("shippingName").value}</p>
-    <p><strong>Email:</strong> ${document.getElementById("shippingEmail").value}</p>
-    <p><strong>Address:</strong> ${document.getElementById("shippingAddress").value}</p>
-    <p><strong>Contact:</strong> ${document.getElementById("shippingContact").value}</p>
-    <p><strong>Notes:</strong> ${document.getElementById("shippingNotes").value}</p>
-  `;
-
-  // Copy total to review
-  document.getElementById("reviewTotal").textContent = cartTotal.textContent;
-});
-
-// Back to Shipping
-document.getElementById("backToShipping").addEventListener("click", () => {
-  reviewStep.classList.add("hidden");
-  shippingStep.classList.remove("hidden");
-  stepReview.classList.remove("active");
-  stepShipping.classList.add("active");
-});
-
-// Review → Payment
-document.getElementById("proceedPaymentBtn").addEventListener("click", () => {
-  reviewStep.classList.add("hidden");
-  paymentStep.classList.remove("hidden");
-  stepReview.classList.remove("active");
-  stepPayment.classList.add("active");
-
-  // Copy total to payment step
-  paymentTotal.textContent = cartTotal.textContent.replace("Total: ", "");
-});
-
-// Back to Review
-document.getElementById("backToReview").addEventListener("click", () => {
-  paymentStep.classList.add("hidden");
-  reviewStep.classList.remove("hidden");
-  stepPayment.classList.remove("active");
-  stepReview.classList.add("active");
-});
+};
 </script>
 
 </body>
